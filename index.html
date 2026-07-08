@@ -67,7 +67,7 @@
         
         /* Action buttons for inline adjustments */
         .inline-actions { display: flex; gap: 8px; margin-top: 4px; }
-        .btn-inline { background: transparent; color: var(--text-muted); font-size: 0.75rem; text-decoration: underline; width: auto; padding: 0; margin: 0; font-weight: 500; }
+        .btn-inline { background: transparent; color: var(--text-muted); font-size: 0.75rem; text-decoration: underline; width: auto; padding: 0; margin: 0; font-weight: 500; border: none; cursor: pointer; }
         .btn-inline.del { color: var(--danger); }
         .btn-inline.edit { color: var(--venice); }
 
@@ -232,7 +232,6 @@
         }
 
         function init() {
-            // Self-repair function: Ensure legacy data pots have IDs assigned
             state.pots.forEach((pot, index) => { if(!pot.id) pot.id = Date.now() + index; });
             populateMonthTimelineOptions();
             toggleFormContext();
@@ -347,17 +346,16 @@
             toggleFormContext();
         }
 
-        /* CRUD OPERATIONS ENGINE: TRANSACTIONS (LEDGER) */
         function deleteTransaction(id) {
             const index = state.ledger.findIndex(item => item.id === id);
             if(index === -1) return;
             const item = state.ledger[index];
             
             if(item.type === 'expense') {
-                state.globalBalance += item.amt; // Refund cash
+                state.globalBalance += item.amt; 
             } else {
-                state.globalBalance -= item.net; // Reverse payout cash
-                state.taxEscrowBalance -= item.tax; // Deduct tax escrow
+                state.globalBalance -= item.net; 
+                state.taxEscrowBalance -= item.tax; 
             }
             state.ledger.splice(index, 1);
             save();
@@ -376,19 +374,17 @@
                 if(isNaN(nextAmt) || nextAmt <= 0) return;
                 
                 const gap = nextAmt - item.amt;
-                state.globalBalance -= gap; // Pull or add difference
+                state.globalBalance -= gap; 
                 item.amt = nextAmt;
             } else {
                 const nextGross = parseFloat(prompt("Modify Gross Pay Allocation Amount ($):", item.gross));
                 if(isNaN(nextGross) || nextGross <= 0) return;
                 
-                const rate = item.tax / item.gross; // Maintain tax margin ratio
+                const rate = item.tax / item.gross; 
                 
-                // Back out original values
                 state.globalBalance -= item.net;
                 state.taxEscrowBalance -= item.tax;
                 
-                // Establish new values
                 item.gross = nextGross;
                 item.tax = nextGross * rate;
                 item.net = nextGross - item.tax;
@@ -396,19 +392,6 @@
                 state.globalBalance += item.net;
                 state.taxEscrowBalance += item.tax;
             }
-            save();
-        }
-
-        /* CRUD OPERATIONS ENGINE: RECURRING TEMPLATES */
-        function addRecurringTemplate() {
-            const desc = document.getElementById('rec-desc').value.trim();
-            const amt = parseFloat(document.getElementById('rec-amt').value);
-            const cat = document.getElementById('rec-cat').value;
-            if(!desc || !amt || amt <= 0) return;
-
-            state.recurringTemplates.push({ id: Date.now(), desc, amt, cat });
-            document.getElementById('rec-desc').value = '';
-            document.getElementById('rec-amt').value = '';
             save();
         }
 
@@ -449,7 +432,6 @@
             save();
         }
 
-        /* CRUD OPERATIONS ENGINE: SAVINGS POTS */
         function createNewPot() {
             const name = document.getElementById('pot-name').value.trim();
             const target = parseFloat(document.getElementById('pot-target').value);
@@ -469,7 +451,7 @@
 
             const allocation = parseFloat(prompt(`Transfer available fluid cash assets into ${pot.name}:`));
             if(!allocation || allocation <= 0 || allocation > state.globalBalance) {
-                alert("Operation aborted. Insufficient fluid liquidity profile assets.");
+                alert("Operation aborted. Insufficient available assets.");
                 return;
             }
             state.globalBalance -= allocation;
@@ -481,13 +463,13 @@
             const pot = state.pots.find(p => p.id === id);
             if(!pot) return;
             
-            const nextName = prompt("Modify Pot Destination Designation Name:", pot.name);
+            const nextName = prompt("Modify Pot Name:", pot.name);
             if(nextName) pot.name = nextName.trim();
             
             const nextTarget = parseFloat(prompt("Modify Target Goal Amount ($):", pot.target));
             if(!isNaN(nextTarget) && nextTarget > 0) pot.target = nextTarget;
             
-            const nextMonthly = parseFloat(prompt("Modify Planned Monthly Commitment Contribution ($):", pot.monthly));
+            const nextMonthly = parseFloat(prompt("Modify Planned Monthly Contribution ($):", pot.monthly));
             if(!isNaN(nextMonthly) && nextMonthly >= 0) pot.monthly = nextMonthly;
             save();
         }
@@ -497,8 +479,8 @@
             if(index === -1) return;
             const pot = state.pots[index];
             
-            if(confirm(`Wipe "${pot.name}" savings target completely? This safely returns all accrued $${pot.current.toFixed(2)} back into your fluid net balance.`)) {
-                state.globalBalance += pot.current; // Reclaim locked pot assets
+            if(confirm(`Wipe "${pot.name}" savings target completely? This returns all accrued $${pot.current.toFixed(2)} back into your fluid net balance.`)) {
+                state.globalBalance += pot.current; 
                 state.pots.splice(index, 1);
                 save();
             }
@@ -550,7 +532,9 @@
                     let d = new Date(2026, 6 + i, 1);
                     let monthStr = (d.getMonth() + 1).toString().padStart(2, '0');
                     let k = `${d.getFullYear()}-${monthStr}`;
-                    let shortLabel = d.toLocaleDateString('en-US', { month: 'short', year: 'digit' });
+                    
+                    /* FIXED: Replaced 'digit' with '2-digit' to resolve the RangeError compilation freeze */
+                    let shortLabel = d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
                     
                     let mItems = state.ledger.filter(item => item.monthKey === k);
                     let mIn = 0; let mOut = 0;
@@ -569,7 +553,6 @@
                 breakdownCard.style.display = 'none';
             }
 
-            // Category Spend Target limits layout configuration logic map
             const capsContainer = document.getElementById('category-caps-container');
             capsContainer.innerHTML = '';
             Object.keys(state.categoryTargets).forEach(cat => {
@@ -592,7 +575,6 @@
                     </div>`;
             });
 
-            // Mapping Recurring automation templates platform list view layout properties
             if(!isYearMode) {
                 const recUl = document.getElementById('recurring-list');
                 recUl.innerHTML = '';
@@ -611,7 +593,6 @@
                 });
             }
 
-            // Render Savings Allocation Pots with Projections & Editing Options
             const potsContainer = document.getElementById('pots-container');
             potsContainer.innerHTML = '';
             state.pots.forEach((pot) => {
@@ -644,7 +625,6 @@
                     </div>`;
             });
 
-            // Ledger Mapping Execution loop framework context
             const ledgerUl = document.getElementById('ledger-container');
             ledgerUl.innerHTML = '';
             if(targetedLedgerDataset.length === 0) {
