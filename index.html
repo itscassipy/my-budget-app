@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Alchemy Budget</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Budget">
+    <style>
+        :root {
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-main: #2d3748;
+            --text-muted: #718096;
+            --accent: #6b46c1;
+            --success: #38a169;
+            --danger: #e53e3e;
+            --border: #e2e8f0;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding: 20px; padding-bottom: 60px; }
+        .container { max-width: 500px; margin: 0 auto; }
+        header { margin-bottom: 24px; text-align: center; }
+        h1 { font-size: 1.5rem; font-weight: 600; color: var(--text-main); }
+        .card { background: var(--card-bg); border-radius: 16px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid var(--border); }
+        h2 { font-size: 1.1rem; margin-bottom: 12px; color: var(--text-main); font-weight: 600; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .balance-label { font-size: 0.85rem; color: var(--text-muted); }
+        .balance-val { font-size: 1.4rem; font-weight: 700; margin-top: 4px; }
+        .input-group { margin-bottom: 12px; }
+        label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; }
+        input, select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; background: var(--bg-color); }
+        button { width: 100%; padding: 12px; background: var(--accent); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 8px; }
+        button.secondary { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+        .item-list { list-style: none; margin-top: 8px; }
+        .item-list li { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 0.95rem; align-items: center; }
+        .item-list li:last-child { border-bottom: none; }
+        .pot-progress { background: var(--border); height: 6px; border-radius: 3px; margin-top: 6px; overflow: hidden; }
+        .pot-bar { background: var(--success); height: 100%; width: 0%; transition: width 0.3s; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Personalized Budget Tracker</h1>
+        </header>
+
+        <div class="card grid">
+            <div>
+                <div class="balance-label">Available Balance</div>
+                <div class="balance-val" id="total-balance">$0.00</div>
+            </div>
+            <div>
+                <div class="balance-label">Tax Reserved</div>
+                <div class="balance-val" style="color: var(--text-muted);" id="tax-reserve">$0.00</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Log Paycheck</h2>
+            <div class="input-group">
+                <label>Gross Income Amount</label>
+                <input type="number" id="gross-income" placeholder="e.g., 3000">
+            </div>
+            <div class="input-group">
+                <label>Estimated Tax Withholding Rate (%)</label>
+                <input type="number" id="tax-rate" value="25">
+            </div>
+            <button onclick="processPaycheck()">Process Paycheck</button>
+        </div>
+
+        <div class="card">
+            <h2>Savings Pots</h2>
+            <div class="input-group">
+                <label>Pot Name</label>
+                <input type="text" id="pot-name" placeholder="e.g., Car Fund, Emergency">
+            </div>
+            <div class="input-group">
+                <label>Target Goal ($)</label>
+                <input type="number" id="pot-target" placeholder="e.g., 5000">
+            </div>
+            <button class="secondary" onclick="createNewPot()">Create New Pot</button>
+            <ul id="pots-container" class="item-list"></ul>
+        </div>
+
+        <div class="card">
+            <h2>Log Expense</h2>
+            <div class="input-group">
+                <label>Description</label>
+                <input type="text" id="expense-desc" placeholder="e.g., Rent, Groceries">
+            </div>
+            <div class="input-group">
+                <label>Amount ($)</label>
+                <input type="number" id="expense-amount" placeholder="0.00">
+            </div>
+            <button onclick="logExpense()" style="background: var(--text-main);">Record Expense</button>
+            <ul id="expenses-container" class="item-list"></ul>
+        </div>
+    </div>
+
+    <script>
+        // State management with LocalStorage persistence
+        let state = JSON.parse(localStorage.getItem('budgetState')) || {
+            balance: 0,
+            taxReserved: 0,
+            pots: [],
+            expenses: []
+        };
+
+        function saveState() {
+            localStorage.setItem('budgetState', JSON.stringify(state));
+            render();
+        }
+
+        function processPaycheck() {
+            const gross = parseFloat(document.getElementById('gross-income').value);
+            const rate = parseFloat(document.getElementById('tax-rate').value) / 100;
+            if (!gross || gross <= 0) return;
+
+            const tax = gross * rate;
+            const net = gross - tax;
+
+            state.taxReserved += tax;
+            state.balance += net;
+            
+            document.getElementById('gross-income').value = '';
+            saveState();
+        }
+
+        function createNewPot() {
+            const name = document.getElementById('pot-name').value.trim();
+            const target = parseFloat(document.getElementById('pot-target').value);
+            if (!name || !target || target <= 0) return;
+
+            state.pots.push({ name, target, current: 0 });
+            document.getElementById('pot-name').value = '';
+            document.getElementById('pot-target').value = '';
+            saveState();
+        }
+
+        function fundPot(index) {
+            const amount = parseFloat(prompt("How much would you like to allocate to this pot?"));
+            if (!amount || amount <= 0 || amount > state.balance) {
+                alert("Invalid amount or insufficient general balance.");
+                return;
+            }
+            state.balance -= amount;
+            state.pots[index].current += amount;
+            saveState();
+        }
+
+        function logExpense() {
+            const desc = document.getElementById('expense-desc').value.trim();
+            const amount = parseFloat(document.getElementById('expense-amount').value);
+            if (!desc || !amount || amount <= 0) return;
+
+            state.balance -= amount;
+            state.expenses.unshift({ desc, amount, date: new Date().toLocaleDateString() });
+            
+            document.getElementById('expense-desc').value = '';
+            document.getElementById('expense-amount').value = '';
+            saveState();
+        }
+
+        function render() {
+            document.getElementById('total-balance').innerText = `$${state.balance.toFixed(2)}`;
+            document.getElementById('tax-reserve').innerText = `$${state.taxReserved.toFixed(2)}`;
+
+            // Render Pots
+            const potsUl = document.getElementById('pots-container');
+            potsUl.innerHTML = '';
+            state.pots.forEach((pot, index) => {
+                const pct = Math.min((pot.current / pot.target) * 100, 100);
+                potsUl.innerHTML += `
+                    <li style="flex-direction: column; align-items: stretch;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                            <strong>${pot.name}</strong>
+                            <span>$${pot.current.toFixed(0)} / $${pot.target.toFixed(0)}</span>
+                        </div>
+                        <div class="pot-progress"><div class="pot-bar" style="width: ${pct}%"></div></div>
+                        <button class="secondary" style="padding: 4px 8px; font-size: 0.8rem; margin-top: 8px; width: auto; align-self: flex-start;" onclick="fundPot(${index})">+ Add Funds</button>
+                    </li>`;
+            });
+
+            // Render Expenses
+            const expUl = document.getElementById('expenses-container');
+            expUl.innerHTML = '';
+            state.expenses.slice(0, 5).forEach(exp => {
+                expUl.innerHTML += `
+                    <li>
+                        <div>
+                            <div>${exp.desc}</div>
+                            <small style="color: var(--text-muted); font-size: 0.75rem;">${exp.date}</small>
+                        </div>
+                        <span style="color: var(--danger); font-weight: 600;">-$${exp.amount.toFixed(2)}</span>
+                    </li>`;
+            });
+        }
+
+        // Register Service Worker for PWA compliance
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
+        }
+
+        render();
+    </script>
+</body>
+</html>
