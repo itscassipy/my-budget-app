@@ -52,6 +52,7 @@
         .mini-stat { background: var(--card-bg); border-radius: 14px; padding: 14px; border: 1px solid var(--border); }
         .stat-lbl { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); font-weight: 600; }
         .stat-val { font-size: 1.2rem; font-weight: 700; margin-top: 4px; color: var(--text-main); }
+        .span-2 { grid-column: span 2; background: var(--linen-light); border-color: var(--linen); }
 
         /* Interactive Inputs & Elements */
         .form-group { margin-bottom: 14px; }
@@ -76,6 +77,7 @@
         .tx-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--bg-color); font-size: 0.9rem; }
         .tx-item:last-child { border-bottom: none; }
         .tx-cat-tag { font-size: 0.68rem; background: var(--linen-light); padding: 3px 8px; border-radius: 6px; color: var(--text-main); display: inline-block; margin-top: 4px; font-weight: 500; }
+        .pot-eta { font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; font-style: italic; }
     </style>
 </head>
 <body>
@@ -86,26 +88,27 @@
             <div id="fluid-balance" style="font-weight: 700; color: var(--success); font-size: 1.1rem;"></div>
         </header>
 
-        <!-- Segment View Switcher -->
         <div class="view-toggle">
             <button id="toggle-month" class="toggle-btn active" onclick="switchView('month')">Month View</button>
             <button id="toggle-year" class="toggle-btn" onclick="switchView('year')">Cycle View (12M)</button>
         </div>
 
-        <!-- Dropdown Timeline Filter -->
         <div id="month-filter-wrap" class="month-select-wrapper">
             <select id="global-month-filter" class="nav-select" onchange="render()"></select>
         </div>
 
-        <!-- Metric Component Displays -->
         <div class="metrics-grid">
-            <div class="mini-stat">
-                <div class="stat-lbl">Tax Escrow Reserve</div>
-                <div class="stat-val" id="dash-tax" style="color: var(--text-muted); font-weight: 500;">$0.00</div>
+            <div class="mini-stat span-2">
+                <div class="stat-lbl"><span class="view-label-ctx">Month</span> Remaining Cash Surplus</div>
+                <div class="stat-val" id="dash-surplus" style="font-size: 1.4rem;">$0.00</div>
             </div>
             <div class="mini-stat">
                 <div class="stat-lbl">Fluid Net Balance</div>
                 <div class="stat-val" id="dash-balance">$0.00</div>
+            </div>
+            <div class="mini-stat">
+                <div class="stat-lbl">Tax Escrow Reserve</div>
+                <div class="stat-val" id="dash-tax" style="color: var(--text-muted); font-weight: 500;">$0.00</div>
             </div>
             <div class="mini-stat">
                 <div class="stat-lbl"><span class="view-label-ctx">Month</span> Total Inflow</div>
@@ -117,13 +120,11 @@
             </div>
         </div>
 
-        <!-- Visual Tracking Gauges -->
         <div class="card">
             <h2><span class="view-label-ctx">Month</span> Spending Targets</h2>
             <div id="category-caps-container"></div>
         </div>
 
-        <!-- Transaction Logger Container -->
         <div class="card">
             <h2>Log Entry Transaction</h2>
             <div class="form-group">
@@ -137,7 +138,6 @@
             <button onclick="submitTransaction()">Record Entry</button>
         </div>
 
-        <!-- Templates Management Workspace -->
         <div class="card" id="recurring-card-manager">
             <h2>Recurring Templates 
                 <button class="action-link" onclick="applyRecurringToCurrentMonth()">Apply to Selected Month</button>
@@ -159,7 +159,6 @@
             <ul id="recurring-list" class="tx-list"></ul>
         </div>
 
-        <!-- Savings Allocation Pots -->
         <div class="card">
             <h2>Long-Term Savings Pots</h2>
             <div class="form-group">
@@ -167,14 +166,21 @@
                 <input type="text" id="pot-name" placeholder="e.g., New Car Fund">
             </div>
             <div class="form-group">
-                <label>Target Funding Goal Target ($)</label>
-                <input type="number" id="pot-target" placeholder="e.g., 15000">
+                <div style="display: flex; gap: 8px;">
+                    <div style="flex: 1;">
+                        <label>Target Goal ($)</label>
+                        <input type="number" id="pot-target" placeholder="15000">
+                    </div>
+                    <div style="flex: 1;">
+                        <label>Monthly Plan ($)</label>
+                        <input type="number" id="pot-monthly" placeholder="500">
+                    </div>
+                </div>
             </div>
             <button style="background: var(--text-main);" onclick="createNewPot()">Initialize Pot</button>
             <div id="pots-container" style="margin-top: 14px;"></div>
         </div>
 
-        <!-- Main Filtered Data Ledger -->
         <div class="card">
             <h2>Dynamic Operational Ledger</h2>
             <ul id="ledger-container" class="tx-list"></ul>
@@ -215,14 +221,13 @@
             const filter = document.getElementById('global-month-filter');
             filter.innerHTML = '';
             
-            // Loop exactly 13 times to construct a timeline from July 2026 through July 2027
             for(let i = 0; i <= 12; i++) {
-                let d = new Date(2026, 6 + i, 1); // 6 represents July
+                let d = new Date(2026, 6 + i, 1); 
                 let monthStr = (d.getMonth() + 1).toString().padStart(2, '0');
                 let k = `${d.getFullYear()}-${monthStr}`;
                 let label = d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
                 let opt = new Option(label, k);
-                if(i === 0) opt.selected = true; // Locks initial default frame directly to July 2026
+                if(i === 0) opt.selected = true; 
                 filter.add(opt);
             }
         }
@@ -328,11 +333,13 @@
         function createNewPot() {
             const name = document.getElementById('pot-name').value.trim();
             const target = parseFloat(document.getElementById('pot-target').value);
+            const monthly = parseFloat(document.getElementById('pot-monthly').value) || 0;
             if(!name || !target || target <= 0) return;
 
-            state.pots.push({ name, target, current: 0 });
+            state.pots.push({ name, target, monthly, current: 0 });
             document.getElementById('pot-name').value = '';
             document.getElementById('pot-target').value = '';
+            document.getElementById('pot-monthly').value = '';
             save();
         }
 
@@ -355,7 +362,6 @@
             document.getElementById('dash-tax').innerText = `$${state.taxEscrowBalance.toFixed(2)}`;
             document.getElementById('fluid-balance').innerText = `$${state.globalBalance.toFixed(0)}`;
 
-            // Dynamic filter range spanning across the custom 2026-07 to 2027-07 boundary loop window
             const targetedLedgerDataset = isYearMode 
                 ? state.ledger.filter(item => item.monthKey >= '2026-07' && item.monthKey <= '2027-07')
                 : state.ledger.filter(item => item.monthKey === activeMonth);
@@ -375,6 +381,12 @@
                     }
                 }
             });
+
+            // Dynamic Surplus Calculation Engine
+            let surplus = totalInflow - totalOutflow;
+            const surplusEl = document.getElementById('dash-surplus');
+            surplusEl.innerText = `${surplus >= 0 ? '' : '-'}$${Math.abs(surplus).toFixed(2)}`;
+            surplusEl.style.color = surplus >= 0 ? 'var(--success)' : 'var(--danger)';
 
             document.getElementById('dash-inflow').innerText = `$${totalInflow.toFixed(2)}`;
             document.getElementById('dash-outflow').innerText = `$${totalOutflow.toFixed(2)}`;
@@ -418,11 +430,23 @@
                 });
             }
 
-            // Render Savings Allocation Pots
+            // Render Savings Allocation Pots with Projections
             const potsContainer = document.getElementById('pots-container');
             potsContainer.innerHTML = '';
             state.pots.forEach((pot, idx) => {
                 const pct = Math.min((pot.current / pot.target) * 100, 100);
+                const remainingAmount = pot.target - pot.current;
+                
+                let projectionText = '';
+                if (remainingAmount <= 0) {
+                    projectionText = 'Goal fully achieved! 🎉';
+                } else if (pot.monthly && pot.monthly > 0) {
+                    const monthsNeeded = Math.ceil(remainingAmount / pot.monthly);
+                    projectionText = `Est. completion: <strong>${monthsNeeded} months</strong> (at $${pot.monthly}/mo)`;
+                } else {
+                    projectionText = 'Assign a monthly plan amount to project timeline ETA.';
+                }
+
                 potsContainer.innerHTML += `
                     <div class="progress-wrapper" style="border-left: 3px solid var(--venice); padding-left:10px; margin-bottom:16px;">
                         <div class="progress-meta">
@@ -430,6 +454,7 @@
                             <span style="font-size:0.82rem;">$${pot.current.toFixed(0)} / $${pot.target.toFixed(0)}</span>
                         </div>
                         <div class="progress-bg"><div class="progress-bar" style="width: ${pct}%; background: var(--venice);"></div></div>
+                        <div class="pot-eta">${projectionText}</div>
                         <button class="secondary" style="margin-top:8px; background:transparent; color:var(--venice); border-color:var(--venice);" onclick="fundPot(${idx})">+ Allocate Cash</button>
                     </div>`;
             });
