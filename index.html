@@ -64,6 +64,12 @@
         button:active { opacity: 0.85; }
         button.secondary { background: var(--linen-light); color: var(--text-main); margin-top: 0; padding: 6px 12px; width: auto; font-size: 0.78rem; border-radius: 6px; border: 1px solid var(--linen); }
         button.action-link { background: transparent; color: var(--venice); width: auto; padding: 0; margin: 0; font-size: 0.82rem; text-decoration: none; font-weight: 600; }
+        
+        /* Action buttons for inline adjustments */
+        .inline-actions { display: flex; gap: 8px; margin-top: 4px; }
+        .btn-inline { background: transparent; color: var(--text-muted); font-size: 0.75rem; text-decoration: underline; width: auto; padding: 0; margin: 0; font-weight: 500; }
+        .btn-inline.del { color: var(--danger); }
+        .btn-inline.edit { color: var(--venice); }
 
         /* Dynamic Progress Bars */
         .progress-wrapper { margin-bottom: 14px; }
@@ -226,6 +232,8 @@
         }
 
         function init() {
+            // Self-repair function: Ensure legacy data pots have IDs assigned
+            state.pots.forEach((pot, index) => { if(!pot.id) pot.id = Date.now() + index; });
             populateMonthTimelineOptions();
             toggleFormContext();
             render();
@@ -274,13 +282,23 @@
             } else {
                 container.innerHTML = `
                     <div class="form-group"><label>Pay Frequency Scope</label>
-                        <select id="field-freq" class="form-input">
+                        <select id="field-freq" class="form-input" onchange="toggleIncomeRatePlaceholder()">
                             <option value="monthly">Single Month Paycheck</option>
                             <option value="annual">Annual Salary (Distribute over 12 Months)</option>
                         </select>
                     </div>
-                    <div class="form-group"><label>Gross Income Amount ($)</label><input type="number" id="field-gross" placeholder="e.g., 75000"></div>
+                    <div class="form-group"><label id="income-amt-label">Gross Income Amount ($)</label><input type="number" id="field-gross" placeholder="e.g., 6250"></div>
                     <div class="form-group"><label>Estimated Withholding Tax Rate (%)</label><input type="number" id="field-tax-rate" value="20"></div>`;
+            }
+        }
+
+        function toggleIncomeRatePlaceholder() {
+            const freq = document.getElementById('field-freq').value;
+            const input = document.getElementById('field-gross');
+            if(freq === 'annual') {
+                input.placeholder = "e.g., 75000";
+            } else {
+                input.placeholder = "e.g., 6250";
             }
         }
 
@@ -304,7 +322,6 @@
                 if(!grossInput || grossInput <= 0) return;
 
                 if(freq === 'annual') {
-                    // Split across the 12 primary months of the custom cycle loop window
                     const monthlyGross = grossInput / 12;
                     const monthlyTax = monthlyGross * rate;
                     const monthlyNet = monthlyGross - monthlyTax;
@@ -330,6 +347,59 @@
             toggleFormContext();
         }
 
+        /* CRUD OPERATIONS ENGINE: TRANSACTIONS (LEDGER) */
+        function deleteTransaction(id) {
+            const index = state.ledger.findIndex(item => item.id === id);
+            if(index === -1) return;
+            const item = state.ledger[index];
+            
+            if(item.type === 'expense') {
+                state.globalBalance += item.amt; // Refund cash
+            } else {
+                state.globalBalance -= item.net; // Reverse payout cash
+                state.taxEscrowBalance -= item.tax; // Deduct tax escrow
+            }
+            state.ledger.splice(index, 1);
+            save();
+        }
+
+        function editTransaction(id) {
+            const item = state.ledger.find(item => item.id === id);
+            if(!item) return;
+
+            const nextDesc = prompt("Modify Description:", item.desc);
+            if(nextDesc === null) return;
+            if(nextDesc.trim() !== '') item.desc = nextDesc.trim();
+
+            if(item.type === 'expense') {
+                const nextAmt = parseFloat(prompt("Modify Expense Amount ($):", item.amt));
+                if(isNaN(nextAmt) || nextAmt <= 0) return;
+                
+                const gap = nextAmt - item.amt;
+                state.globalBalance -= gap; // Pull or add difference
+                item.amt = nextAmt;
+            } else {
+                const nextGross = parseFloat(prompt("Modify Gross Pay Allocation Amount ($):", item.gross));
+                if(isNaN(nextGross) || nextGross <= 0) return;
+                
+                const rate = item.tax / item.gross; // Maintain tax margin ratio
+                
+                // Back out original values
+                state.globalBalance -= item.net;
+                state.taxEscrowBalance -= item.tax;
+                
+                // Establish new values
+                item.gross = nextGross;
+                item.tax = nextGross * rate;
+                item.net = nextGross - item.tax;
+                
+                state.globalBalance += item.net;
+                state.taxEscrowBalance += item.tax;
+            }
+            save();
+        }
+
+        /* CRUD OPERATIONS ENGINE: RECURRING TEMPLATES */
         function addRecurringTemplate() {
             const desc = document.getElementById('rec-desc').value.trim();
             const amt = parseFloat(document.getElementById('rec-amt').value);
@@ -339,6 +409,18 @@
             state.recurringTemplates.push({ id: Date.now(), desc, amt, cat });
             document.getElementById('rec-desc').value = '';
             document.getElementById('rec-amt').value = '';
+            save();
+        }
+
+        function editRecurringTemplate(id) {
+            const template = state.recurringTemplates.find(r => r.id === id);
+            if(!template) return;
+            
+            const nextDesc = prompt("Modify Template Name:", template.desc);
+            if(nextDesc) template.desc = nextDesc.trim();
+            
+            const nextAmt = parseFloat(prompt("Modify Template Default Amount ($):", template.amt));
+            if(!isNaN(nextAmt) && nextAmt > 0) template.amt = nextAmt;
             save();
         }
 
@@ -367,28 +449,59 @@
             save();
         }
 
+        /* CRUD OPERATIONS ENGINE: SAVINGS POTS */
         function createNewPot() {
             const name = document.getElementById('pot-name').value.trim();
             const target = parseFloat(document.getElementById('pot-target').value);
             const monthly = parseFloat(document.getElementById('pot-monthly').value) || 0;
             if(!name || !target || target <= 0) return;
 
-            state.pots.push({ name, target, monthly, current: 0 });
+            state.pots.push({ id: Date.now(), name, target, monthly, current: 0 });
             document.getElementById('pot-name').value = '';
             document.getElementById('pot-target').value = '';
             document.getElementById('pot-monthly').value = '';
             save();
         }
 
-        function fundPot(idx) {
-            const allocation = parseFloat(prompt(`Transfer available assets into this pot:`));
+        function fundPot(id) {
+            const pot = state.pots.find(p => p.id === id);
+            if(!pot) return;
+
+            const allocation = parseFloat(prompt(`Transfer available fluid cash assets into ${pot.name}:`));
             if(!allocation || allocation <= 0 || allocation > state.globalBalance) {
-                alert("Operation failed. Insufficient liquid profile balance.");
+                alert("Operation aborted. Insufficient fluid liquidity profile assets.");
                 return;
             }
             state.globalBalance -= allocation;
-            state.pots[idx].current += allocation;
+            pot.current += allocation;
             save();
+        }
+
+        function editPot(id) {
+            const pot = state.pots.find(p => p.id === id);
+            if(!pot) return;
+            
+            const nextName = prompt("Modify Pot Destination Designation Name:", pot.name);
+            if(nextName) pot.name = nextName.trim();
+            
+            const nextTarget = parseFloat(prompt("Modify Target Goal Amount ($):", pot.target));
+            if(!isNaN(nextTarget) && nextTarget > 0) pot.target = nextTarget;
+            
+            const nextMonthly = parseFloat(prompt("Modify Planned Monthly Commitment Contribution ($):", pot.monthly));
+            if(!isNaN(nextMonthly) && nextMonthly >= 0) pot.monthly = nextMonthly;
+            save();
+        }
+
+        function deletePot(id) {
+            const index = state.pots.findIndex(p => p.id === id);
+            if(index === -1) return;
+            const pot = state.pots[index];
+            
+            if(confirm(`Wipe "${pot.name}" savings target completely? This safely returns all accrued $${pot.current.toFixed(2)} back into your fluid net balance.`)) {
+                state.globalBalance += pot.current; // Reclaim locked pot assets
+                state.pots.splice(index, 1);
+                save();
+            }
         }
 
         function render() {
@@ -419,7 +532,6 @@
                 }
             });
 
-            // Dynamic Surplus Calculation Engine
             let surplus = totalInflow - totalOutflow;
             const surplusEl = document.getElementById('dash-surplus');
             surplusEl.innerText = `${surplus >= 0 ? '' : '-'}$${Math.abs(surplus).toFixed(2)}`;
@@ -428,7 +540,6 @@
             document.getElementById('dash-inflow').innerText = `$${totalInflow.toFixed(2)}`;
             document.getElementById('dash-outflow').innerText = `$${totalOutflow.toFixed(2)}`;
 
-            // Render Year-by-Month Snapshot Table if Macro View is Toggled
             const breakdownCard = document.getElementById('cycle-breakdown-card');
             if (isYearMode) {
                 breakdownCard.style.display = 'block';
@@ -439,7 +550,7 @@
                     let d = new Date(2026, 6 + i, 1);
                     let monthStr = (d.getMonth() + 1).toString().padStart(2, '0');
                     let k = `${d.getFullYear()}-${monthStr}`;
-                    let shortLabel = d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+                    let shortLabel = d.toLocaleDateString('en-US', { month: 'short', year: 'digit' });
                     
                     let mItems = state.ledger.filter(item => item.monthKey === k);
                     let mIn = 0; let mOut = 0;
@@ -458,7 +569,7 @@
                 breakdownCard.style.display = 'none';
             }
 
-            // Build Target Spend visual bars
+            // Category Spend Target limits layout configuration logic map
             const capsContainer = document.getElementById('category-caps-container');
             capsContainer.innerHTML = '';
             Object.keys(state.categoryTargets).forEach(cat => {
@@ -481,26 +592,29 @@
                     </div>`;
             });
 
-            // Map templates layout data
+            // Mapping Recurring automation templates platform list view layout properties
             if(!isYearMode) {
                 const recUl = document.getElementById('recurring-list');
                 recUl.innerHTML = '';
                 state.recurringTemplates.forEach(item => {
                     recUl.innerHTML += `
-                        <li class="tx-item" style="padding: 8px 0;">
-                            <div>${item.desc} <span class="tx-cat-tag" style="background: var(--bg-color);">${item.cat}</span></div>
-                            <div>
-                                <span style="font-weight:600; margin-right:12px;">$${item.amt}</span>
-                                <button class="action-link" style="color:var(--danger);" onclick="removeRecurringTemplate(${item.id})">Drop</button>
+                        <li class="tx-item" style="padding: 8px 0; align-items: flex-start; flex-direction: column;">
+                            <div style="display:flex; justify-content:space-between; width:100%;">
+                                <div>${item.desc} <span class="tx-cat-tag" style="background: var(--bg-color);">${item.cat}</span></div>
+                                <span style="font-weight:600;">$${item.amt}</span>
+                            </div>
+                            <div class="inline-actions">
+                                <button class="btn-inline edit" onclick="editRecurringTemplate(${item.id})">Edit</button>
+                                <button class="btn-inline del" onclick="removeRecurringTemplate(${item.id})">Drop</button>
                             </div>
                         </li>`;
                 });
             }
 
-            // Render Savings Allocation Pots with Projections
+            // Render Savings Allocation Pots with Projections & Editing Options
             const potsContainer = document.getElementById('pots-container');
             potsContainer.innerHTML = '';
-            state.pots.forEach((pot, idx) => {
+            state.pots.forEach((pot) => {
                 const pct = Math.min((pot.current / pot.target) * 100, 100);
                 const remainingAmount = pot.target - pot.current;
                 
@@ -522,28 +636,46 @@
                         </div>
                         <div class="progress-bg"><div class="progress-bar" style="width: ${pct}%; background: var(--venice);"></div></div>
                         <div class="pot-eta">${projectionText}</div>
-                        <button class="secondary" style="margin-top:8px; background:transparent; color:var(--venice); border-color:var(--venice);" onclick="fundPot(${idx})">+ Allocate Cash</button>
+                        <div class="inline-actions" style="margin-bottom: 4px;">
+                            <button class="btn-inline edit" onclick="editPot(${pot.id})">Modify Limits</button>
+                            <button class="btn-inline del" onclick="deletePot(${pot.id})">Wipe Pot</button>
+                        </div>
+                        <button class="secondary" style="margin-top:6px; background:transparent; color:var(--venice); border-color:var(--venice);" onclick="fundPot(${pot.id})">+ Allocate Cash</button>
                     </div>`;
             });
 
-            // Dynamic Ledger lists component data map
+            // Ledger Mapping Execution loop framework context
             const ledgerUl = document.getElementById('ledger-container');
             ledgerUl.innerHTML = '';
             if(targetedLedgerDataset.length === 0) {
                 ledgerUl.innerHTML = `<li class="tx-item" style="color:var(--text-muted); justify-content:center; padding: 20px 0;">No active logs found for this cycle window.</li>`;
             } else {
                 targetedLedgerDataset.slice(0, 15).forEach(item => {
+                    const inlineActionMarkup = `
+                        <div class="inline-actions">
+                            <button class="btn-inline edit" onclick="editTransaction(${item.id})">Adjust</button>
+                            <button class="btn-inline del" onclick="deleteTransaction(${item.id})">Delete</button>
+                        </div>`;
+                        
                     if(item.type === 'expense') {
                         ledgerUl.innerHTML += `
-                            <li class="tx-item">
-                                <div><div>${item.desc}</div><span class="tx-cat-tag">${item.cat}</span></div>
-                                <span style="color:var(--text-main); font-weight:600;">-$${item.amt.toFixed(2)}</span>
+                            <li class="tx-item" style="align-items: center;">
+                                <div>
+                                    <div><strong>${item.desc}</strong></div>
+                                    <span class="tx-cat-tag">${item.cat} (${item.monthKey})</span>
+                                    ${inlineActionMarkup}
+                                </div>
+                                <span style="color:var(--text-main); font-weight:600; font-size: 1rem;">-$${item.amt.toFixed(2)}</span>
                             </li>`;
                     } else {
                         ledgerUl.innerHTML += `
-                            <li class="tx-item">
-                                <div><div>${item.desc}</div><span class="tx-cat-tag" style="background:var(--accent-light); color:var(--text-main);">Net Pay</span></div>
-                                <span style="color:var(--success); font-weight:600;">+$${item.net.toFixed(2)}</span>
+                            <li class="tx-item" style="align-items: center;">
+                                <div>
+                                    <div><strong>${item.desc}</strong></div>
+                                    <span class="tx-cat-tag" style="background:var(--accent-light); color:var(--text-main);">Net Pay (${item.monthKey})</span>
+                                    ${inlineActionMarkup}
+                                </div>
+                                <span style="color:var(--success); font-weight:600; font-size: 1rem;">+$${item.net.toFixed(2)}</span>
                             </li>`;
                     }
                 });
