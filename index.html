@@ -10,22 +10,22 @@
     <meta name="apple-mobile-web-app-title" content="Cassidy Budget">
     <style>
         :root {
-            /* Your Custom Palette */
+            /* Custom Palette */
             --linen: #DDC5A9;
             --venice: #8894B7;
             --shine: #F5C74D;
             
             /* Expanded Harmonizing Tones */
-            --bg-color: #f7f5f0;        /* Soft tinted linen canvas */
+            --bg-color: #f7f5f0;        
             --card-bg: #ffffff;
-            --text-main: #323946;      /* Deep slate navy for honest readability */
-            --text-muted: #697386;     /* Muted slate twilight */
-            --accent-light: #e3e7f2;   /* Airy Venice mist */
-            --linen-light: #f2eae1;    /* Whipped linen cream */
-            --success: #6b846e;        /* Earthy Sage Green for inflows */
-            --warning: #e09f3e;        /* Deep gold ochre for caution */
-            --danger: #c37b7b;         /* Dusty terracotta rose for caps */
-            --border: #e8e2d7;         /* Delicate linen seam border */
+            --text-main: #323946;      
+            --text-muted: #697386;     
+            --accent-light: #e3e7f2;   
+            --linen-light: #f2eae1;    
+            --success: #6b846e;        
+            --warning: #e09f3e;        
+            --danger: #c37b7b;         
+            --border: #e8e2d7;         
         }
         
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
@@ -86,15 +86,18 @@
             <div id="fluid-balance" style="font-weight: 700; color: var(--success); font-size: 1.1rem;"></div>
         </header>
 
+        <!-- Segment View Switcher -->
         <div class="view-toggle">
             <button id="toggle-month" class="toggle-btn active" onclick="switchView('month')">Month View</button>
-            <button id="toggle-year" class="toggle-btn" onclick="switchView('year')">Year View (2026)</button>
+            <button id="toggle-year" class="toggle-btn" onclick="switchView('year')">Cycle View (12M)</button>
         </div>
 
+        <!-- Dropdown Timeline Filter -->
         <div id="month-filter-wrap" class="month-select-wrapper">
             <select id="global-month-filter" class="nav-select" onchange="render()"></select>
         </div>
 
+        <!-- Metric Component Displays -->
         <div class="metrics-grid">
             <div class="mini-stat">
                 <div class="stat-lbl">Tax Escrow Reserve</div>
@@ -114,11 +117,13 @@
             </div>
         </div>
 
+        <!-- Visual Tracking Gauges -->
         <div class="card">
             <h2><span class="view-label-ctx">Month</span> Spending Targets</h2>
             <div id="category-caps-container"></div>
         </div>
 
+        <!-- Transaction Logger Container -->
         <div class="card">
             <h2>Log Entry Transaction</h2>
             <div class="form-group">
@@ -132,6 +137,7 @@
             <button onclick="submitTransaction()">Record Entry</button>
         </div>
 
+        <!-- Templates Management Workspace -->
         <div class="card" id="recurring-card-manager">
             <h2>Recurring Templates 
                 <button class="action-link" onclick="applyRecurringToCurrentMonth()">Apply to Selected Month</button>
@@ -153,6 +159,7 @@
             <ul id="recurring-list" class="tx-list"></ul>
         </div>
 
+        <!-- Savings Allocation Pots -->
         <div class="card">
             <h2>Long-Term Savings Pots</h2>
             <div class="form-group">
@@ -167,6 +174,7 @@
             <div id="pots-container" style="margin-top: 14px;"></div>
         </div>
 
+        <!-- Main Filtered Data Ledger -->
         <div class="card">
             <h2>Dynamic Operational Ledger</h2>
             <ul id="ledger-container" class="tx-list"></ul>
@@ -206,13 +214,15 @@
         function populateMonthTimelineOptions() {
             const filter = document.getElementById('global-month-filter');
             filter.innerHTML = '';
-            for(let m = 1; m <= 12; m++) {
-                let monthStr = m < 10 ? `0${m}` : `${m}`;
-                let k = `2026-${monthStr}`;
-                let d = new Date(2026, m - 1, 1);
+            
+            // Loop exactly 13 times to construct a timeline from July 2026 through July 2027
+            for(let i = 0; i <= 12; i++) {
+                let d = new Date(2026, 6 + i, 1); // 6 represents July
+                let monthStr = (d.getMonth() + 1).toString().padStart(2, '0');
+                let k = `${d.getFullYear()}-${monthStr}`;
                 let label = d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
                 let opt = new Option(label, k);
-                if(k === '2026-07') opt.selected = true; // Lock onto starting baseline target context frame
+                if(i === 0) opt.selected = true; // Locks initial default frame directly to July 2026
                 filter.add(opt);
             }
         }
@@ -225,7 +235,7 @@
             document.getElementById('recurring-card-manager').style.display = mode === 'month' ? 'block' : 'none';
             
             document.querySelectorAll('.view-label-ctx').forEach(el => {
-                el.innerText = mode === 'month' ? 'Month' : 'Annual';
+                el.innerText = mode === 'month' ? 'Month' : 'Cycle';
             });
             render();
         }
@@ -327,7 +337,7 @@
         }
 
         function fundPot(idx) {
-            const allocation = parseFloat(prompt(`Transfer available liquidity profiles into this pot:`));
+            const allocation = parseFloat(prompt(`Transfer available assets into this pot:`));
             if(!allocation || allocation <= 0 || allocation > state.globalBalance) {
                 alert("Operation failed. Insufficient liquid profile balance.");
                 return;
@@ -341,14 +351,13 @@
             const activeMonth = document.getElementById('global-month-filter').value;
             const isYearMode = state.currentViewMode === 'year';
 
-            // Fixed Absolute Totals Context Output
             document.getElementById('dash-balance').innerText = `$${state.globalBalance.toFixed(2)}`;
             document.getElementById('dash-tax').innerText = `$${state.taxEscrowBalance.toFixed(2)}`;
             document.getElementById('fluid-balance').innerText = `$${state.globalBalance.toFixed(0)}`;
 
-            // Filter context array matching dataset bounds configuration parameters
+            // Dynamic filter range spanning across the custom 2026-07 to 2027-07 boundary loop window
             const targetedLedgerDataset = isYearMode 
-                ? state.ledger.filter(item => item.monthKey.startsWith('2026'))
+                ? state.ledger.filter(item => item.monthKey >= '2026-07' && item.monthKey <= '2027-07')
                 : state.ledger.filter(item => item.monthKey === activeMonth);
 
             let totalInflow = 0;
@@ -409,7 +418,7 @@
                 });
             }
 
-            // Build dynamic savings long term allocations interface cards components mapping
+            // Render Savings Allocation Pots
             const potsContainer = document.getElementById('pots-container');
             potsContainer.innerHTML = '';
             state.pots.forEach((pot, idx) => {
@@ -425,11 +434,11 @@
                     </div>`;
             });
 
-            // Dynamic Ledger lists data map UI component arrays
+            // Dynamic Ledger lists component data map
             const ledgerUl = document.getElementById('ledger-container');
             ledgerUl.innerHTML = '';
             if(targetedLedgerDataset.length === 0) {
-                ledgerUl.innerHTML = `<li class="tx-item" style="color:var(--text-muted); justify-content:center; padding: 20px 0;">No active logs found.</li>`;
+                ledgerUl.innerHTML = `<li class="tx-item" style="color:var(--text-muted); justify-content:center; padding: 20px 0;">No active logs found for this cycle window.</li>`;
             } else {
                 targetedLedgerDataset.slice(0, 15).forEach(item => {
                     if(item.type === 'expense') {
