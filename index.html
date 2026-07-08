@@ -3,144 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Alchemy Budget Pro</title>
+    <title>Cassidy's Budget</title>
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Budget Pro">
+    <meta name="apple-mobile-web-app-title" content="Cassidy Budget">
     <style>
         :root {
-            --bg-color: #f4f6f8;
+            /* Your Custom Palette */
+            --linen: #DDC5A9;
+            --venice: #8894B7;
+            --shine: #F5C74D;
+            
+            /* Expanded Harmonizing Tones */
+            --bg-color: #f7f5f0;        /* Soft tinted linen canvas */
             --card-bg: #ffffff;
-            --text-main: #1a202c;
-            --text-muted: #4a5568;
-            --accent: #553c9a;
-            --accent-light: #e9d8fd;
-            --success: #2f855a;
-            --warning: #dd6b20;
-            --danger: #e53e3e;
-            --border: #e2e8f0;
+            --text-main: #323946;      /* Deep slate navy for honest readability */
+            --text-muted: #697386;     /* Muted slate twilight */
+            --accent-light: #e3e7f2;   /* Airy Venice mist */
+            --linen-light: #f2eae1;    /* Whipped linen cream */
+            --success: #6b846e;        /* Earthy Sage Green for inflows */
+            --warning: #e09f3e;        /* Deep gold ochre for caution */
+            --danger: #c37b7b;         /* Dusty terracotta rose for caps */
+            --border: #e8e2d7;         /* Delicate linen seam border */
         }
+        
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-main); padding: 16px; padding-bottom: 40px; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding: 16px; padding-bottom: 60px; -webkit-font-smoothing: antialiased; }
         .container { max-width: 480px; margin: 0 auto; }
         
-        /* Top Navigation/Filter Bar */
-        .month-selector-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        select.nav-select { padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--card-bg); font-weight: 600; font-size: 0.95rem; color: var(--accent); }
-
-        /* Typography & Layout */
-        h1 { font-size: 1.3rem; font-weight: 700; color: var(--text-main); }
-        h2 { font-size: 1.05rem; margin-bottom: 14px; color: var(--text-main); font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
-        .card { background: var(--card-bg); border-radius: 16px; padding: 18px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid var(--border); }
+        /* Layout Structure */
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-top: 8px; }
+        h1 { font-size: 1.35rem; font-weight: 600; letter-spacing: -0.3px; color: var(--text-main); }
+        h2 { font-size: 1rem; margin-bottom: 14px; color: var(--text-main); font-weight: 600; display: flex; justify-content: space-between; align-items: center; letter-spacing: -0.1px; }
         
-        /* Dashboard Stats */
-        .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
-        .mini-stat { background: var(--card-bg); border-radius: 12px; padding: 12px; border: 1px solid var(--border); }
-        .stat-lbl { font-size: 0.75rem; text-transform: uppercase; tracking: 0.5px; color: var(--text-muted); font-weight: 600; }
-        .stat-val { font-size: 1.25rem; font-weight: 700; margin-top: 4px; }
+        /* Segment Controller */
+        .view-toggle { display: flex; background: var(--border); padding: 3px; border-radius: 12px; margin-bottom: 18px; }
+        .toggle-btn { flex: 1; text-align: center; padding: 9px; border-radius: 9px; font-size: 0.85rem; font-weight: 600; border: none; background: transparent; cursor: pointer; color: var(--text-muted); transition: all 0.2s ease; }
+        .toggle-btn.active { background: var(--card-bg); color: var(--text-main); box-shadow: 0 2px 6px rgba(50,57,70,0.06); }
 
-        /* Form styling */
-        .form-group { margin-bottom: 12px; }
-        label { display: block; font-size: 0.8rem; color: var(--text-muted); font-weight: 600; margin-bottom: 4px; }
-        input, select.form-input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.95rem; background: var(--bg-color); color: var(--text-main); }
-        button { width: 100%; padding: 12px; background: var(--accent); color: white; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; margin-top: 6px; }
-        button.secondary { background: var(--accent-light); color: var(--accent); margin-top: 0; padding: 6px 12px; width: auto; font-size: 0.8rem; }
+        .month-select-wrapper { display: flex; justify-content: flex-end; margin-bottom: 18px; }
+        select.nav-select { padding: 8px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--card-bg); font-weight: 600; font-size: 0.9rem; color: var(--text-main); outline: none; }
 
-        /* Progress Bars */
-        .progress-wrapper { margin-bottom: 12px; }
-        .progress-meta { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px; }
-        .progress-bg { background: var(--border); height: 8px; border-radius: 4px; overflow: hidden; }
-        .progress-bar { height: 100%; width: 0%; transition: width 0.3s; background: var(--success); }
+        .card { background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 16px rgba(136,148,183,0.04); border: 1px solid var(--border); }
+        
+        /* Financial Grid Analytics */
+        .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
+        .mini-stat { background: var(--card-bg); border-radius: 14px; padding: 14px; border: 1px solid var(--border); }
+        .stat-lbl { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); font-weight: 600; }
+        .stat-val { font-size: 1.2rem; font-weight: 700; margin-top: 4px; color: var(--text-main); }
 
-        /* Transaction List */
+        /* Interactive Inputs & Elements */
+        .form-group { margin-bottom: 14px; }
+        label { display: block; font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-bottom: 5px; }
+        input, select.form-input { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.95rem; background: var(--bg-color); color: var(--text-main); outline: none; transition: border 0.2s; }
+        input:focus, select.form-input:focus { border-color: var(--venice); }
+        
+        button { width: 100%; padding: 14px; background: var(--venice); color: white; border: none; border-radius: 10px; font-size: 0.95rem; font-weight: 600; cursor: pointer; margin-top: 6px; transition: opacity 0.2s; }
+        button:active { opacity: 0.85; }
+        button.secondary { background: var(--linen-light); color: var(--text-main); margin-top: 0; padding: 6px 12px; width: auto; font-size: 0.78rem; border-radius: 6px; border: 1px solid var(--linen); }
+        button.action-link { background: transparent; color: var(--venice); width: auto; padding: 0; margin: 0; font-size: 0.82rem; text-decoration: none; font-weight: 600; }
+
+        /* Dynamic Progress Bars */
+        .progress-wrapper { margin-bottom: 14px; }
+        .progress-wrapper:last-child { margin-bottom: 0; }
+        .progress-meta { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 5px; }
+        .progress-bg { background: var(--bg-color); height: 8px; border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
+        .progress-bar { height: 100%; width: 0%; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); background: var(--success); }
+
+        /* General Transaction Ledger Lists */
         .tx-list { list-style: none; }
-        .tx-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+        .tx-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--bg-color); font-size: 0.9rem; }
         .tx-item:last-child { border-bottom: none; }
-        .tx-cat-tag { font-size: 0.7rem; background: var(--bg-color); padding: 2px 6px; border-radius: 4px; color: var(--text-muted); display: inline-block; margin-top: 2px; }
+        .tx-cat-tag { font-size: 0.68rem; background: var(--linen-light); padding: 3px 8px; border-radius: 6px; color: var(--text-main); display: inline-block; margin-top: 4px; font-weight: 500; }
     </style>
 </head>
 <body>
     <div class="container">
         
-        <!-- App Header & Month Filter -->
-        <div class="month-selector-bar">
-            <h1>Alchemy Budget</h1>
+        <header>
+            <h1>Cassidy's Budget</h1>
+            <div id="fluid-balance" style="font-weight: 700; color: var(--success); font-size: 1.1rem;"></div>
+        </header>
+
+        <div class="view-toggle">
+            <button id="toggle-month" class="toggle-btn active" onclick="switchView('month')">Month View</button>
+            <button id="toggle-year" class="toggle-btn" onclick="switchView('year')">Year View (2026)</button>
+        </div>
+
+        <div id="month-filter-wrap" class="month-select-wrapper">
             <select id="global-month-filter" class="nav-select" onchange="render()"></select>
         </div>
 
-        <!-- High-Level Dynamic Snapshot -->
         <div class="metrics-grid">
             <div class="mini-stat">
-                <div class="stat-lbl">Available Cash</div>
-                <div class="stat-val" id="dash-balance" style="color: var(--success);">$0.00</div>
+                <div class="stat-lbl">Tax Escrow Reserve</div>
+                <div class="stat-val" id="dash-tax" style="color: var(--text-muted); font-weight: 500;">$0.00</div>
             </div>
             <div class="mini-stat">
-                <div class="stat-lbl">Tax Escrow</div>
-                <div class="stat-val" id="dash-tax" style="color: var(--text-muted);">$0.00</div>
+                <div class="stat-lbl">Fluid Net Balance</div>
+                <div class="stat-val" id="dash-balance">$0.00</div>
             </div>
             <div class="mini-stat">
-                <div class="stat-lbl">Month Income</div>
-                <div class="stat-val" id="dash-month-inc">$0.00</div>
+                <div class="stat-lbl"><span class="view-label-ctx">Month</span> Total Inflow</div>
+                <div class="stat-val" id="dash-inflow" style="color: var(--success);">$0.00</div>
             </div>
             <div class="mini-stat">
-                <div class="stat-lbl">Month Outflow</div>
-                <div class="stat-val" id="dash-month-exp" style="color: var(--warning);">$0.00</div>
+                <div class="stat-lbl"><span class="view-label-ctx">Month</span> Total Outflow</div>
+                <div class="stat-val" id="dash-outflow" style="color: var(--warning);">$0.00</div>
             </div>
         </div>
 
-        <!-- Category Budgets Tracking Section -->
         <div class="card">
-            <h2>Category Visual Spending</h2>
+            <h2><span class="view-label-ctx">Month</span> Spending Targets</h2>
             <div id="category-caps-container"></div>
         </div>
 
-        <!-- Contextual Logger Tab/Cards -->
         <div class="card">
-            <h2>Log Transaction</h2>
+            <h2>Log Entry Transaction</h2>
             <div class="form-group">
-                <label>Transaction Type</label>
+                <label>Transaction Blueprint Type</label>
                 <select id="tx-type" class="form-input" onchange="toggleFormContext()">
                     <option value="expense">Expense / Bill Outflow</option>
                     <option value="income">Paycheck / Inflow</option>
                 </select>
             </div>
-
-            <!-- Dynamic Fields Container -->
             <div id="dynamic-form-fields"></div>
             <button onclick="submitTransaction()">Record Entry</button>
         </div>
 
-        <!-- Long Term Goals / Savings Pots -->
+        <div class="card" id="recurring-card-manager">
+            <h2>Recurring Templates 
+                <button class="action-link" onclick="applyRecurringToCurrentMonth()">Apply to Selected Month</button>
+            </h2>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:14px; margin-top: 10px;">
+                <input type="text" id="rec-desc" placeholder="Rent, Spotify...">
+                <input type="number" id="rec-amt" placeholder="Amount ($)">
+                <select id="rec-cat" class="form-input">
+                    <option value="Housing">Housing</option>
+                    <option value="Groceries">Groceries</option>
+                    <option value="Utilities">Utilities</option>
+                    <option value="Transport">Transport</option>
+                    <option value="Entertainment">Entertainment</option>
+                    <option value="Miscellaneous">Miscellaneous</option>
+                    <option value="Income-Pay">Income-Pay</option>
+                </select>
+                <button class="secondary" style="margin-top:0;" onclick="addRecurringTemplate()">+ Save Template</button>
+            </div>
+            <ul id="recurring-list" class="tx-list"></ul>
+        </div>
+
         <div class="card">
             <h2>Long-Term Savings Pots</h2>
             <div class="form-group">
-                <label>Pot Designation Name</label>
-                <input type="text" id="pot-name" placeholder="e.g., Car Fund, Vacation">
+                <label>Designation Name</label>
+                <input type="text" id="pot-name" placeholder="e.g., New Car Fund">
             </div>
             <div class="form-group">
-                <label>Target Funding Goal ($)</label>
-                <input type="number" id="pot-target" placeholder="e.g., 10000">
+                <label>Target Funding Goal Target ($)</label>
+                <input type="number" id="pot-target" placeholder="e.g., 15000">
             </div>
             <button style="background: var(--text-main);" onclick="createNewPot()">Initialize Pot</button>
             <div id="pots-container" style="margin-top: 14px;"></div>
         </div>
 
-        <!-- Ledger View -->
         <div class="card">
-            <h2>Monthly Filtered Ledger</h2>
+            <h2>Dynamic Operational Ledger</h2>
             <ul id="ledger-container" class="tx-list"></ul>
         </div>
 
     </div>
 
     <script>
-        // Set up architecture to track complex records
-        let state = JSON.parse(localStorage.getItem('budgetProState')) || {
+        let state = JSON.parse(localStorage.getItem('cassidyProBudgetState')) || {
             globalBalance: 0,
             taxEscrowBalance: 0,
+            currentViewMode: 'month',
             pots: [],
-            ledger: [], // Contains both income and expense items
+            ledger: [], 
+            recurringTemplates: [],
             categoryTargets: {
                 "Housing": 1600,
                 "Groceries": 450,
@@ -152,56 +193,65 @@
         };
 
         function save() {
-            localStorage.setItem('budgetProState', JSON.stringify(state));
+            localStorage.setItem('cassidyProBudgetState', JSON.stringify(state));
             render();
         }
 
-        // Initialize baseline configuration parameters
         function init() {
-            populateMonthFilter();
+            populateMonthTimelineOptions();
             toggleFormContext();
             render();
         }
 
-        function populateMonthFilter() {
+        function populateMonthTimelineOptions() {
             const filter = document.getElementById('global-month-filter');
-            const current = new Date();
             filter.innerHTML = '';
-            
-            // Build an active timeline window spanning back 3 months and forward 6 months
-            for(let i = -3; i <= 6; i++) {
-                let d = new Date(current.getFullYear(), current.getMonth() + i, 1);
-                let k = d.toISOString().slice(0,7); // YYYY-MM
+            for(let m = 1; m <= 12; m++) {
+                let monthStr = m < 10 ? `0${m}` : `${m}`;
+                let k = `2026-${monthStr}`;
+                let d = new Date(2026, m - 1, 1);
                 let label = d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
                 let opt = new Option(label, k);
-                if(i === 0) opt.selected = true;
+                if(k === '2026-07') opt.selected = true; // Lock onto starting baseline target context frame
                 filter.add(opt);
             }
+        }
+
+        function switchView(mode) {
+            state.currentViewMode = mode;
+            document.getElementById('toggle-month').classList.toggle('active', mode === 'month');
+            document.getElementById('toggle-year').classList.toggle('active', mode === 'year');
+            document.getElementById('month-filter-wrap').style.display = mode === 'month' ? 'flex' : 'none';
+            document.getElementById('recurring-card-manager').style.display = mode === 'month' ? 'block' : 'none';
+            
+            document.querySelectorAll('.view-label-ctx').forEach(el => {
+                el.innerText = mode === 'month' ? 'Month' : 'Annual';
+            });
+            render();
         }
 
         function toggleFormContext() {
             const type = document.getElementById('tx-type').value;
             const container = document.getElementById('dynamic-form-fields');
-            
             if(type === 'expense') {
                 container.innerHTML = `
                     <div class="form-group"><label>Description</label><input type="text" id="field-desc" placeholder="e.g., Central Market"></div>
                     <div class="form-group"><label>Amount ($)</label><input type="number" id="field-amount" placeholder="0.00"></div>
-                    <div class="form-group"><label>Expense Category Target</label>
+                    <div class="form-group"><label>Target Allocation Category</label>
                         <select id="field-cat" class="form-input">
                             ${Object.keys(state.categoryTargets).map(c => `<option value="${c}">${c}</option>`).join('')}
                         </select>
                     </div>`;
             } else {
                 container.innerHTML = `
-                    <div class="form-group"><label>Gross Income Base</label><input type="number" id="field-gross" placeholder="e.g., 6250"></div>
-                    <div class="form-group"><label>Calculated Tax Withholding Rate (%)</label><input type="number" id="field-tax-rate" value="20"></div>`;
+                    <div class="form-group"><label>Gross Cash Pay Inflow</label><input type="number" id="field-gross" placeholder="e.g., 6250"></div>
+                    <div class="form-group"><label>Estimated Withholding Tax Rate (%)</label><input type="number" id="field-tax-rate" value="20"></div>`;
             }
         }
 
         function submitTransaction() {
             const type = document.getElementById('tx-type').value;
-            const selectedMonth = document.getElementById('global-month-filter').value; // Match dashboard view
+            const activeMonth = document.getElementById('global-month-filter').value;
             const dateStr = new Date().toLocaleDateString();
 
             if(type === 'expense') {
@@ -211,7 +261,7 @@
                 if(!desc || !amt || amt <= 0) return;
 
                 state.globalBalance -= amt;
-                state.ledger.unshift({ type, desc, amt, cat, date: dateStr, monthKey: selectedMonth });
+                state.ledger.unshift({ id: Date.now(), type, desc, amt, cat, date: dateStr, monthKey: activeMonth });
             } else {
                 const gross = parseFloat(document.getElementById('field-gross').value);
                 const rate = parseFloat(document.getElementById('field-tax-rate').value) / 100;
@@ -222,10 +272,47 @@
 
                 state.globalBalance += net;
                 state.taxEscrowBalance += tax;
-                state.ledger.unshift({ type, desc: 'Paycheck Deposit', gross, tax, net, date: dateStr, monthKey: selectedMonth });
+                state.ledger.unshift({ id: Date.now(), type, desc: 'Paycheck Inflow', gross, tax, net, date: dateStr, monthKey: activeMonth });
             }
             save();
             toggleFormContext();
+        }
+
+        function addRecurringTemplate() {
+            const desc = document.getElementById('rec-desc').value.trim();
+            const amt = parseFloat(document.getElementById('rec-amt').value);
+            const cat = document.getElementById('rec-cat').value;
+            if(!desc || !amt || amt <= 0) return;
+
+            state.recurringTemplates.push({ id: Date.now(), desc, amt, cat });
+            document.getElementById('rec-desc').value = '';
+            document.getElementById('rec-amt').value = '';
+            save();
+        }
+
+        function removeRecurringTemplate(id) {
+            state.recurringTemplates = state.recurringTemplates.filter(r => r.id !== id);
+            save();
+        }
+
+        function applyRecurringToCurrentMonth() {
+            const activeMonth = document.getElementById('global-month-filter').value;
+            const dateStr = new Date().toLocaleDateString();
+            
+            state.recurringTemplates.forEach(item => {
+                if(item.cat === 'Income-Pay') {
+                    const gross = item.amt;
+                    const tax = gross * 0.20;
+                    const net = gross - tax;
+                    state.globalBalance += net;
+                    state.taxEscrowBalance += tax;
+                    state.ledger.unshift({ id: Date.now() + Math.random(), type: 'income', desc: item.desc, gross, tax, net, date: dateStr, monthKey: activeMonth });
+                } else {
+                    state.globalBalance -= item.amt;
+                    state.ledger.unshift({ id: Date.now() + Math.random(), type: 'expense', desc: item.desc, amt: item.amt, cat: item.cat, date: dateStr, monthKey: activeMonth });
+                }
+            });
+            save();
         }
 
         function createNewPot() {
@@ -240,9 +327,9 @@
         }
 
         function fundPot(idx) {
-            const allocation = parseFloat(prompt(`Transfer available cash reserves into this pot:`));
+            const allocation = parseFloat(prompt(`Transfer available liquidity profiles into this pot:`));
             if(!allocation || allocation <= 0 || allocation > state.globalBalance) {
-                alert("Insufficient fluid funds or unparseable amount.");
+                alert("Operation failed. Insufficient liquid profile balance.");
                 return;
             }
             state.globalBalance -= allocation;
@@ -252,40 +339,44 @@
 
         function render() {
             const activeMonth = document.getElementById('global-month-filter').value;
-            
-            // Core Aggregated Capital Metrics
+            const isYearMode = state.currentViewMode === 'year';
+
+            // Fixed Absolute Totals Context Output
             document.getElementById('dash-balance').innerText = `$${state.globalBalance.toFixed(2)}`;
             document.getElementById('dash-tax').innerText = `$${state.taxEscrowBalance.toFixed(2)}`;
+            document.getElementById('fluid-balance').innerText = `$${state.globalBalance.toFixed(0)}`;
 
-            // Filter context ledger dataset matching targeted timeline key
-            const monthlyItems = state.ledger.filter(item => item.monthKey === activeMonth);
+            // Filter context array matching dataset bounds configuration parameters
+            const targetedLedgerDataset = isYearMode 
+                ? state.ledger.filter(item => item.monthKey.startsWith('2026'))
+                : state.ledger.filter(item => item.monthKey === activeMonth);
 
-            // Compute math metrics corresponding to current timeline segment
-            let monthIncTotal = 0;
-            let monthExpTotal = 0;
+            let totalInflow = 0;
+            let totalOutflow = 0;
             let categorySpendingMap = {};
             Object.keys(state.categoryTargets).forEach(c => categorySpendingMap[c] = 0);
 
-            monthlyItems.forEach(item => {
+            targetedLedgerDataset.forEach(item => {
                 if(item.type === 'income') {
-                    monthIncTotal += item.net;
+                    totalInflow += item.net;
                 } else {
-                    monthExpTotal += item.amt;
+                    totalOutflow += item.amt;
                     if(categorySpendingMap[item.cat] !== undefined) {
                         categorySpendingMap[item.cat] += item.amt;
                     }
                 }
             });
 
-            document.getElementById('dash-month-inc').innerText = `$${monthIncTotal.toFixed(2)}`;
-            document.getElementById('dash-month-exp').innerText = `$${monthExpTotal.toFixed(2)}`;
+            document.getElementById('dash-inflow').innerText = `$${totalInflow.toFixed(2)}`;
+            document.getElementById('dash-outflow').innerText = `$${totalOutflow.toFixed(2)}`;
 
-            // Render Dynamic Visual Category Spending Caps
+            // Build Target Spend visual bars
             const capsContainer = document.getElementById('category-caps-container');
             capsContainer.innerHTML = '';
             Object.keys(state.categoryTargets).forEach(cat => {
                 const spent = categorySpendingMap[cat];
-                const limit = state.categoryTargets[cat];
+                const baseLimit = state.categoryTargets[cat];
+                const limit = isYearMode ? baseLimit * 12 : baseLimit;
                 const pct = Math.min((spent / limit) * 100, 100);
                 
                 let color = 'var(--success)';
@@ -295,46 +386,62 @@
                 capsContainer.innerHTML += `
                     <div class="progress-wrapper">
                         <div class="progress-meta">
-                            <strong>${cat}</strong>
-                            <span>$${spent.toFixed(0)} / $${limit}</span>
+                            <strong style="font-weight: 500; font-size:0.88rem;">${cat}</strong>
+                            <span style="color: var(--text-muted); font-size:0.82rem;">$${spent.toFixed(0)} / $${limit}</span>
                         </div>
                         <div class="progress-bg"><div class="progress-bar" style="width: ${pct}%; background: ${color};"></div></div>
                     </div>`;
             });
 
-            // Render Savings Allocation Pots
+            // Map templates layout data
+            if(!isYearMode) {
+                const recUl = document.getElementById('recurring-list');
+                recUl.innerHTML = '';
+                state.recurringTemplates.forEach(item => {
+                    recUl.innerHTML += `
+                        <li class="tx-item" style="padding: 8px 0;">
+                            <div>${item.desc} <span class="tx-cat-tag" style="background: var(--bg-color);">${item.cat}</span></div>
+                            <div>
+                                <span style="font-weight:600; margin-right:12px;">$${item.amt}</span>
+                                <button class="action-link" style="color:var(--danger);" onclick="removeRecurringTemplate(${item.id})">Drop</button>
+                            </div>
+                        </li>`;
+                });
+            }
+
+            // Build dynamic savings long term allocations interface cards components mapping
             const potsContainer = document.getElementById('pots-container');
             potsContainer.innerHTML = '';
             state.pots.forEach((pot, idx) => {
                 const pct = Math.min((pot.current / pot.target) * 100, 100);
                 potsContainer.innerHTML += `
-                    <div class="progress-wrapper" style="border-left: 3px solid var(--accent); padding-left:8px;">
+                    <div class="progress-wrapper" style="border-left: 3px solid var(--venice); padding-left:10px; margin-bottom:16px;">
                         <div class="progress-meta">
-                            <strong>${pot.name}</strong>
-                            <span>$${pot.current.toFixed(0)} / $${pot.target.toFixed(0)}</span>
+                            <strong style="font-weight:500;">${pot.name}</strong>
+                            <span style="font-size:0.82rem;">$${pot.current.toFixed(0)} / $${pot.target.toFixed(0)}</span>
                         </div>
-                        <div class="progress-bg"><div class="progress-bar" style="width: ${pct}%; background: var(--accent);"></div></div>
-                        <button class="secondary" style="margin-top:6px;" onclick="fundPot(${idx})">+ Fund Target</button>
+                        <div class="progress-bg"><div class="progress-bar" style="width: ${pct}%; background: var(--venice);"></div></div>
+                        <button class="secondary" style="margin-top:8px; background:transparent; color:var(--venice); border-color:var(--venice);" onclick="fundPot(${idx})">+ Allocate Cash</button>
                     </div>`;
             });
 
-            // Render the Filtered Output List Ledger
+            // Dynamic Ledger lists data map UI component arrays
             const ledgerUl = document.getElementById('ledger-container');
             ledgerUl.innerHTML = '';
-            if(monthlyItems.length === 0) {
-                ledgerUl.innerHTML = `<li class="tx-item" style="color:var(--text-muted); justify-content:center;">No log data for this period.</li>`;
+            if(targetedLedgerDataset.length === 0) {
+                ledgerUl.innerHTML = `<li class="tx-item" style="color:var(--text-muted); justify-content:center; padding: 20px 0;">No active logs found.</li>`;
             } else {
-                monthlyItems.forEach(item => {
+                targetedLedgerDataset.slice(0, 15).forEach(item => {
                     if(item.type === 'expense') {
                         ledgerUl.innerHTML += `
                             <li class="tx-item">
                                 <div><div>${item.desc}</div><span class="tx-cat-tag">${item.cat}</span></div>
-                                <span style="color:var(--danger); font-weight:600;">-$${item.amt.toFixed(2)}</span>
+                                <span style="color:var(--text-main); font-weight:600;">-$${item.amt.toFixed(2)}</span>
                             </li>`;
                     } else {
                         ledgerUl.innerHTML += `
                             <li class="tx-item">
-                                <div><div>${item.desc}</div><span class="tx-cat-tag" style="background:var(--accent-light)">Net Inflow</span></div>
+                                <div><div>${item.desc}</div><span class="tx-cat-tag" style="background:var(--accent-light); color:var(--text-main);">Net Pay</span></div>
                                 <span style="color:var(--success); font-weight:600;">+$${item.net.toFixed(2)}</span>
                             </li>`;
                     }
@@ -342,7 +449,6 @@
             }
         }
 
-        // Standard event listener initializer triggers configuration sequence
         window.onload = init;
     </script>
 </body>
