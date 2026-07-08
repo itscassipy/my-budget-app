@@ -88,15 +88,18 @@
             <div id="fluid-balance" style="font-weight: 700; color: var(--success); font-size: 1.1rem;"></div>
         </header>
 
+        <!-- Segment View Switcher -->
         <div class="view-toggle">
             <button id="toggle-month" class="toggle-btn active" onclick="switchView('month')">Month View</button>
             <button id="toggle-year" class="toggle-btn" onclick="switchView('year')">Cycle View (12M)</button>
         </div>
 
+        <!-- Dropdown Timeline Filter -->
         <div id="month-filter-wrap" class="month-select-wrapper">
             <select id="global-month-filter" class="nav-select" onchange="render()"></select>
         </div>
 
+        <!-- Metric Component Displays -->
         <div class="metrics-grid">
             <div class="mini-stat span-2">
                 <div class="stat-lbl"><span class="view-label-ctx">Month</span> Remaining Cash Surplus</div>
@@ -120,11 +123,19 @@
             </div>
         </div>
 
+        <!-- Dynamic Year-by-Month Macro Breakdown Board -->
+        <div class="card" id="cycle-breakdown-card" style="display: none;">
+            <h2>Cycle Month-by-Month Snapshot</h2>
+            <div id="cycle-months-list" style="margin-top: 10px;"></div>
+        </div>
+
+        <!-- Visual Tracking Gauges -->
         <div class="card">
             <h2><span class="view-label-ctx">Month</span> Spending Targets</h2>
             <div id="category-caps-container"></div>
         </div>
 
+        <!-- Transaction Logger Container -->
         <div class="card">
             <h2>Log Entry Transaction</h2>
             <div class="form-group">
@@ -138,6 +149,7 @@
             <button onclick="submitTransaction()">Record Entry</button>
         </div>
 
+        <!-- Templates Management Workspace -->
         <div class="card" id="recurring-card-manager">
             <h2>Recurring Templates 
                 <button class="action-link" onclick="applyRecurringToCurrentMonth()">Apply to Selected Month</button>
@@ -159,6 +171,7 @@
             <ul id="recurring-list" class="tx-list"></ul>
         </div>
 
+        <!-- Savings Allocation Pots -->
         <div class="card">
             <h2>Long-Term Savings Pots</h2>
             <div class="form-group">
@@ -181,6 +194,7 @@
             <div id="pots-container" style="margin-top: 14px;"></div>
         </div>
 
+        <!-- Main Filtered Data Ledger -->
         <div class="card">
             <h2>Dynamic Operational Ledger</h2>
             <ul id="ledger-container" class="tx-list"></ul>
@@ -259,7 +273,13 @@
                     </div>`;
             } else {
                 container.innerHTML = `
-                    <div class="form-group"><label>Gross Cash Pay Inflow</label><input type="number" id="field-gross" placeholder="e.g., 6250"></div>
+                    <div class="form-group"><label>Pay Frequency Scope</label>
+                        <select id="field-freq" class="form-input">
+                            <option value="monthly">Single Month Paycheck</option>
+                            <option value="annual">Annual Salary (Distribute over 12 Months)</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Gross Income Amount ($)</label><input type="number" id="field-gross" placeholder="e.g., 75000"></div>
                     <div class="form-group"><label>Estimated Withholding Tax Rate (%)</label><input type="number" id="field-tax-rate" value="20"></div>`;
             }
         }
@@ -278,16 +298,33 @@
                 state.globalBalance -= amt;
                 state.ledger.unshift({ id: Date.now(), type, desc, amt, cat, date: dateStr, monthKey: activeMonth });
             } else {
-                const gross = parseFloat(document.getElementById('field-gross').value);
+                const freq = document.getElementById('field-freq').value;
+                const grossInput = parseFloat(document.getElementById('field-gross').value);
                 const rate = parseFloat(document.getElementById('field-tax-rate').value) / 100;
-                if(!gross || gross <= 0) return;
+                if(!grossInput || grossInput <= 0) return;
 
-                const tax = gross * rate;
-                const net = gross - tax;
+                if(freq === 'annual') {
+                    // Split across the 12 primary months of the custom cycle loop window
+                    const monthlyGross = grossInput / 12;
+                    const monthlyTax = monthlyGross * rate;
+                    const monthlyNet = monthlyGross - monthlyTax;
 
-                state.globalBalance += net;
-                state.taxEscrowBalance += tax;
-                state.ledger.unshift({ id: Date.now(), type, desc: 'Paycheck Inflow', gross, tax, net, date: dateStr, monthKey: activeMonth });
+                    for(let i = 0; i < 12; i++) {
+                        let d = new Date(2026, 6 + i, 1);
+                        let monthStr = (d.getMonth() + 1).toString().padStart(2, '0');
+                        let k = `${d.getFullYear()}-${monthStr}`;
+                        
+                        state.globalBalance += monthlyNet;
+                        state.taxEscrowBalance += monthlyTax;
+                        state.ledger.unshift({ id: Date.now() + Math.random(), type: 'income', desc: 'Annual Salary Allocation', gross: monthlyGross, tax: monthlyTax, net: monthlyNet, date: dateStr, monthKey: k });
+                    }
+                } else {
+                    const tax = grossInput * rate;
+                    const net = grossInput - tax;
+                    state.globalBalance += net;
+                    state.taxEscrowBalance += tax;
+                    state.ledger.unshift({ id: Date.now(), type: 'income', desc: 'Paycheck Inflow', gross: grossInput, tax, net, date: dateStr, monthKey: activeMonth });
+                }
             }
             save();
             toggleFormContext();
@@ -390,6 +427,36 @@
 
             document.getElementById('dash-inflow').innerText = `$${totalInflow.toFixed(2)}`;
             document.getElementById('dash-outflow').innerText = `$${totalOutflow.toFixed(2)}`;
+
+            // Render Year-by-Month Snapshot Table if Macro View is Toggled
+            const breakdownCard = document.getElementById('cycle-breakdown-card');
+            if (isYearMode) {
+                breakdownCard.style.display = 'block';
+                const breakdownContainer = document.getElementById('cycle-months-list');
+                breakdownContainer.innerHTML = '';
+                
+                for(let i = 0; i <= 12; i++) {
+                    let d = new Date(2026, 6 + i, 1);
+                    let monthStr = (d.getMonth() + 1).toString().padStart(2, '0');
+                    let k = `${d.getFullYear()}-${monthStr}`;
+                    let shortLabel = d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+                    
+                    let mItems = state.ledger.filter(item => item.monthKey === k);
+                    let mIn = 0; let mOut = 0;
+                    mItems.forEach(item => { if(item.type === 'income') mIn += item.net; else mOut += item.amt; });
+                    let mLeft = mIn - mOut;
+
+                    breakdownContainer.innerHTML += `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--bg-color); font-size: 0.85rem;">
+                            <strong style="width: 65px; color: var(--text-main);">${shortLabel}</strong>
+                            <span style="color: var(--success); flex: 1; text-align: right; padding-right: 12px;">+$${mIn.toFixed(0)}</span>
+                            <span style="color: var(--warning); flex: 1; text-align: right; padding-right: 12px;">-$${mOut.toFixed(0)}</span>
+                            <strong style="color: ${mLeft >= 0 ? 'var(--success)' : 'var(--danger)'}; width: 85px; text-align: right;">$${mLeft.toFixed(0)} left</strong>
+                        </div>`;
+                }
+            } else {
+                breakdownCard.style.display = 'none';
+            }
 
             // Build Target Spend visual bars
             const capsContainer = document.getElementById('category-caps-container');
