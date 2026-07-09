@@ -10,140 +10,158 @@
     <meta name="apple-mobile-web-app-title" content="Cassidy Budget">
     <style>
         :root {
-            /* Your Core Palette Tokens */
+            /* Inspo Palette Tokens */
             --linen: #DDC5A9;
             --venice: #8894B7;
             --shine: #F5C74D;
             
-            /* UI Canvas & Typographic Color Palette */
-            --bg-color: #FAF8F5;        /* Ultra-soft warm linen ivory backdrop */
+            /* Premium Soft Contrast Canvas Tones */
+            --bg-color: #FAF6EE;        /* Organic warm cream backdrop from image_3 */
             --card-bg: #FFFFFF;
-            --text-main: #2A2F3D;      /* Deep obsidian navy for premium contrast */
-            --text-muted: #7A8499;     /* Soft slate grey for meta anchors */
-            --accent-light: #F0F3FA;   /* Venice mist */
-            --linen-light: #F7F2EB;    /* Delicate whipped linen cream */
-            --success: #6E8773;        /* Calm botanical sage green */
-            --warning: #E3A655;        /* Warm amber clay */
-            --danger: #CD8484;         /* Soft terracotta rose */
-            --border: #EFEBE4;         /* Fine cream baseline rules */
+            --text-main: #232733;      /* Crisp editorial deep charcoal */
+            --text-muted: #788294;     
+            --accent-light: #EBF0F9;   /* Lavender-tinted Venice mist */
+            --linen-light: #F6EFE5;    
+            --success: #6E8573;        /* Botanical matte sage */
+            --warning: #E5A958;        
+            --danger: #D68C8C;         /* Terracotta rose warning color */
+            --border: #F0EAE1;         
+            --dock-bg: #1A1D26;        /* Sleek dark bottom dock from image_4 */
         }
         
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-main); padding: 20px 16px; padding-bottom: 80px; -webkit-font-smoothing: antialiased; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding: 24px 16px; padding-bottom: 110px; -webkit-font-smoothing: antialiased; }
         .container { max-width: 480px; margin: 0 auto; }
         
-        /* Typography Overhaul - Inspired by modern premium lifestyle interfaces */
-        header h1 { font-family: "Georgia", Georgia, serif; font-weight: 400; font-style: italic; font-size: 1.7rem; color: var(--text-main); letter-spacing: -0.5px; }
-        h2 { font-family: -apple-system, sans-serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 16px; color: var(--text-main); display: flex; justify-content: space-between; align-items: center; letter-spacing: -0.2px; }
+        /* Editorial Typography */
+        header h1 { font-family: "Georgia", Georgia, serif; font-weight: 400; font-style: italic; font-size: 1.8rem; color: var(--text-main); letter-spacing: -0.5px; text-transform: lowercase; }
+        h2 { font-family: "Georgia", Georgia, serif; font-style: italic; font-size: 1.2rem; font-weight: 400; margin-bottom: 18px; color: var(--text-main); display: flex; justify-content: space-between; align-items: center; }
         
-        /* Tab Segment Controller UI Elements */
-        .view-toggle { display: flex; background: var(--linen-light); padding: 4px; border-radius: 16px; margin-bottom: 24px; border: 1px solid var(--border); }
-        .toggle-btn { flex: 1; text-align: center; padding: 12px; border-radius: 12px; font-size: 0.88rem; font-weight: 600; border: none; background: transparent; cursor: pointer; color: var(--text-muted); transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
-        .toggle-btn.active { background: var(--card-bg); color: var(--text-main); box-shadow: 0 4px 12px rgba(42,47,61,0.04); }
+        /* Capsule View Toggle */
+        .view-toggle { display: flex; background: #EFE9DE; padding: 4px; border-radius: 20px; margin-bottom: 24px; }
+        .toggle-btn { flex: 1; text-align: center; padding: 12px; border-radius: 16px; font-size: 0.88rem; font-weight: 600; border: none; background: transparent; cursor: pointer; color: var(--text-muted); transition: all 0.2s ease; }
+        .toggle-btn.active { background: var(--card-bg); color: var(--text-main); box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
 
         .month-select-wrapper { display: flex; justify-content: flex-end; margin-bottom: 20px; }
-        select.nav-select { padding: 10px 16px; border-radius: 14px; border: 1px solid var(--border); background: var(--card-bg); font-weight: 600; font-size: 0.88rem; color: var(--text-main); outline: none; box-shadow: 0 2px 6px rgba(0,0,0,0.01); }
+        select.nav-select { padding: 10px 16px; border-radius: 16px; border: 1px solid var(--border); background: var(--card-bg); font-weight: 600; font-size: 0.88rem; color: var(--text-main); outline: none; }
 
-        /* Premium Rounded Widget Blocks */
-        .card { background: var(--card-bg); border-radius: 24px; padding: 22px; margin-bottom: 18px; box-shadow: 0 6px 20px rgba(136,148,183,0.05); border: 1px solid var(--border); overflow: hidden; }
+        /* Premium Soft-Curved Widgets */
+        .card { background: var(--card-bg); border-radius: 28px; padding: 24px; margin-bottom: 20px; box-shadow: 0 8px 24px rgba(35,39,51,0.02); border: 1px solid var(--border); overflow: hidden; }
         
-        /* Grid Block Metrics Layout Framework */
-        .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-        .mini-stat { background: var(--card-bg); border-radius: 20px; padding: 16px; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(136,148,183,0.03); }
-        .stat-lbl { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); font-weight: 700; }
+        /* Lifestyle Grid Blocks Layout */
+        .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+        .mini-stat { background: var(--card-bg); border-radius: 24px; padding: 18px; border: 1px solid var(--border); }
+        .stat-lbl { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); font-weight: 700; }
         .stat-val { font-size: 1.35rem; font-weight: 700; margin-top: 6px; color: var(--text-main); letter-spacing: -0.5px; }
         
-        /* Highlight Feature Banner Configuration */
-        .span-2 { grid-column: span 2; background: linear-gradient(135deg, var(--linen-light) 0%, #FAF6F0 100%); border: 1px solid var(--linen); position: relative; }
-        .span-2 .stat-val { font-family: "Georgia", Georgia, serif; font-style: italic; font-size: 1.9rem; font-weight: 400; color: var(--text-main); margin-top: 2px; }
+        /* Hero Visual Block - Reminiscent of Today's Vibe Card */
+        .span-2 { grid-column: span 2; background: linear-gradient(135deg, #FFFDF9 0%, var(--linen-light) 100%); border: 1px solid var(--linen); }
+        .span-2 .stat-val { font-family: "Georgia", Georgia, serif; font-style: italic; font-size: 2.1rem; font-weight: 400; color: var(--text-main); margin-top: 4px; }
 
-        /* Premium Form Controls */
+        /* Input Customizations */
         .form-group { margin-bottom: 16px; }
-        label { display: block; font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px; }
-        input, select.form-input { width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 14px; font-size: 0.95rem; background: var(--bg-color); color: var(--text-main); outline: none; transition: all 0.2s ease; }
+        label { display: block; font-size: 0.75rem; color: var(--text-muted); font-weight: 700; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        input, select.form-input { width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 16px; font-size: 0.95rem; background: var(--bg-color); color: var(--text-main); outline: none; transition: all 0.2s; }
         input:focus, select.form-input:focus { border-color: var(--venice); background: var(--card-bg); box-shadow: 0 0 0 3px rgba(136,148,183,0.1); }
         
-        /* Modern Rounded Actions Buttons */
-        button { width: 100%; padding: 16px; background: var(--venice); color: white; border: none; border-radius: 16px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(136,148,183,0.2); }
-        button:active { transform: scale(0.98); opacity: 0.9; }
-        button.secondary { background: var(--card-bg); color: var(--text-main); margin-top: 0; padding: 8px 14px; width: auto; font-size: 0.78rem; border-radius: 10px; border: 1px solid var(--linen); box-shadow: none; }
-        button.action-link { background: transparent; color: var(--venice); width: auto; padding: 0; margin: 0; font-size: 0.82rem; text-decoration: none; font-weight: 600; box-shadow: none; }
+        /* Dynamic Action Buttons */
+        button { width: 100%; padding: 16px; background: var(--venice); color: white; border: none; border-radius: 18px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+        button:active { opacity: 0.85; }
+        button.secondary { background: var(--linen-light); color: var(--text-main); margin-top: 0; padding: 8px 14px; width: auto; font-size: 0.78rem; border-radius: 12px; border: 1px solid var(--linen); }
+        button.action-link { background: transparent; color: var(--venice); width: auto; padding: 0; margin: 0; font-size: 0.85rem; font-weight: 700; }
         
-        /* Inline Operational Micro Anchors */
-        .inline-actions { display: flex; gap: 12px; margin-top: 6px; }
-        .btn-inline { background: transparent; color: var(--text-muted); font-size: 0.75rem; text-decoration: none; width: auto; padding: 0; margin: 0; font-weight: 600; border: none; cursor: pointer; text-transform: uppercase; letter-spacing: 0.3px; }
+        /* Action Control Triggers */
+        .inline-actions { display: flex; gap: 12px; margin-top: 8px; }
+        .btn-inline { background: transparent; color: var(--text-muted); font-size: 0.72rem; width: auto; padding: 0; margin: 0; font-weight: 700; border: none; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; }
         .btn-inline.del { color: var(--danger); }
         .btn-inline.edit { color: var(--venice); }
 
-        /* Smooth Capsule Progress Component Rails */
-        .progress-wrapper { margin-bottom: 18px; }
+        /* Curved Capsule Progress Bars */
+        .progress-wrapper { margin-bottom: 20px; }
         .progress-wrapper:last-child { margin-bottom: 0; }
-        .progress-meta { display: flex; justify-content: space-between; font-size: 0.88rem; margin-bottom: 6px; align-items: center; }
-        .progress-bg { background: var(--bg-color); height: 10px; border-radius: 5px; overflow: hidden; border: 1px solid var(--border); }
-        .progress-bar { height: 100%; width: 0%; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 5px; }
+        .progress-meta { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 6px; align-items: center; }
+        .progress-bg { background: var(--bg-color); height: 12px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border); }
+        .progress-bar { height: 100%; width: 0%; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 6px; }
 
-        /* Scannable Layout Item Ledgers */
+        /* General Transaction Lists */
         .tx-list { list-style: none; }
-        .tx-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--bg-color); font-size: 0.92rem; }
+        .tx-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--bg-color); font-size: 0.95rem; }
         .tx-item:last-child { border-bottom: none; }
         
-        /* Capsule Styling Elements */
-        .tx-cat-tag { font-size: 0.68rem; background: var(--linen-light); padding: 4px 10px; border-radius: 20px; color: var(--text-main); display: inline-block; margin-top: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; border: 1px solid transparent; }
-        .tx-cat-tag.nn { background: var(--accent-light); color: var(--text-main); border-color: var(--venice); }
+        /* Pill Badges */
+        .tx-cat-tag { font-size: 0.65rem; background: var(--linen-light); padding: 4px 12px; border-radius: 20px; color: var(--text-main); display: inline-block; margin-top: 6px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .tx-cat-tag.nn { background: var(--accent-light); color: var(--text-main); border: 1px solid var(--venice); }
         .pot-eta { font-size: 0.78rem; color: var(--text-muted); margin-top: 6px; font-style: italic; }
+
+        /* Stylized Floating Bottom Navigation Dock */
+        .bottom-dock { position: fixed; bottom: 16px; left: 16px; right: 16px; background: var(--dock-bg); height: 68px; border-radius: 24px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 8px 30px rgba(0,0,0,0.15); z-index: 1000; padding: 0 10px; }
+        .dock-item { color: #A0AEC0; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border: none; background: transparent; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 60px; height: 100%; }
+        .dock-item.active { color: var(--shine); }
+        .dock-center-btn { background: var(--shine); width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; color: var(--dock-bg); font-weight: 300; border: none; cursor: pointer; box-shadow: 0 4px 14px rgba(245,199,77,0.4); transform: translateY(-12px); transition: transform 0.2s; }
+        .dock-center-btn:active { transform: translateY(-10px) scale(0.95); }
     </style>
 </head>
 <body>
     <div class="container">
         
-        <header>
-            <h1>cassidy's lifestyle archive</h1>
-            <div id="fluid-balance" style="font-weight: 700; color: var(--success); font-size: 1.1rem; background: var(--linen-light); padding: 6px 12px; border-radius: 12px; border: 1px solid var(--border);"></div>
+        <header style="margin-bottom: 24px;">
+            <h1>lifestyle archive</h1>
+            <div id="fluid-balance" style="font-weight: 700; color: var(--success); font-size: 0.95rem; background: var(--card-bg); padding: 6px 14px; border-radius: 14px; border: 1px solid var(--border);">$0</div>
         </header>
 
+        <!-- Segment View Switcher -->
         <div class="view-toggle">
             <button id="toggle-month" class="toggle-btn active" onclick="switchView('month')">Month View</button>
             <button id="toggle-year" class="toggle-btn" onclick="switchView('year')">Cycle View (12M)</button>
         </div>
 
+        <!-- Dropdown Timeline Filter -->
         <div id="month-filter-wrap" class="month-select-wrapper">
             <select id="global-month-filter" class="nav-select" onchange="render()"></select>
         </div>
 
+        <!-- Metric Component Displays -->
         <div class="metrics-grid">
             <div class="mini-stat span-2">
-                <div class="stat-lbl"><span class="view-label-ctx">Month</span> Remaining Choice Allowance</div>
+                <div class="stat-lbl"><span class="view-label-ctx">Month</span> Choice Allowance</div>
                 <div class="stat-val" id="dash-choice-cash">$0.00</div>
             </div>
-            <div class="mini-stat">
-                <div class="stat-lbl">Fluid Net Balance</div>
+            <div class="mini-stat" style="background: var(--linen-light);">
+                <div class="stat-lbl">Fluid Balance</div>
                 <div class="stat-val" id="dash-balance">$0.00</div>
             </div>
-            <div class="mini-stat">
+            <div class="mini-stat" style="background: var(--accent-light);">
                 <div class="stat-lbl">Essential Vault</div>
-                <div class="stat-val" id="dash-nn-vault" style="color: var(--text-main); font-weight: 600;">$0.00</div>
+                <div class="stat-val" id="dash-nn-vault" style="font-weight: 600;">$0.00</div>
             </div>
             <div class="mini-stat">
-                <div class="stat-lbl">Tax Escrow Reserve</div>
+                <div class="stat-lbl">Tax Escrow</div>
                 <div class="stat-val" id="dash-tax" style="color: var(--text-muted); font-weight: 500;">$0.00</div>
             </div>
             <div class="mini-stat">
-                <div class="stat-lbl"><span class="view-label-ctx">Month</span> Net Inflow</div>
-                <div class="stat-val" id="dash-inflow" style="color: var(--success);">$0.00</div>
+                <div class="stat-lbl"><span class="view-label-ctx">Month</span> Outflow</div>
+                <div class="stat-val" id="dash-outflow" style="color: var(--warning);">$0.00</div>
+            </div>
+            <div class="mini-stat" style="display:none;">
+                <!-- Internal script binding cache hook -->
+                <div id="dash-inflow"></div>
             </div>
         </div>
 
+        <!-- Dynamic Year-by-Month Macro Breakdown Board -->
         <div class="card" id="cycle-breakdown-card" style="display: none;">
-            <h2>Cycle Month-by-Month Snapshot</h2>
+            <h2>cycle month-by-month summary</h2>
             <div id="cycle-months-list" style="margin-top: 10px;"></div>
         </div>
 
+        <!-- Visual Tracking Gauges -->
         <div class="card">
-            <h2><span class="view-label-ctx">Month</span> Spending Targets</h2>
+            <h2><span class="view-label-ctx">Month</span> spending targets</h2>
             <div id="category-caps-container"></div>
         </div>
 
-        <div class="card">
+        <!-- Transaction Logger Container -->
+        <div class="card" id="logger-section-anchor">
             <h2>Log Entry Transaction</h2>
             <div class="form-group">
                 <label>Transaction Blueprint Type</label>
@@ -156,8 +174,9 @@
             <button onclick="submitTransaction()">Record Entry</button>
         </div>
 
+        <!-- Templates Management Workspace -->
         <div class="card" id="recurring-card-manager">
-            <h2>Recurring Templates 
+            <h2>recurring templates 
                 <button class="action-link" onclick="applyRecurringToCurrentMonth()">Apply to Month</button>
             </h2>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:14px; margin-top: 12px;">
@@ -169,8 +188,9 @@
             <ul id="recurring-list" class="tx-list"></ul>
         </div>
 
+        <!-- Savings Allocation Pots -->
         <div class="card">
-            <h2>Long-Term Savings Pots</h2>
+            <h2>long-term savings pots</h2>
             <div class="form-group">
                 <label>Designation Name</label>
                 <input type="text" id="pot-name" placeholder="e.g., New Car Fund">
@@ -191,11 +211,19 @@
             <div id="pots-container" style="margin-top: 18px;"></div>
         </div>
 
+        <!-- Main Filtered Data Ledger -->
         <div class="card">
-            <h2>Dynamic Operational Ledger</h2>
+            <h2>dynamic operational ledger</h2>
             <ul id="ledger-container" class="tx-list"></ul>
         </div>
 
+    </div>
+
+    <!-- Floating Dock Inspired by mockups -->
+    <div class="bottom-dock">
+        <button class="dock-item active" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">Home</button>
+        <button class="dock-center-btn" onclick="document.getElementById('logger-section-anchor').scrollIntoView({behavior: 'smooth'})">+</button>
+        <button class="dock-item" onclick="document.getElementById('recurring-card-manager').scrollIntoView({behavior: 'smooth'})">Rules</button>
     </div>
 
     <script>
@@ -562,15 +590,15 @@
                     <div class="progress-wrapper">
                         <div class="progress-meta">
                             <div>
-                                <strong style="font-weight: 600; font-size:0.88rem;">${cat.name}</strong>
-                                <span class="tx-cat-tag ${cat.nonNegotiable ? 'nn' : ''}" style="margin-top:0; margin-left:6px; font-size:0.62rem; padding:2px 6px;">
+                                <strong style="font-weight: 600; font-size:0.88rem;">${cat.name.toLowerCase()}</strong>
+                                <span class="tx-cat-tag ${cat.nonNegotiable ? 'nn' : ''}" style="margin-top:0; margin-left:6px; font-size:0.58rem; padding:2px 8px; border-radius:10px;">
                                     ${cat.nonNegotiable ? 'Essential' : 'Choice'}
                                 </span>
                             </div>
-                            <span style="color: var(--text-muted); font-size:0.82rem;">$${spent.toFixed(0)} / $${limit}</span>
+                            <span style="color: var(--text-muted); font-size:0.82rem; font-weight: 600;">$${spent.toFixed(0)} / $${limit}</span>
                         </div>
                         <div class="progress-bg"><div class="progress-bar" style="width: ${pct}%; background: ${color};"></div></div>
-                        <div class="inline-actions" style="margin-top: 4px; margin-bottom: 10px;">
+                        <div class="inline-actions" style="margin-top: 6px; margin-bottom: 12px;">
                             <button class="btn-inline edit" onclick="editCategoryLimit('${cat.name}')">Adjust Cap</button>
                             <button class="btn-inline" style="color: var(--text-muted);" onclick="toggleCategoryPrioritization('${cat.name}')">Swap Priority</button>
                         </div>
@@ -584,7 +612,7 @@
                     recUl.innerHTML += `
                         <li class="tx-item" style="padding: 10px 0; align-items: flex-start; flex-direction: column;">
                             <div style="display:flex; justify-content:space-between; width:100%;">
-                                <div><strong>${item.desc}</strong> <span class="tx-cat-tag" style="background: var(--bg-color);">${item.cat}</span></div>
+                                <div><strong>${item.desc.toLowerCase()}</strong> <span class="tx-cat-tag" style="background: var(--bg-color);">${item.cat}</span></div>
                                 <span style="font-weight:600;">$${item.amt}</span>
                             </div>
                             <div class="inline-actions">
@@ -605,7 +633,7 @@
                 potsContainer.innerHTML += `
                     <div class="progress-wrapper" style="border-left: 3px solid var(--venice); padding-left:12px; margin-bottom:18px;">
                         <div class="progress-meta">
-                            <strong style="font-weight:600;">${pot.name}</strong>
+                            <strong style="font-weight:600;">${pot.name.toLowerCase()}</strong>
                             <span style="font-size:0.82rem; font-weight: 600;">$${pot.current.toFixed(0)} / $${pot.target.toFixed(0)}</span>
                         </div>
                         <div class="progress-bg"><div class="progress-bar" style="width: ${pct}%; background: var(--venice);"></div></div>
@@ -631,7 +659,7 @@
                         ledgerUl.innerHTML += `
                             <li class="tx-item" style="align-items: center;">
                                 <div>
-                                    <div><strong>${item.desc}</strong></div>
+                                    <div><strong>${item.desc.toLowerCase()}</strong></div>
                                     <span class="tx-cat-tag ${isNN ? 'nn' : ''}">${item.cat}</span>
                                     ${inlineActionMarkup}
                                 </div>
@@ -641,7 +669,7 @@
                         ledgerUl.innerHTML += `
                             <li class="tx-item" style="align-items: center;">
                                 <div>
-                                    <div><strong>${item.desc}</strong></div>
+                                    <div><strong>${item.desc.toLowerCase()}</strong></div>
                                     <span class="tx-cat-tag" style="background:var(--accent-light); color:var(--text-main);">Net Pay</span>
                                     ${inlineActionMarkup}
                                 </div>
