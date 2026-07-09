@@ -39,17 +39,21 @@
         body { background-color: var(--bg-color); color: var(--text-main); padding: 24px 16px; padding-bottom: 120px; -webkit-font-smoothing: antialiased; }
         .container { max-width: 480px; margin: 0 auto; }
         
-        /* Editorial Premium Typography */
+        /* Editorial Premium Typography & Expanded Space Rules */
+        header { margin-bottom: 42px; display: flex; justify-content: space-between; align-items: center; }
         header h1 { font-family: "Georgia", Georgia, serif; font-weight: 400; font-style: italic; font-size: 1.8rem; color: var(--text-main); letter-spacing: -0.5px; text-transform: lowercase; }
         h2 { font-family: "Georgia", Georgia, serif; font-style: italic; font-size: 1.25rem; font-weight: 400; margin-bottom: 20px; color: var(--text-main); display: flex; justify-content: space-between; align-items: center; }
+        
+        /* Inline Hero Combination Layout Container */
+        .hero-inline-row { display: flex; gap: 14px; align-items: stretch; margin-bottom: 20px; width: 100%; }
         
         /* Interactive Capsule Segment Controls */
         .view-toggle { display: flex; background: #EFE9DE; padding: 4px; border-radius: 20px; margin-bottom: 24px; }
         .toggle-btn { flex: 1; text-align: center; padding: 12px; border-radius: 16px; font-size: 0.88rem; font-weight: 600; border: none; background: transparent; cursor: pointer; color: var(--text-muted); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
         .toggle-btn.active { background: var(--card-bg); color: var(--text-main); box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
 
-        .month-select-wrapper { display: flex; justify-content: flex-end; margin-bottom: 20px; }
-        select.nav-select { padding: 10px 16px; border-radius: 16px; border: 1px solid var(--border); background: var(--card-bg); font-weight: 600; font-size: 0.88rem; color: var(--text-main); outline: none; }
+        .month-select-wrapper { display: flex; align-items: center; justify-content: center; }
+        select.nav-select { height: 100%; padding: 0 16px; border-radius: 24px; border: 1px solid var(--border); background: var(--card-bg); font-weight: 600; font-size: 0.88rem; color: var(--text-main); outline: none; box-shadow: 0 4px 12px rgba(0,0,0,0.02); -webkit-appearance: none; min-width: 120px; text-align: center; }
 
         /* Premium Curved Layout Container Widgets */
         .card { background: var(--card-bg); border-radius: 28px; padding: 24px; margin-bottom: 20px; box-shadow: 0 8px 24px rgba(35,39,51,0.02); border: 1px solid var(--border); overflow: hidden; }
@@ -60,9 +64,9 @@
         .stat-lbl { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); font-weight: 700; }
         .stat-val { font-size: 1.4rem; font-weight: 700; margin-top: 6px; color: var(--text-main); letter-spacing: -0.5px; }
         
-        /* Pastel Highlight Blocks - Matched to Color-Blocked Inspo Photos */
-        .span-2 { grid-column: span 2; background: linear-gradient(135deg, #FFFDF9 0%, var(--block-cream) 100%); border: 1px solid var(--linen); }
-        .span-2 .stat-val { font-family: "Georgia", Georgia, serif; font-style: italic; font-size: 2.2rem; font-weight: 400; color: var(--text-main); margin-top: 4px; }
+        /* Choice Cash Structural Alignment Variable Box */
+        .choice-hero-box { flex: 1; background: linear-gradient(135deg, #FFFDF9 0%, var(--block-cream) 100%); border: 1px solid var(--linen); border-radius: 24px; padding: 18px; }
+        .choice-hero-box .stat-val { font-family: "Georgia", Georgia, serif; font-style: italic; font-size: 2.1rem; font-weight: 400; color: var(--text-main); margin-top: 4px; }
 
         /* Minimalist Input Forms */
         .form-group { margin-bottom: 16px; }
@@ -99,7 +103,7 @@
         .tx-cat-tag.nn { background: var(--block-blue); color: var(--text-main); border: 1px solid rgba(136,148,183,0.3); }
         .pot-eta { font-size: 0.78rem; color: var(--text-muted); margin-top: 6px; font-style: italic; }
 
-        /* Stylized Floating Bottom Navigation Dock */
+        /* Floating Navigation Dock */
         .bottom-dock { position: fixed; bottom: 16px; left: 16px; right: 16px; background: var(--dock-bg); height: 68px; border-radius: 24px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 8px 30px rgba(0,0,0,0.15); z-index: 1000; padding: 0 10px; }
         .dock-item { color: #A0AEC0; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border: none; background: transparent; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 60px; height: 100%; }
         .dock-item.active { color: var(--shine); }
@@ -110,25 +114,30 @@
 <body>
     <div class="container">
         
-        <header style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
-            <h1>lifestyle archive</h1>
+        <header>
+            <h1>lucky girl cass</h1>
             <div id="fluid-balance" style="font-weight: 700; color: var(--success); font-size: 0.95rem; background: var(--card-bg); padding: 6px 14px; border-radius: 14px; border: 1px solid var(--border);">$0</div>
         </header>
 
+        <!-- Segment View Switcher -->
         <div class="view-toggle">
             <button id="toggle-month" class="toggle-btn active" onclick="switchView('month')">Month View</button>
             <button id="toggle-year" class="toggle-btn" onclick="switchView('year')">Cycle View (12M)</button>
         </div>
 
-        <div id="month-filter-wrap" class="month-select-wrapper">
-            <select id="global-month-filter" class="nav-select" onchange="render()"></select>
-        </div>
-
-        <div class="metrics-grid">
-            <div class="mini-stat span-2">
+        <!-- Combined Inline Choice Allowance Card and Month Dropdown Row -->
+        <div class="hero-inline-row">
+            <div class="choice-hero-box">
                 <div class="stat-lbl"><span class="view-label-ctx">Month</span> Choice Allowance</div>
                 <div class="stat-val" id="dash-choice-cash">$0.00</div>
             </div>
+            <div id="month-filter-wrap" class="month-select-wrapper">
+                <select id="global-month-filter" class="nav-select" onchange="render()"></select>
+            </div>
+        </div>
+
+        <!-- Metric Component Displays with Pastel Block Overrides mapping to Mockup styles -->
+        <div class="metrics-grid">
             <div class="mini-stat" style="background-color: var(--block-blue); border-color: rgba(136,148,183,0.2);">
                 <div class="stat-lbl">Fluid Balance</div>
                 <div class="stat-val" id="dash-balance">$0.00</div>
@@ -141,26 +150,29 @@
                 <div class="stat-lbl">Tax Escrow</div>
                 <div class="stat-val" id="dash-tax" style="font-weight: 600;">$0.00</div>
             </div>
-            <div class="mini-stat" style="background-color: var(--block-green); border-color: rgba(110,133,115,0.2);">
-                <div class="stat-lbl"><span class="view-label-ctx">Month</span> Inflow</div>
-                <div class="stat-val" id="dash-inflow" style="color: var(--success); font-weight: 700;">$0.00</div>
-            </div>
             <div class="mini-stat" style="background-color: var(--block-pink); border-color: rgba(214,140,140,0.2);">
                 <div class="stat-lbl"><span class="view-label-ctx">Month</span> Outflow</div>
                 <div class="stat-val" id="dash-outflow" style="color: var(--danger); font-weight: 700;">$0.00</div>
             </div>
+            <div class="mini-stat" style="display:none;">
+                <!-- Internal script binding cache hooks safely retained -->
+                <div id="dash-inflow"></div>
+            </div>
         </div>
 
+        <!-- Dynamic Year-by-Month Macro Breakdown Board -->
         <div class="card" id="cycle-breakdown-card" style="display: none;">
             <h2>cycle month-by-month summary</h2>
             <div id="cycle-months-list" style="margin-top: 10px;"></div>
         </div>
 
+        <!-- Visual Tracking Gauges -->
         <div class="card">
             <h2><span class="view-label-ctx">Month</span> spending targets</h2>
             <div id="category-caps-container"></div>
         </div>
 
+        <!-- Transaction Logger Container -->
         <div class="card" id="logger-section-anchor">
             <h2>Log Entry Transaction</h2>
             <div class="form-group">
@@ -174,6 +186,7 @@
             <button onclick="submitTransaction()">Record Entry</button>
         </div>
 
+        <!-- Templates Management Workspace -->
         <div class="card" id="recurring-card-manager">
             <h2>recurring templates 
                 <button class="action-link" onclick="applyRecurringToCurrentMonth()">Apply to Month</button>
@@ -187,6 +200,7 @@
             <ul id="recurring-list" class="tx-list"></ul>
         </div>
 
+        <!-- Savings Allocation Pots -->
         <div class="card">
             <h2>long-term savings pots</h2>
             <div class="form-group">
@@ -209,6 +223,7 @@
             <div id="pots-container" style="margin-top: 18px;"></div>
         </div>
 
+        <!-- Main Filtered Data Ledger -->
         <div class="card">
             <h2>dynamic operational ledger</h2>
             <ul id="ledger-container" class="tx-list"></ul>
@@ -216,6 +231,7 @@
 
     </div>
 
+    <!-- Floating Dock Inspired by mockups -->
     <div class="bottom-dock">
         <button class="dock-item active" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">Home</button>
         <button class="dock-center-btn" onclick="document.getElementById('logger-section-anchor').scrollIntoView({behavior: 'smooth'})">+</button>
