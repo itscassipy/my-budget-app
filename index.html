@@ -46,7 +46,7 @@
         .container { max-width: 480px; margin: 0 auto; }
         
         /* Editorial Premium Typography & Expanded Space Rules */
-        header { margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; }
+        header { margin-bottom: 42px; display: flex; justify-content: space-between; align-items: center; }
         header h1 { font-family: "Georgia", Georgia, serif; font-weight: 400; font-style: italic; font-size: 1.8rem; color: var(--text-main); letter-spacing: -0.5px; text-transform: lowercase; }
         h2 { font-family: "Georgia", Georgia, serif; font-style: italic; font-size: 1.25rem; font-weight: 400; margin-bottom: 20px; color: var(--text-main); display: flex; justify-content: space-between; align-items: center; }
         
@@ -64,11 +64,6 @@
         /* Premium Curved Layout Container Widgets */
         .card { background: var(--card-bg); border-radius: 28px; padding: 24px; margin-bottom: 20px; box-shadow: 0 8px 24px rgba(35,39,51,0.02); border: 1px solid var(--border); overflow: hidden; }
         
-        /* Game Theory & Milestone Elements */
-        .gamified-banner { background: linear-gradient(135deg, var(--dock-bg) 0%, #2D3748 100%); color: white; border-radius: 24px; padding: 22px; margin-bottom: 20px; position: relative; overflow: hidden; }
-        .gamified-banner h3 { font-family: "Georgia", Georgia, serif; font-style: italic; font-weight: 400; font-size: 1.4rem; margin-bottom: 8px; color: var(--shine); }
-        .badge-pill { display: inline-block; background: rgba(245,199,77,0.2); color: var(--shine); padding: 4px 10px; border-radius: 12px; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 8px; }
-
         /* Grid Component Layouts */
         .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px; }
         .mini-stat { background: var(--card-bg); border-radius: 24px; padding: 18px; border: 1px solid var(--border); transition: transform 0.2s; }
@@ -78,11 +73,6 @@
         /* Choice Cash Structural Alignment Variable Box */
         .choice-hero-box { flex: 1; background: linear-gradient(135deg, #FFFDF9 0%, var(--block-cream) 100%); border: 1px solid var(--linen); border-radius: 24px; padding: 18px; }
         .choice-hero-box .stat-val { font-family: "Georgia", Georgia, serif; font-style: italic; font-size: 2.1rem; font-weight: 400; color: var(--text-main); margin-top: 4px; }
-
-        /* Assessment Simulator Alert Box */
-        .assessment-shield { padding: 16px; border-radius: 18px; margin-top: 14px; font-size: 0.88rem; font-weight: 600; display: none; line-height: 1.4; }
-        .assessment-shield.pass { background-color: var(--block-green); color: var(--success); border: 1px solid rgba(82,117,88,0.2); }
-        .assessment-shield.fail { background-color: var(--block-pink); color: var(--danger); border: 1px solid rgba(186,104,104,0.2); }
 
         /* Minimalist Input Forms */
         .form-group { margin-bottom: 16px; }
@@ -123,10 +113,12 @@
         .tx-cat-tag.nn { background: var(--block-blue); color: var(--text-main); border: 1px solid rgba(136,148,183,0.3); }
         .pot-eta { font-size: 0.78rem; color: var(--text-muted); margin-top: 6px; font-style: italic; }
 
-        /* Floating Navigation Dock realigned to Master Architecture Tabs */
+        /* Floating Navigation Dock */
         .bottom-dock { position: fixed; bottom: 16px; left: 16px; right: 16px; background: var(--dock-bg); height: 68px; border-radius: 24px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 8px 30px rgba(0,0,0,0.15); z-index: 1000; padding: 0 10px; }
-        .dock-item { color: #A0AEC0; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border: none; background: transparent; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 90px; height: 100%; gap: 4px; }
+        .dock-item { color: #A0AEC0; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border: none; background: transparent; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 60px; height: 100%; }
         .dock-item.active { color: var(--shine); }
+        .dock-center-btn { background: var(--shine); width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; color: var(--dock-bg); font-weight: 300; border: none; cursor: pointer; box-shadow: 0 4px 14px rgba(245,199,77,0.4); transform: translateY(-12px); transition: transform 0.2s; }
+        .dock-center-btn:active { transform: translateY(-10px) scale(0.95); }
     </style>
 </head>
 <body>
@@ -137,178 +129,137 @@
             <div id="fluid-balance" style="font-weight: 700; color: var(--success); font-size: 0.95rem; background: var(--card-bg); padding: 6px 14px; border-radius: 14px; border: 1px solid var(--border);">$0</div>
         </header>
 
-        <!-- APP ROUTER VIEWS CONTAINER -->
+        <!-- Segment View Switcher -->
+        <div class="view-toggle">
+            <button id="toggle-month" class="toggle-btn active" onclick="switchView('month')">Month View</button>
+            <button id="toggle-year" class="toggle-btn" onclick="switchView('year')">Cycle View (12M)</button>
+        </div>
 
-        <!-- ================= TAB 1: FINANCIAL GOALS VIEW (BIG & FRONT) ================= -->
-        <div id="view-goals" class="app-view">
-            <!-- Game Theory Milestone Track Engine -->
-            <div class="gamified-banner">
-                <span id="milestone-percentage-badge" style="float: right; font-weight: 800; font-size: 1.2rem; color: var(--shine);">0%</span>
-                <h3 id="gamified-headline">Calculating your focus...</h3>
-                <div class="progress-bg" style="background: rgba(255,255,255,0.1); height: 8px; border: none; margin: 12px 0 6px 0;">
-                    <div id="milestone-progress-bar" class="progress-bar" style="background: var(--shine); width: 0%;"></div>
-                </div>
-                <p id="milestone-status-subtext" style="font-size: 0.8rem; opacity: 0.85;">Initialize a goal pot below to compute your Game Theory strategy tier.</p>
-                <div id="game-tier-pill" class="badge-pill">Tier 1: Foundation Building</div>
+        <!-- Combined Inline Choice Allowance Card and Month Dropdown Row -->
+        <div class="hero-inline-row">
+            <div class="choice-hero-box">
+                <div class="stat-lbl"><span class="view-label-ctx">Month</span> Choice Allowance</div>
+                <div class="stat-val" id="dash-choice-cash">$0.00</div>
             </div>
-
-            <!-- Savings Allocation Pots -->
-            <div class="card">
-                <h2>long-term savings pots (30% commitment)</h2>
-                <div class="form-group">
-                    <label>Designation Name</label>
-                    <input type="text" id="pot-name" placeholder="e.g., Cold Savings Runway">
-                </div>
-                <div class="form-group">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 4px;">
-                        <div>
-                            <label>Target Goal ($)</label>
-                            <input type="number" id="pot-target" placeholder="15000">
-                        </div>
-                        <div>
-                            <label>Already Saved ($)</label>
-                            <input type="number" id="pot-starting" placeholder="5000" value="0">
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Planned Monthly Contribution ($)</label>
-                    <input type="number" id="pot-monthly" placeholder="500">
-                </div>
-                <button style="background: var(--text-main);" onclick="createNewPot()">Initialize Pot</button>
-                <div id="pots-container" style="margin-top: 18px;"></div>
+            <div id="month-filter-wrap" class="month-select-wrapper">
+                <select id="global-month-filter" class="nav-select" onchange="render()"></select>
             </div>
         </div>
 
-        <!-- ================= TAB 2: WHAT CAN I AFFORD ASSESSMENT VIEW ================= -->
-        <div id="view-afford" class="app-view" style="display: none;">
-            <div class="card">
-                <h2>essentials & rent assessment</h2>
-                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px; line-height: 1.4;">
-                    A \$5,000 apartment on a \$100k income is <strong>not essential</strong>. Use this checklist tool to measure if fixed bills are robbing your future savings runway.
-                </p>
-                
-                <div class="form-group">
-                    <label>Estimated Gross Annual Income ($)</label>
-                    <input type="number" id="assess-income" placeholder="e.g., 100000" oninput="runEssentialsAssessment()">
-                </div>
-                <div class="form-group">
-                    <label>Monthly Rent / Housing Payment ($)</label>
-                    <input type="number" id="assess-housing" placeholder="e.g., 5000" oninput="runEssentialsAssessment()">
-                </div>
-                <div class="form-group">
-                    <label>Other Monthly Fixed Contracts ($)</label>
-                    <input type="number" id="assess-fixed" placeholder="e.g., 600" value="0" oninput="runEssentialsAssessment()">
-                </div>
-
-                <div id="assessment-output-box" class="assessment-shield"></div>
+        <!-- Metric Component Displays with Pastel Block Overrides mapping to Mockup styles -->
+        <div class="metrics-grid">
+            <div class="mini-stat" style="background-color: var(--block-blue); border-color: rgba(136,148,183,0.2);">
+                <div class="stat-lbl">Fluid Balance</div>
+                <div class="stat-val" id="dash-balance">$0.00</div>
+            </div>
+            <div class="mini-stat" style="background-color: var(--block-cream); border-color: rgba(221,197,169,0.4);">
+                <div class="stat-lbl">Essential Vault</div>
+                <div class="stat-val" id="dash-nn-vault" style="font-weight: 600;">$0.00</div>
+            </div>
+            <div class="mini-stat" style="background-color: var(--block-yellow); border-color: rgba(245,199,77,0.3);">
+                <div class="stat-lbl">Tax Escrow</div>
+                <div class="stat-val" id="dash-tax" style="font-weight: 600;">$0.00</div>
+            </div>
+            <div class="mini-stat" style="background-color: var(--block-pink); border-color: rgba(214,140,140,0.2);">
+                <div class="stat-lbl"><span class="view-label-ctx">Month</span> Outflow</div>
+                <div class="stat-val" id="dash-outflow" style="color: var(--danger); font-weight: 700;">$0.00</div>
+            </div>
+            <div class="mini-stat" style="display:none;">
+                <!-- Internal script binding cache hooks safely retained -->
+                <div id="dash-inflow"></div>
             </div>
         </div>
 
-        <!-- ================= TAB 3: SHORT-TERM HAPPINESS DASHBOARD VIEW ================= -->
-        <div id="view-happiness" class="app-view" style="display: none;">
-            <!-- Segment View Switcher -->
-            <div class="view-toggle">
-                <button id="toggle-month" class="toggle-btn active" onclick="switchView('month')">Month View</button>
-                <button id="toggle-year" class="toggle-btn" onclick="switchView('year')">Cycle View (12M)</button>
+        <!-- Dynamic Year-by-Month Macro Breakdown Board -->
+        <div class="card" id="cycle-breakdown-card" style="display: none;">
+            <h2>cycle month-by-month summary</h2>
+            <div id="cycle-months-list" style="margin-top: 10px;"></div>
+        </div>
+
+        <!-- Visual Tracking Gauges -->
+        <div class="card">
+            <h2><span class="view-label-ctx">Month</span> spending targets</h2>
+            <div id="category-caps-container"></div>
+        </div>
+
+        <!-- Transaction Logger Container with Native OCR Scanner Integrated -->
+        <div class="card" id="logger-section-anchor">
+            <h2>Log Entry Transaction</h2>
+            
+            <!-- Sleek Document Scanner Target -->
+            <div style="margin-top: 10px;">
+                <div class="scan-trigger-pill" onclick="document.getElementById('native-ocr-input').click()">
+                    📷 Scan Raw Receipt
+                </div>
+                <div id="receipt-scan-loader" class="scan-loading-txt">reading paper asset layout... please wait...</div>
+                <input type="file" id="native-ocr-input" accept="image/*" capture="environment" style="display: none;" onchange="executeOpticalReceiptScan(event)">
             </div>
 
-            <!-- Combined Inline Choice Allowance Card and Month Dropdown Row -->
-            <div class="hero-inline-row">
-                <div class="choice-hero-box">
-                    <div class="stat-lbl"><span class="view-label-ctx">Month</span> Cash Left for Happiness</div>
-                    <div class="stat-val" id="dash-choice-cash">$0.00</div>
-                </div>
-                <div id="month-filter-wrap" class="month-select-wrapper">
-                    <select id="global-month-filter" class="nav-select" onchange="render()"></select>
-                </div>
+            <div class="form-group">
+                <label>Transaction Blueprint Type</label>
+                <select id="tx-type" class="form-input" onchange="toggleFormContext()">
+                    <option value="expense">Expense / Bill Outflow</option>
+                    <option value="income">Paycheck / Inflow</option>
+                </select>
             </div>
+            <div id="dynamic-form-fields"></div>
+            <button onclick="submitTransaction()">Record Entry</button>
+        </div>
 
-            <!-- Metric Component Displays with Pastel Block Overrides mapping to Mockup styles -->
-            <div class="metrics-grid">
-                <div class="mini-stat" style="background-color: var(--block-blue); border-color: rgba(136,148,183,0.2);">
-                    <div class="stat-lbl">Fluid Balance</div>
-                    <div class="stat-val" id="dash-balance">$0.00</div>
-                </div>
-                <div class="mini-stat" style="background-color: var(--block-cream); border-color: rgba(221,197,169,0.4);">
-                    <div class="stat-lbl">Essential Vault</div>
-                    <div class="stat-val" id="dash-nn-vault" style="font-weight: 600;">$0.00</div>
-                </div>
-                <div class="mini-stat" style="background-color: var(--block-yellow); border-color: rgba(245,199,77,0.3);">
-                    <div class="stat-lbl">Tax Escrow</div>
-                    <div class="stat-val" id="dash-tax" style="font-weight: 600;">$0.00</div>
-                </div>
-                <div class="mini-stat" style="background-color: var(--block-pink); border-color: rgba(214,140,140,0.2);">
-                    <div class="stat-lbl"><span class="view-label-ctx">Month</span> Outflow</div>
-                    <div class="stat-val" id="dash-outflow" style="color: var(--danger); font-weight: 700;">$0.00</div>
-                </div>
-                <div class="mini-stat" style="display:none;">
-                    <div id="dash-inflow"></div>
-                </div>
+        <!-- Templates Management Workspace -->
+        <div class="card" id="recurring-card-manager">
+            <h2>recurring templates 
+                <button class="action-link" onclick="applyRecurringToCurrentMonth()">Apply to Month</button>
+            </h2>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:14px; margin-top: 12px;">
+                <input type="text" id="rec-desc" placeholder="Rent, Spotify...">
+                <input type="number" id="rec-amt" placeholder="Amount ($)">
+                <select id="rec-cat" class="form-input"></select>
+                <button class="secondary" style="margin-top:0; width: 100%; padding: 12px;" onclick="addRecurringTemplate()">+ Save Template</button>
             </div>
+            <ul id="recurring-list" class="tx-list"></ul>
+        </div>
 
-            <!-- Dynamic Year-by-Month Macro Breakdown Board -->
-            <div class="card" id="cycle-breakdown-card" style="display: none;">
-                <h2>cycle month-by-month summary</h2>
-                <div id="cycle-months-list" style="margin-top: 10px;"></div>
+        <!-- Savings Allocation Pots -->
+        <div class="card">
+            <h2>long-term savings pots</h2>
+            <div class="form-group">
+                <label>Designation Name</label>
+                <input type="text" id="pot-name" placeholder="e.g., Cold Savings Runway">
             </div>
-
-            <!-- Visual Tracking Gauges -->
-            <div class="card">
-                <h2><span class="view-label-ctx">Month</span> spending targets</h2>
-                <div id="category-caps-container"></div>
-            </div>
-
-            <!-- Transaction Logger Container with Native OCR Scanner Integrated -->
-            <div class="card" id="logger-section-anchor">
-                <h2>Log Entry Transaction</h2>
-                <div style="margin-top: 10px;">
-                    <div class="scan-trigger-pill" onclick="document.getElementById('native-ocr-input').click()">
-                        📷 Scan Raw Receipt
+            <div class="form-group">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 4px;">
+                    <div>
+                        <label>Target Goal ($)</label>
+                        <input type="number" id="pot-target" placeholder="15000">
                     </div>
-                    <div id="receipt-scan-loader" class="scan-loading-txt">reading paper asset layout... please wait...</div>
-                    <input type="file" id="native-ocr-input" accept="image/*" capture="environment" style="display: none;" onchange="executeOpticalReceiptScan(event)">
+                    <div>
+                        <label>Already Saved ($)</label>
+                        <input type="number" id="pot-starting" placeholder="5000" value="0">
+                    </div>
                 </div>
-
-                <div class="form-group">
-                    <label>Transaction Blueprint Type</label>
-                    <select id="tx-type" class="form-input" onchange="toggleFormContext()">
-                        <option value="expense">Expense / Bill Outflow</option>
-                        <option value="income">Paycheck / Inflow</option>
-                    </select>
-                </div>
-                <div id="dynamic-form-fields"></div>
-                <button onclick="submitTransaction()">Record Entry</button>
             </div>
-
-            <!-- Templates Management Workspace -->
-            <div class="card" id="recurring-card-manager">
-                <h2>recurring templates 
-                    <button class="action-link" onclick="applyRecurringToCurrentMonth()">Apply to Month</button>
-                </h2>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:14px; margin-top: 12px;">
-                    <input type="text" id="rec-desc" placeholder="Rent, Spotify...">
-                    <input type="number" id="rec-amt" placeholder="Amount ($)">
-                    <select id="rec-cat" class="form-input"></select>
-                    <button class="secondary" style="margin-top:0; width: 100%; padding: 12px;" onclick="addRecurringTemplate()">+ Save Template</button>
-                </div>
-                <ul id="recurring-list" class="tx-list"></ul>
+            <div class="form-group">
+                <label>Planned Monthly Contribution ($)</label>
+                <input type="number" id="pot-monthly" placeholder="500">
             </div>
+            <button style="background: var(--text-main);" onclick="createNewPot()">Initialize Pot</button>
+            <div id="pots-container" style="margin-top: 18px;"></div>
+        </div>
 
-            <!-- Main Filtered Data Ledger -->
-            <div class="card">
-                <h2>dynamic operational ledger</h2>
-                <ul id="ledger-container" class="tx-list"></ul>
-            </div>
+        <!-- Main Filtered Data Ledger -->
+        <div class="card">
+            <h2>dynamic operational ledger</h2>
+            <ul id="ledger-container" class="tx-list"></ul>
         </div>
 
     </div>
 
-    <!-- Floating Master Navigation Architecture Tabs -->
+    <!-- Floating Dock Inspired by mockups -->
     <div class="bottom-dock">
-        <button id="dock-goals" class="dock-item active" onclick="switchTab('goals')">🎯 Goals</button>
-        <button id="dock-afford" class="dock-item" onclick="switchTab('afford')">🤔 Can I Afford?</button>
-        <button id="dock-happiness" class="dock-item" onclick="switchTab('happiness')">🌸 Happiness</button>
+        <button class="dock-item active" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">Home</button>
+        <button class="dock-center-btn" onclick="document.getElementById('logger-section-anchor').scrollIntoView({behavior: 'smooth'})">+</button>
+        <button class="dock-item" onclick="document.getElementById('recurring-card-manager').scrollIntoView({behavior: 'smooth'})">Rules</button>
     </div>
 
     <script>
@@ -349,17 +300,7 @@
             populateMonthTimelineOptions();
             toggleFormContext();
             populateCategorySelectFields();
-            switchTab('goals'); 
             render();
-        }
-
-        function switchTab(tabName) {
-            document.querySelectorAll('.app-view').forEach(el => el.style.display = 'none');
-            document.querySelectorAll('.dock-item').forEach(el => el.classList.remove('active'));
-            
-            document.getElementById(`view-${tabName}`).style.display = 'block';
-            document.getElementById(`dock-${tabName}`).classList.add('active');
-            window.scrollTo({top: 0, behavior: 'smooth'});
         }
 
         function populateMonthTimelineOptions() {
@@ -397,7 +338,6 @@
         function toggleFormContext() {
             const type = document.getElementById('tx-type').value;
             const container = document.getElementById('dynamic-form-fields');
-            if(!container) return;
             if(type === 'expense') {
                 container.innerHTML = `
                     <div class="form-group"><label>Description</label><input type="text" id="field-desc" placeholder="e.g., Central Market"></div>
@@ -426,36 +366,7 @@
             input.placeholder = freq === 'annual' ? "e.g., 75000" : "e.g., 6250";
         }
 
-        function runEssentialsAssessment() {
-            const income = parseFloat(document.getElementById('assess-income').value) || 0;
-            const housing = parseFloat(document.getElementById('assess-housing').value) || 0;
-            const fixed = parseFloat(document.getElementById('assess-fixed').value) || 0;
-            const box = document.getElementById('assessment-output-box');
-
-            if (income <= 0 || housing <= 0) {
-                box.style.display = "none";
-                return;
-            }
-
-            box.style.display = "block";
-            const monthlyGross = income / 12;
-            const totalFixedOutflow = housing + fixed;
-            const housingRatio = (housing / monthlyGross) * 100;
-            const totalFixedRatio = (totalFixedOutflow / monthlyGross) * 100;
-
-            if (housingRatio > 35) {
-                box.className = "assessment-shield fail";
-                box.innerHTML = `🚨 <strong>High Danger Warning:</strong> Your housing cost consumes ${housingRatio.toFixed(1)}% of gross revenue. Like the example from your texts, living in a $${housing.toFixed(0)} apartment is <strong>not essential</strong> and is cannibalizing your ability to save 30% for your future self!`;
-            } else if (totalFixedRatio > 50) {
-                box.className = "assessment-shield fail";
-                box.innerHTML = `⚠️ <strong>Fixed Heavy Stress:</strong> Your total essentials load takes up ${totalFixedRatio.toFixed(1)}% of your monthly base intake. Something has to give if you want to protect your short-term happiness allowance.`;
-            } else {
-                box.className = "assessment-shield pass";
-                box.innerHTML = `🎉  <strong>Excellent Efficiency Profile:</strong> Your structural housing cost sits perfectly at ${housingRatio.toFixed(1)}% of your earnings flow. This leaves your 30% savings commitment fully safe and unbothered!`;
-            }
-        }
-
-        /* Client-Side Receipt Extraction Engine */
+        /* Pure Client-Side Receipt Extraction & Parsing Engine */
         function executeOpticalReceiptScan(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -478,7 +389,7 @@
                     parseReceiptTextLayoutMetrics(text);
                 }).catch(err => {
                     console.error(err);
-                    loader.innerText = "OCR error. Log manually.";
+                    loader.innerText = "OCR connection fault. Fill manually.";
                     loader.style.color = "var(--danger)";
                 });
             };
@@ -578,40 +489,22 @@
                     const monthlyGross = grossInput / 12;
                     const monthlyTax = monthlyGross * rate;
                     const monthlyNet = monthlyGross - monthlyTax;
-                    
-                    // Implement strict game theory 30% savings commitment allocation split
-                    const savingsSlice = monthlyNet * 0.30;
-                    const lifestyleSlice = monthlyNet * 0.70;
 
                     for(let i = 0; i < 12; i++) {
                         let d = new Date(2026, 6 + i, 1);
                         let monthStr = (d.getMonth() + 1).toString().padStart(2, '0');
                         let k = `${d.getFullYear()}-${monthStr}`;
                         
-                        state.globalBalance += lifestyleSlice;
+                        state.globalBalance += monthlyNet;
                         state.taxEscrowBalance += monthlyTax;
-                        
-                        state.ledger.unshift({ id: Date.now() + Math.random(), type: 'income', desc: 'Net Revenue 70% Flow', gross: monthlyGross, tax: monthlyTax, net: lifestyleSlice, date: dateStr, monthKey: k });
-                        
-                        if(state.pots.length > 0) {
-                            state.pots[0].current += savingsSlice;
-                        }
+                        state.ledger.unshift({ id: Date.now() + Math.random(), type: 'income', desc: 'Annual Salary Allocation', gross: monthlyGross, tax: monthlyTax, net: monthlyNet, date: dateStr, monthKey: k });
                     }
                 } else {
                     const tax = grossInput * rate;
                     const net = grossInput - tax;
-                    
-                    const savingsSlice = net * 0.30;
-                    const lifestyleSlice = net * 0.70;
-
-                    state.globalBalance += lifestyleSlice;
+                    state.globalBalance += net;
                     state.taxEscrowBalance += tax;
-                    
-                    state.ledger.unshift({ id: Date.now(), type: 'income', desc: 'Base Intake 70% Flow', gross: grossInput, tax, net: lifestyleSlice, date: dateStr, monthKey: activeMonth });
-                    
-                    if(state.pots.length > 0) {
-                        state.pots[0].current += savingsSlice;
-                    }
+                    state.ledger.unshift({ id: Date.now(), type: 'income', desc: 'Paycheck Inflow', gross: grossInput, tax, net, date: dateStr, monthKey: activeMonth });
                 }
             }
             save();
@@ -681,9 +574,8 @@
             state.recurringTemplates.forEach(item => {
                 if(item.cat === 'Income-Pay') {
                     const gross = item.amt; const tax = gross * 0.20; const net = gross - tax;
-                    const lifestyleSlice = net * 0.70;
-                    state.globalBalance += lifestyleSlice; state.taxEscrowBalance += tax;
-                    state.ledger.unshift({ id: Date.now() + Math.random(), type: 'income', desc: item.desc, gross, tax, net: lifestyleSlice, date: dateStr, monthKey: activeMonth });
+                    state.globalBalance += net; state.taxEscrowBalance += tax;
+                    state.ledger.unshift({ id: Date.now() + Math.random(), type: 'income', desc: item.desc, gross, tax, net, date: dateStr, monthKey: activeMonth });
                 } else {
                     state.globalBalance -= item.amt;
                     state.ledger.unshift({ id: Date.now() + Math.random(), type: 'expense', desc: item.desc, amt: item.amt, cat: item.cat, date: dateStr, monthKey: activeMonth });
@@ -794,7 +686,7 @@
                     
                     const matchingCat = state.categoryTargets.find(c => c.name === item.cat);
                     if (matchingCat && matchingCat.nonNegotiable) {
-                        // Essentials tracking skip
+                        // Core fixed calculation skips
                     } else {
                         choiceExpensesLogged += item.amt;
                     }
@@ -810,30 +702,6 @@
             const choiceCashEl = document.getElementById('dash-choice-cash');
             choiceCashEl.innerText = `${trueChoiceCashRemaining >= 0 ? '' : '-'}$${Math.abs(trueChoiceCashRemaining).toFixed(2)}`;
             choiceCashEl.style.color = trueChoiceCashRemaining >= 0 ? 'var(--success)' : 'var(--danger)';
-
-            // Synchronize Game Theory tracking calculations
-            if(state.pots.length > 0) {
-                const primePot = state.pots[0];
-                const pct = Math.min((primePot.current / primePot.target) * 100, 100);
-                document.getElementById('milestone-percentage-badge').innerText = `${Math.round(pct)}%`;
-                document.getElementById('milestone-progress-bar').style.width = `${pct}%`;
-                document.getElementById('gamified-headline').innerText = `You are ${Math.round(pct)}% close to your goal of ${primePot.name.toLowerCase()}!`;
-                document.getElementById('milestone-status-subtext').innerText = `$${primePot.current.toFixed(0)} safely secured out of your $${primePot.target.toFixed(0)} milestone. Keep compounding!`;
-                
-                const tierPill = document.getElementById('game-tier-pill');
-                if(pct >= 75) {
-                    tierPill.innerText = "Tier 4: Wealth Sovereign";
-                    tierPill.style.backgroundColor = "rgba(82,117,88,0.3)";
-                } else if(pct >= 40) {
-                    tierPill.innerText = "Tier 3: Compound Champion";
-                    tierPill.style.backgroundColor = "rgba(136,148,183,0.3)";
-                } else if(pct >= 15) {
-                    tierPill.innerText = "Tier 2: Runway Architect";
-                    tierPill.style.backgroundColor = "rgba(209,141,52,0.3)";
-                } else {
-                    tierPill.innerText = "Tier 1: Foundation Builder";
-                }
-            }
 
             const breakdownCard = document.getElementById('cycle-breakdown-card');
             if (isYearMode) {
