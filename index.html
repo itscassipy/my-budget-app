@@ -83,6 +83,7 @@
         .tx-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--bg-color); font-size: 0.9rem; }
         .tx-item:last-child { border-bottom: none; }
         .tx-cat-tag { font-size: 0.68rem; background: var(--linen-light); padding: 3px 8px; border-radius: 6px; color: var(--text-main); display: inline-block; margin-top: 4px; font-weight: 500; }
+        .tx-cat-tag.nn { background: var(--accent-light); color: var(--text-main); border: 1px solid var(--venice); }
         .pot-eta { font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; font-style: italic; }
     </style>
 </head>
@@ -94,54 +95,48 @@
             <div id="fluid-balance" style="font-weight: 700; color: var(--success); font-size: 1.1rem;"></div>
         </header>
 
-        <!-- Segment View Switcher -->
         <div class="view-toggle">
             <button id="toggle-month" class="toggle-btn active" onclick="switchView('month')">Month View</button>
             <button id="toggle-year" class="toggle-btn" onclick="switchView('year')">Cycle View (12M)</button>
         </div>
 
-        <!-- Dropdown Timeline Filter -->
         <div id="month-filter-wrap" class="month-select-wrapper">
             <select id="global-month-filter" class="nav-select" onchange="render()"></select>
         </div>
 
-        <!-- Metric Component Displays -->
         <div class="metrics-grid">
             <div class="mini-stat span-2">
-                <div class="stat-lbl"><span class="view-label-ctx">Month</span> Remaining Cash Surplus</div>
-                <div class="stat-val" id="dash-surplus" style="font-size: 1.4rem;">$0.00</div>
+                <div class="stat-lbl"><span class="view-label-ctx">Month</span> Remaining Choice Cash</div>
+                <div class="stat-val" id="dash-choice-cash" style="font-size: 1.4rem; color: var(--success);">$0.00</div>
             </div>
             <div class="mini-stat">
                 <div class="stat-lbl">Fluid Net Balance</div>
                 <div class="stat-val" id="dash-balance">$0.00</div>
             </div>
             <div class="mini-stat">
+                <div class="stat-lbl">Non-Negotiable Vault</div>
+                <div class="stat-val" id="dash-nn-vault" style="color: var(--text-main); font-weight: 600;">$0.00</div>
+            </div>
+            <div class="mini-stat">
                 <div class="stat-lbl">Tax Escrow Reserve</div>
                 <div class="stat-val" id="dash-tax" style="color: var(--text-muted); font-weight: 500;">$0.00</div>
             </div>
             <div class="mini-stat">
-                <div class="stat-lbl"><span class="view-label-ctx">Month</span> Total Inflow</div>
+                <div class="stat-lbl"><span class="view-label-ctx">Month</span> Net Inflow</div>
                 <div class="stat-val" id="dash-inflow" style="color: var(--success);">$0.00</div>
-            </div>
-            <div class="mini-stat">
-                <div class="stat-lbl"><span class="view-label-ctx">Month</span> Total Outflow</div>
-                <div class="stat-val" id="dash-outflow" style="color: var(--warning);">$0.00</div>
             </div>
         </div>
 
-        <!-- Dynamic Year-by-Month Macro Breakdown Board -->
         <div class="card" id="cycle-breakdown-card" style="display: none;">
             <h2>Cycle Month-by-Month Snapshot</h2>
             <div id="cycle-months-list" style="margin-top: 10px;"></div>
         </div>
 
-        <!-- Visual Tracking Gauges -->
         <div class="card">
             <h2><span class="view-label-ctx">Month</span> Spending Targets</h2>
             <div id="category-caps-container"></div>
         </div>
 
-        <!-- Transaction Logger Container -->
         <div class="card">
             <h2>Log Entry Transaction</h2>
             <div class="form-group">
@@ -155,7 +150,6 @@
             <button onclick="submitTransaction()">Record Entry</button>
         </div>
 
-        <!-- Templates Management Workspace -->
         <div class="card" id="recurring-card-manager">
             <h2>Recurring Templates 
                 <button class="action-link" onclick="applyRecurringToCurrentMonth()">Apply to Selected Month</button>
@@ -163,21 +157,12 @@
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:14px; margin-top: 10px;">
                 <input type="text" id="rec-desc" placeholder="Rent, Spotify...">
                 <input type="number" id="rec-amt" placeholder="Amount ($)">
-                <select id="rec-cat" class="form-input">
-                    <option value="Housing">Housing</option>
-                    <option value="Groceries">Groceries</option>
-                    <option value="Utilities">Utilities</option>
-                    <option value="Transport">Transport</option>
-                    <option value="Entertainment">Entertainment</option>
-                    <option value="Miscellaneous">Miscellaneous</option>
-                    <option value="Income-Pay">Income-Pay</option>
-                </select>
+                <select id="rec-cat" class="form-input"></select>
                 <button class="secondary" style="margin-top:0;" onclick="addRecurringTemplate()">+ Save Template</button>
             </div>
             <ul id="recurring-list" class="tx-list"></ul>
         </div>
 
-        <!-- Savings Allocation Pots -->
         <div class="card">
             <h2>Long-Term Savings Pots</h2>
             <div class="form-group">
@@ -200,7 +185,6 @@
             <div id="pots-container" style="margin-top: 14px;"></div>
         </div>
 
-        <!-- Main Filtered Data Ledger -->
         <div class="card">
             <h2>Dynamic Operational Ledger</h2>
             <ul id="ledger-container" class="tx-list"></ul>
@@ -216,14 +200,15 @@
             pots: [],
             ledger: [], 
             recurringTemplates: [],
-            categoryTargets: {
-                "Housing": 1600,
-                "Groceries": 450,
-                "Utilities": 250,
-                "Transport": 350,
-                "Entertainment": 300,
-                "Miscellaneous": 200
-            }
+            // Robust architecture updating categories into structured property states
+            categoryTargets: [
+                { name: "Housing", limit: 1600, nonNegotiable: true },
+                { name: "Groceries", limit: 450, nonNegotiable: true },
+                { name: "Utilities", limit: 250, nonNegotiable: true },
+                { name: "Transport", limit: 350, nonNegotiable: false },
+                { name: "Entertainment", limit: 300, nonNegotiable: false },
+                { name: "Miscellaneous", limit: 200, nonNegotiable: false }
+            ]
         };
 
         function save() {
@@ -232,16 +217,27 @@
         }
 
         function init() {
+            // Data structure self-repair fallback migration block
+            if (!Array.isArray(state.categoryTargets)) {
+                state.categoryTargets = [
+                    { name: "Housing", limit: 1600, nonNegotiable: true },
+                    { name: "Groceries", limit: 450, nonNegotiable: true },
+                    { name: "Utilities", limit: 250, nonNegotiable: true },
+                    { name: "Transport", limit: 350, nonNegotiable: false },
+                    { name: "Entertainment", limit: 300, nonNegotiable: false },
+                    { name: "Miscellaneous", limit: 200, nonNegotiable: false }
+                ];
+            }
             state.pots.forEach((pot, index) => { if(!pot.id) pot.id = Date.now() + index; });
             populateMonthTimelineOptions();
             toggleFormContext();
+            populateCategorySelectFields();
             render();
         }
 
         function populateMonthTimelineOptions() {
             const filter = document.getElementById('global-month-filter');
             filter.innerHTML = '';
-            
             for(let i = 0; i <= 12; i++) {
                 let d = new Date(2026, 6 + i, 1); 
                 let monthStr = (d.getMonth() + 1).toString().padStart(2, '0');
@@ -251,6 +247,11 @@
                 if(i === 0) opt.selected = true; 
                 filter.add(opt);
             }
+        }
+
+        function populateCategorySelectFields() {
+            const select = document.getElementById('rec-cat');
+            select.innerHTML = state.categoryTargets.map(c => `<option value="${c.name}">${c.name}</option>`).join('') + `<option value="Income-Pay">Income-Pay</option>`;
         }
 
         function switchView(mode) {
@@ -275,7 +276,7 @@
                     <div class="form-group"><label>Amount ($)</label><input type="number" id="field-amount" placeholder="0.00"></div>
                     <div class="form-group"><label>Target Allocation Category</label>
                         <select id="field-cat" class="form-input">
-                            ${Object.keys(state.categoryTargets).map(c => `<option value="${c}">${c}</option>`).join('')}
+                            ${state.categoryTargets.map(c => `<option value="${c.name}">${c.name}</option>`).join('')}
                         </select>
                     </div>`;
             } else {
@@ -294,10 +295,25 @@
         function toggleIncomeRatePlaceholder() {
             const freq = document.getElementById('field-freq').value;
             const input = document.getElementById('field-gross');
-            if(freq === 'annual') {
-                input.placeholder = "e.g., 75000";
-            } else {
-                input.placeholder = "e.g., 6250";
+            input.placeholder = freq === 'annual' ? "e.g., 75000" : "e.g., 6250";
+        }
+
+        function toggleCategoryPrioritization(name) {
+            const cat = state.categoryTargets.find(c => c.name === name);
+            if(cat) {
+                cat.nonNegotiable = !cat.nonNegotiable;
+                save();
+            }
+        }
+
+        function editCategoryLimit(name) {
+            const cat = state.categoryTargets.find(c => c.name === name);
+            if(cat) {
+                const nextLimit = parseFloat(prompt(`Modify plan cap target for ${cat.name}:`, cat.limit));
+                if(!isNaN(nextLimit) && nextLimit >= 0) {
+                    cat.limit = nextLimit;
+                    save();
+                }
             }
         }
 
@@ -350,13 +366,8 @@
             const index = state.ledger.findIndex(item => item.id === id);
             if(index === -1) return;
             const item = state.ledger[index];
-            
-            if(item.type === 'expense') {
-                state.globalBalance += item.amt; 
-            } else {
-                state.globalBalance -= item.net; 
-                state.taxEscrowBalance -= item.tax; 
-            }
+            if(item.type === 'expense') state.globalBalance += item.amt; 
+            else { state.globalBalance -= item.net; state.taxEscrowBalance -= item.tax; }
             state.ledger.splice(index, 1);
             save();
         }
@@ -364,44 +375,40 @@
         function editTransaction(id) {
             const item = state.ledger.find(item => item.id === id);
             if(!item) return;
-
             const nextDesc = prompt("Modify Description:", item.desc);
-            if(nextDesc === null) return;
-            if(nextDesc.trim() !== '') item.desc = nextDesc.trim();
+            if(nextDesc !== null && nextDesc.trim() !== '') item.desc = nextDesc.trim();
 
             if(item.type === 'expense') {
                 const nextAmt = parseFloat(prompt("Modify Expense Amount ($):", item.amt));
                 if(isNaN(nextAmt) || nextAmt <= 0) return;
-                
-                const gap = nextAmt - item.amt;
-                state.globalBalance -= gap; 
+                state.globalBalance -= (nextAmt - item.amt); 
                 item.amt = nextAmt;
             } else {
                 const nextGross = parseFloat(prompt("Modify Gross Pay Allocation Amount ($):", item.gross));
                 if(isNaN(nextGross) || nextGross <= 0) return;
-                
                 const rate = item.tax / item.gross; 
-                
-                state.globalBalance -= item.net;
-                state.taxEscrowBalance -= item.tax;
-                
-                item.gross = nextGross;
-                item.tax = nextGross * rate;
-                item.net = nextGross - item.tax;
-                
-                state.globalBalance += item.net;
-                state.taxEscrowBalance += item.tax;
+                state.globalBalance -= item.net; state.taxEscrowBalance -= item.tax;
+                item.gross = nextGross; item.tax = nextGross * rate; item.net = nextGross - item.tax;
+                state.globalBalance += item.net; state.taxEscrowBalance += item.tax;
             }
+            save();
+        }
+
+        function addRecurringTemplate() {
+            const desc = document.getElementById('rec-desc').value.trim();
+            const amt = parseFloat(document.getElementById('rec-amt').value);
+            const cat = document.getElementById('rec-cat').value;
+            if(!desc || !amt || amt <= 0) return;
+            state.recurringTemplates.push({ id: Date.now(), desc, amt, cat });
+            document.getElementById('rec-desc').value = ''; document.getElementById('rec-amt').value = '';
             save();
         }
 
         function editRecurringTemplate(id) {
             const template = state.recurringTemplates.find(r => r.id === id);
             if(!template) return;
-            
             const nextDesc = prompt("Modify Template Name:", template.desc);
             if(nextDesc) template.desc = nextDesc.trim();
-            
             const nextAmt = parseFloat(prompt("Modify Template Default Amount ($):", template.amt));
             if(!isNaN(nextAmt) && nextAmt > 0) template.amt = nextAmt;
             save();
@@ -415,14 +422,10 @@
         function applyRecurringToCurrentMonth() {
             const activeMonth = document.getElementById('global-month-filter').value;
             const dateStr = new Date().toLocaleDateString();
-            
             state.recurringTemplates.forEach(item => {
                 if(item.cat === 'Income-Pay') {
-                    const gross = item.amt;
-                    const tax = gross * 0.20;
-                    const net = gross - tax;
-                    state.globalBalance += net;
-                    state.taxEscrowBalance += tax;
+                    const gross = item.amt; const tax = gross * 0.20; const net = gross - tax;
+                    state.globalBalance += net; state.taxEscrowBalance += tax;
                     state.ledger.unshift({ id: Date.now() + Math.random(), type: 'income', desc: item.desc, gross, tax, net, date: dateStr, monthKey: activeMonth });
                 } else {
                     state.globalBalance -= item.amt;
@@ -437,53 +440,33 @@
             const target = parseFloat(document.getElementById('pot-target').value);
             const monthly = parseFloat(document.getElementById('pot-monthly').value) || 0;
             if(!name || !target || target <= 0) return;
-
             state.pots.push({ id: Date.now(), name, target, monthly, current: 0 });
-            document.getElementById('pot-name').value = '';
-            document.getElementById('pot-target').value = '';
-            document.getElementById('pot-monthly').value = '';
+            document.getElementById('pot-name').value = ''; document.getElementById('pot-target').value = ''; document.getElementById('pot-monthly').value = '';
             save();
         }
 
         function fundPot(id) {
             const pot = state.pots.find(p => p.id === id);
             if(!pot) return;
-
             const allocation = parseFloat(prompt(`Transfer available fluid cash assets into ${pot.name}:`));
-            if(!allocation || allocation <= 0 || allocation > state.globalBalance) {
-                alert("Operation aborted. Insufficient available assets.");
-                return;
-            }
-            state.globalBalance -= allocation;
-            pot.current += allocation;
+            if(!allocation || allocation <= 0 || allocation > state.globalBalance) { alert("Operation aborted."); return; }
+            state.globalBalance -= allocation; pot.current += allocation;
             save();
         }
 
         function editPot(id) {
             const pot = state.pots.find(p => p.id === id);
             if(!pot) return;
-            
-            const nextName = prompt("Modify Pot Name:", pot.name);
-            if(nextName) pot.name = nextName.trim();
-            
-            const nextTarget = parseFloat(prompt("Modify Target Goal Amount ($):", pot.target));
-            if(!isNaN(nextTarget) && nextTarget > 0) pot.target = nextTarget;
-            
-            const nextMonthly = parseFloat(prompt("Modify Planned Monthly Contribution ($):", pot.monthly));
-            if(!isNaN(nextMonthly) && nextMonthly >= 0) pot.monthly = nextMonthly;
+            const nextName = prompt("Modify Pot Name:", pot.name); if(nextName) pot.name = nextName.trim();
+            const nextTarget = parseFloat(prompt("Modify Target Goal Amount ($):", pot.target)); if(!isNaN(nextTarget) && nextTarget > 0) pot.target = nextTarget;
+            const nextMonthly = parseFloat(prompt("Modify Planned Monthly Contribution ($):", pot.monthly)); if(!isNaN(nextMonthly) && nextMonthly >= 0) pot.monthly = nextMonthly;
             save();
         }
 
         function deletePot(id) {
-            const index = state.pots.findIndex(p => p.id === id);
-            if(index === -1) return;
+            const index = state.pots.findIndex(p => p.id === id); if(index === -1) return;
             const pot = state.pots[index];
-            
-            if(confirm(`Wipe "${pot.name}" savings target completely? This returns all accrued $${pot.current.toFixed(2)} back into your fluid net balance.`)) {
-                state.globalBalance += pot.current; 
-                state.pots.splice(index, 1);
-                save();
-            }
+            if(confirm(`Wipe "${pot.name}" savings target completely?`)) { state.globalBalance += pot.current; state.pots.splice(index, 1); save(); }
         }
 
         function render() {
@@ -501,26 +484,37 @@
             let totalInflow = 0;
             let totalOutflow = 0;
             let categorySpendingMap = {};
-            Object.keys(state.categoryTargets).forEach(c => categorySpendingMap[c] = 0);
+            state.categoryTargets.forEach(c => categorySpendingMap[c.name] = 0);
 
             targetedLedgerDataset.forEach(item => {
-                if(item.type === 'income') {
-                    totalInflow += item.net;
+                if(item.type === 'income') { totalInflow += item.net; } 
+                else { totalOutflow += item.amt; if(categorySpendingMap[item.cat] !== undefined) { categorySpendingMap[item.cat] += item.amt; } }
+            });
+
+            // Advanced Priority Optimization & Auto-Withholding Calculation
+            let nonNegotiableVaultTotal = 0;
+            let choiceExpensesLogged = 0;
+
+            state.categoryTargets.forEach(cat => {
+                const baseLimit = cat.limit;
+                const activeLimit = isYearMode ? baseLimit * 12 : baseLimit;
+                if(cat.nonNegotiable) {
+                    nonNegotiableVaultTotal += activeLimit;
                 } else {
-                    totalOutflow += item.amt;
-                    if(categorySpendingMap[item.cat] !== undefined) {
-                        categorySpendingMap[item.cat] += item.amt;
-                    }
+                    choiceExpensesLogged += categorySpendingMap[cat.name];
                 }
             });
 
-            let surplus = totalInflow - totalOutflow;
-            const surplusEl = document.getElementById('dash-surplus');
-            surplusEl.innerText = `${surplus >= 0 ? '' : '-'}$${Math.abs(surplus).toFixed(2)}`;
-            surplusEl.style.color = surplus >= 0 ? 'var(--success)' : 'var(--danger)';
+            // True Choice Cash Left = Total Earned Inflow - Auto-Sheltered Non-Negotiables Total - Discretionary Expenses Already Logged
+            let trueChoiceCashRemaining = totalInflow - nonNegotiableVaultTotal - choiceExpensesLogged;
 
+            document.getElementById('dash-nn-vault').innerText = `$${nonNegotiableVaultTotal.toFixed(0)}`;
             document.getElementById('dash-inflow').innerText = `$${totalInflow.toFixed(2)}`;
             document.getElementById('dash-outflow').innerText = `$${totalOutflow.toFixed(2)}`;
+            
+            const choiceCashEl = document.getElementById('dash-choice-cash');
+            choiceCashEl.innerText = `${trueChoiceCashRemaining >= 0 ? '' : '-'}$${Math.abs(trueChoiceCashRemaining).toFixed(2)}`;
+            choiceCashEl.style.color = trueChoiceCashRemaining >= 0 ? 'var(--success)' : 'var(--danger)';
 
             const breakdownCard = document.getElementById('cycle-breakdown-card');
             if (isYearMode) {
@@ -530,10 +524,7 @@
                 
                 for(let i = 0; i <= 12; i++) {
                     let d = new Date(2026, 6 + i, 1);
-                    let monthStr = (d.getMonth() + 1).toString().padStart(2, '0');
-                    let k = `${d.getFullYear()}-${monthStr}`;
-                    
-                    /* FIXED: Replaced 'digit' with '2-digit' to resolve the RangeError compilation freeze */
+                    let k = `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}`;
                     let shortLabel = d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
                     
                     let mItems = state.ledger.filter(item => item.monthKey === k);
@@ -553,11 +544,12 @@
                 breakdownCard.style.display = 'none';
             }
 
+            // Build spending visual components splitting non-negotiable badges elegantly
             const capsContainer = document.getElementById('category-caps-container');
             capsContainer.innerHTML = '';
-            Object.keys(state.categoryTargets).forEach(cat => {
-                const spent = categorySpendingMap[cat];
-                const baseLimit = state.categoryTargets[cat];
+            state.categoryTargets.forEach(cat => {
+                const spent = categorySpendingMap[cat.name];
+                const baseLimit = cat.limit;
                 const limit = isYearMode ? baseLimit * 12 : baseLimit;
                 const pct = Math.min((spent / limit) * 100, 100);
                 
@@ -568,10 +560,19 @@
                 capsContainer.innerHTML += `
                     <div class="progress-wrapper">
                         <div class="progress-meta">
-                            <strong style="font-weight: 500; font-size:0.88rem;">${cat}</strong>
+                            <div>
+                                <strong style="font-weight: 600; font-size:0.88rem;">${cat.name}</strong>
+                                <span class="tx-cat-tag ${cat.nonNegotiable ? 'nn' : ''}" style="margin-top:0; margin-left:6px; font-size:0.62rem; padding:1px 5px;">
+                                    ${cat.nonNegotiable ? 'Non-Negotiable' : 'Choice'}
+                                </span>
+                            </div>
                             <span style="color: var(--text-muted); font-size:0.82rem;">$${spent.toFixed(0)} / $${limit}</span>
                         </div>
                         <div class="progress-bg"><div class="progress-bar" style="width: ${pct}%; background: ${color};"></div></div>
+                        <div class="inline-actions" style="margin-top: 2px; margin-bottom: 8px;">
+                            <button class="btn-inline edit" onclick="editCategoryLimit('${cat.name}')">Adjust Cap</button>
+                            <button class="btn-inline" style="color: var(--text-muted);" onclick="toggleCategoryPrioritization('${cat.name}')">Swap Priority</button>
+                        </div>
                     </div>`;
             });
 
@@ -598,16 +599,7 @@
             state.pots.forEach((pot) => {
                 const pct = Math.min((pot.current / pot.target) * 100, 100);
                 const remainingAmount = pot.target - pot.current;
-                
-                let projectionText = '';
-                if (remainingAmount <= 0) {
-                    projectionText = 'Goal fully achieved! 🎉';
-                } else if (pot.monthly && pot.monthly > 0) {
-                    const monthsNeeded = Math.ceil(remainingAmount / pot.monthly);
-                    projectionText = `Est. completion: <strong>${monthsNeeded} months</strong> (at $${pot.monthly}/mo)`;
-                } else {
-                    projectionText = 'Assign a monthly plan amount to project timeline ETA.';
-                }
+                let projectionText = remainingAmount <= 0 ? 'Goal fully achieved! 🎉' : (pot.monthly && pot.monthly > 0 ? `Est. completion: <strong>${Math.ceil(remainingAmount / pot.monthly)} months</strong>` : 'Assign a monthly plan.');
 
                 potsContainer.innerHTML += `
                     <div class="progress-wrapper" style="border-left: 3px solid var(--venice); padding-left:10px; margin-bottom:16px;">
@@ -628,21 +620,18 @@
             const ledgerUl = document.getElementById('ledger-container');
             ledgerUl.innerHTML = '';
             if(targetedLedgerDataset.length === 0) {
-                ledgerUl.innerHTML = `<li class="tx-item" style="color:var(--text-muted); justify-content:center; padding: 20px 0;">No active logs found for this cycle window.</li>`;
+                ledgerUl.innerHTML = `<li class="tx-item" style="color:var(--text-muted); justify-content:center; padding: 20px 0;">No active logs found for this window.</li>`;
             } else {
                 targetedLedgerDataset.slice(0, 15).forEach(item => {
-                    const inlineActionMarkup = `
-                        <div class="inline-actions">
-                            <button class="btn-inline edit" onclick="editTransaction(${item.id})">Adjust</button>
-                            <button class="btn-inline del" onclick="deleteTransaction(${item.id})">Delete</button>
-                        </div>`;
-                        
+                    const inlineActionMarkup = `<div class="inline-actions"><button class="btn-inline edit" onclick="editTransaction(${item.id})">Adjust</button><button class="btn-inline del" onclick="deleteTransaction(${item.id})">Delete</button></div>`;
+                    const isNN = state.categoryTargets.find(c => c.name === item.cat)?.nonNegotiable;
+                    
                     if(item.type === 'expense') {
                         ledgerUl.innerHTML += `
                             <li class="tx-item" style="align-items: center;">
                                 <div>
                                     <div><strong>${item.desc}</strong></div>
-                                    <span class="tx-cat-tag">${item.cat} (${item.monthKey})</span>
+                                    <span class="tx-cat-tag ${isNN ? 'nn' : ''}">${item.cat}</span>
                                     ${inlineActionMarkup}
                                 </div>
                                 <span style="color:var(--text-main); font-weight:600; font-size: 1rem;">-$${item.amt.toFixed(2)}</span>
@@ -652,7 +641,7 @@
                             <li class="tx-item" style="align-items: center;">
                                 <div>
                                     <div><strong>${item.desc}</strong></div>
-                                    <span class="tx-cat-tag" style="background:var(--accent-light); color:var(--text-main);">Net Pay (${item.monthKey})</span>
+                                    <span class="tx-cat-tag" style="background:var(--accent-light); color:var(--text-main);">Net Pay</span>
                                     ${inlineActionMarkup}
                                 </div>
                                 <span style="color:var(--success); font-weight:600; font-size: 1rem;">+$${item.net.toFixed(2)}</span>
