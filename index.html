@@ -8,6 +8,11 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Cassidy Budget">
+    
+    <!-- Native iOS Home Screen App Icon Link (Points to image_8.png) -->
+    <link rel="apple-touch-icon" href="image_8.png">
+    
+    <!-- On-Device OCR Optical Scanning Engine Link -->
     <script src="https://unpkg.com/tesseract.js@5.1.0/dist/tesseract.min.js"></script>
     <style>
         :root {
@@ -124,11 +129,13 @@
             <div id="fluid-balance" style="font-weight: 700; color: var(--success); font-size: 0.95rem; background: var(--card-bg); padding: 6px 14px; border-radius: 14px; border: 1px solid var(--border);">$0</div>
         </header>
 
+        <!-- Segment View Switcher -->
         <div class="view-toggle">
             <button id="toggle-month" class="toggle-btn active" onclick="switchView('month')">Month View</button>
             <button id="toggle-year" class="toggle-btn" onclick="switchView('year')">Cycle View (12M)</button>
         </div>
 
+        <!-- Combined Inline Choice Allowance Card and Month Dropdown Row -->
         <div class="hero-inline-row">
             <div class="choice-hero-box">
                 <div class="stat-lbl"><span class="view-label-ctx">Month</span> Choice Allowance</div>
@@ -139,6 +146,7 @@
             </div>
         </div>
 
+        <!-- Metric Component Displays with Pastel Block Overrides mapping to Mockup styles -->
         <div class="metrics-grid">
             <div class="mini-stat" style="background-color: var(--block-blue); border-color: rgba(136,148,183,0.2);">
                 <div class="stat-lbl">Fluid Balance</div>
@@ -157,23 +165,28 @@
                 <div class="stat-val" id="dash-outflow" style="color: var(--danger); font-weight: 700;">$0.00</div>
             </div>
             <div class="mini-stat" style="display:none;">
+                <!-- Internal script binding cache hooks safely retained -->
                 <div id="dash-inflow"></div>
             </div>
         </div>
 
+        <!-- Dynamic Year-by-Month Macro Breakdown Board -->
         <div class="card" id="cycle-breakdown-card" style="display: none;">
             <h2>cycle month-by-month summary</h2>
             <div id="cycle-months-list" style="margin-top: 10px;"></div>
         </div>
 
+        <!-- Visual Tracking Gauges -->
         <div class="card">
             <h2><span class="view-label-ctx">Month</span> spending targets</h2>
             <div id="category-caps-container"></div>
         </div>
 
+        <!-- Transaction Logger Container with Native OCR Scanner Integrated -->
         <div class="card" id="logger-section-anchor">
             <h2>Log Entry Transaction</h2>
             
+            <!-- Sleek Document Scanner Target -->
             <div style="margin-top: 10px;">
                 <div class="scan-trigger-pill" onclick="document.getElementById('native-ocr-input').click()">
                     📷 Scan Raw Receipt
@@ -193,6 +206,7 @@
             <button onclick="submitTransaction()">Record Entry</button>
         </div>
 
+        <!-- Templates Management Workspace -->
         <div class="card" id="recurring-card-manager">
             <h2>recurring templates 
                 <button class="action-link" onclick="applyRecurringToCurrentMonth()">Apply to Month</button>
@@ -206,6 +220,7 @@
             <ul id="recurring-list" class="tx-list"></ul>
         </div>
 
+        <!-- Savings Allocation Pots -->
         <div class="card">
             <h2>long-term savings pots</h2>
             <div class="form-group">
@@ -232,6 +247,7 @@
             <div id="pots-container" style="margin-top: 18px;"></div>
         </div>
 
+        <!-- Main Filtered Data Ledger -->
         <div class="card">
             <h2>dynamic operational ledger</h2>
             <ul id="ledger-container" class="tx-list"></ul>
@@ -239,6 +255,7 @@
 
     </div>
 
+    <!-- Floating Dock Inspired by mockups -->
     <div class="bottom-dock">
         <button class="dock-item active" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">Home</button>
         <button class="dock-center-btn" onclick="document.getElementById('logger-section-anchor').scrollIntoView({behavior: 'smooth'})">+</button>
@@ -358,7 +375,6 @@
             loader.style.display = "block";
             loader.innerText = "loading on-device scanning matrix...";
 
-            // Dynamically force type to expense to accommodate receipt filling
             document.getElementById('tx-type').value = 'expense';
             toggleFormContext();
 
@@ -386,7 +402,6 @@
             let detectedCategory = "Miscellaneous";
             let detectedDescription = "";
 
-            // Heuristic Amount Isolation Matching Token Lookups
             const priceRegex = /\d+\.\d{2}/g;
             const fallbackPrices = text.match(priceRegex) || [];
 
@@ -400,7 +415,6 @@
                 }
             }
 
-            // Fallback strategy: assign the highest decimal price block that isn't a serial barcode
             if (detectedAmount === 0 && fallbackPrices.length > 0) {
                 let sortedPrices = fallbackPrices.map(p => parseFloat(p)).filter(p => p < 999);
                 if (sortedPrices.length > 0) {
@@ -408,7 +422,6 @@
                 }
             }
 
-            // Keyword Merchant Taxonomy Analysis Matrix
             const corpus = text.toLowerCase();
             if (corpus.match(/(market|grocery|heb|kroger|central market|walmart|target|whole foods|trader|safeway|costco|aldi|food)/)) {
                 detectedCategory = "Groceries";
@@ -429,7 +442,6 @@
                 detectedDescription = "scanned vendor log";
             }
 
-            // Map variables securely back into interactive form components
             if (document.getElementById('field-desc')) document.getElementById('field-desc').value = detectedDescription;
             if (document.getElementById('field-amount')) document.getElementById('field-amount').value = detectedAmount > 0 ? detectedAmount.toFixed(2) : "";
             if (document.getElementById('field-cat')) document.getElementById('field-cat').value = detectedCategory;
@@ -674,7 +686,7 @@
                     
                     const matchingCat = state.categoryTargets.find(c => c.name === item.cat);
                     if (matchingCat && matchingCat.nonNegotiable) {
-                        // Core ledger calculations bypass
+                        // Core fixed calculation skips
                     } else {
                         choiceExpensesLogged += item.amt;
                     }
