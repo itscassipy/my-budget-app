@@ -15,82 +15,88 @@
             --venice: #8894B7;
             --shine: #F5C74D;
             
-            /* Premium Soft Contrast Canvas Tones */
-            --bg-color: #FAF6EE;        /* Organic warm cream backdrop from image_3 */
+            /* Pastel Blocking Palette from Mockups */
+            --bg-color: #FAF6EE;        /* Clean organic warm cream background */
             --card-bg: #FFFFFF;
-            --text-main: #232733;      /* Crisp editorial deep charcoal */
-            --text-muted: #788294;     
-            --accent-light: #EBF0F9;   /* Lavender-tinted Venice mist */
-            --linen-light: #F6EFE5;    
-            --success: #6E8573;        /* Botanical matte sage */
-            --warning: #E5A958;        
-            --danger: #D68C8C;         /* Terracotta rose warning color */
-            --border: #F0EAE1;         
-            --dock-bg: #1A1D26;        /* Sleek dark bottom dock from image_4 */
+            --text-main: #1C1E24;      /* Strong deep obsidian navy */
+            --text-muted: #727B8E;     
+            
+            /* Inspo Block Overrides */
+            --block-pink: #F5D3D3;     /* Soft terracotta rose */
+            --block-blue: #D3DCF5;     /* Soft lavender-blue Venice mist */
+            --block-yellow: #FBE6AD;   /* Warm butter Shine */
+            --block-green: #D3F5D9;    /* Botanical pale sage green */
+            --block-cream: #F6EFE5;    /* Soft whipped linen */
+            
+            --success: #527558;        
+            --warning: #D18D34;        
+            --danger: #BA6868;         
+            --border: #EFE9DE;         
+            --dock-bg: #1A1D26;        /* Floating dark navigation bar anchor */
         }
         
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-main); padding: 24px 16px; padding-bottom: 110px; -webkit-font-smoothing: antialiased; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding: 24px 16px; padding-bottom: 120px; -webkit-font-smoothing: antialiased; }
         .container { max-width: 480px; margin: 0 auto; }
         
-        /* Editorial Typography */
+        /* Editorial Premium Typography */
         header h1 { font-family: "Georgia", Georgia, serif; font-weight: 400; font-style: italic; font-size: 1.8rem; color: var(--text-main); letter-spacing: -0.5px; text-transform: lowercase; }
-        h2 { font-family: "Georgia", Georgia, serif; font-style: italic; font-size: 1.2rem; font-weight: 400; margin-bottom: 18px; color: var(--text-main); display: flex; justify-content: space-between; align-items: center; }
+        h2 { font-family: "Georgia", Georgia, serif; font-style: italic; font-size: 1.25rem; font-weight: 400; margin-bottom: 20px; color: var(--text-main); display: flex; justify-content: space-between; align-items: center; }
         
-        /* Capsule View Toggle */
+        /* Interactive Capsule Segment Controls */
         .view-toggle { display: flex; background: #EFE9DE; padding: 4px; border-radius: 20px; margin-bottom: 24px; }
-        .toggle-btn { flex: 1; text-align: center; padding: 12px; border-radius: 16px; font-size: 0.88rem; font-weight: 600; border: none; background: transparent; cursor: pointer; color: var(--text-muted); transition: all 0.2s ease; }
-        .toggle-btn.active { background: var(--card-bg); color: var(--text-main); box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .toggle-btn { flex: 1; text-align: center; padding: 12px; border-radius: 16px; font-size: 0.88rem; font-weight: 600; border: none; background: transparent; cursor: pointer; color: var(--text-muted); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .toggle-btn.active { background: var(--card-bg); color: var(--text-main); box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
 
         .month-select-wrapper { display: flex; justify-content: flex-end; margin-bottom: 20px; }
         select.nav-select { padding: 10px 16px; border-radius: 16px; border: 1px solid var(--border); background: var(--card-bg); font-weight: 600; font-size: 0.88rem; color: var(--text-main); outline: none; }
 
-        /* Premium Soft-Curved Widgets */
+        /* Premium Curved Layout Container Widgets */
         .card { background: var(--card-bg); border-radius: 28px; padding: 24px; margin-bottom: 20px; box-shadow: 0 8px 24px rgba(35,39,51,0.02); border: 1px solid var(--border); overflow: hidden; }
         
-        /* Lifestyle Grid Blocks Layout */
-        .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
-        .mini-stat { background: var(--card-bg); border-radius: 24px; padding: 18px; border: 1px solid var(--border); }
+        /* Perfectly Balanced Grid Component Layouts */
+        .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px; }
+        .mini-stat { background: var(--card-bg); border-radius: 24px; padding: 18px; border: 1px solid var(--border); transition: transform 0.2s; }
         .stat-lbl { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); font-weight: 700; }
-        .stat-val { font-size: 1.35rem; font-weight: 700; margin-top: 6px; color: var(--text-main); letter-spacing: -0.5px; }
+        .stat-val { font-size: 1.4rem; font-weight: 700; margin-top: 6px; color: var(--text-main); letter-spacing: -0.5px; }
         
-        /* Hero Visual Block - Reminiscent of Today's Vibe Card */
-        .span-2 { grid-column: span 2; background: linear-gradient(135deg, #FFFDF9 0%, var(--linen-light) 100%); border: 1px solid var(--linen); }
-        .span-2 .stat-val { font-family: "Georgia", Georgia, serif; font-style: italic; font-size: 2.1rem; font-weight: 400; color: var(--text-main); margin-top: 4px; }
+        /* Pastel Highlight Blocks - Matched to Color-Blocked Inspo Photos */
+        .span-2 { grid-column: span 2; background: linear-gradient(135deg, #FFFDF9 0%, var(--block-cream) 100%); border: 1px solid var(--linen); }
+        .span-2 .stat-val { font-family: "Georgia", Georgia, serif; font-style: italic; font-size: 2.2rem; font-weight: 400; color: var(--text-main); margin-top: 4px; }
 
-        /* Input Customizations */
+        /* Minimalist Input Forms */
         .form-group { margin-bottom: 16px; }
         label { display: block; font-size: 0.75rem; color: var(--text-muted); font-weight: 700; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
-        input, select.form-input { width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 16px; font-size: 0.95rem; background: var(--bg-color); color: var(--text-main); outline: none; transition: all 0.2s; }
+        input, select.form-input { width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 16px; font-size: 0.95rem; background: var(--bg-color); color: var(--text-main); outline: none; transition: all 0.2s ease; }
         input:focus, select.form-input:focus { border-color: var(--venice); background: var(--card-bg); box-shadow: 0 0 0 3px rgba(136,148,183,0.1); }
         
-        /* Dynamic Action Buttons */
+        /* Elegant Action Controllers */
         button { width: 100%; padding: 16px; background: var(--venice); color: white; border: none; border-radius: 18px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
-        button:active { opacity: 0.85; }
-        button.secondary { background: var(--linen-light); color: var(--text-main); margin-top: 0; padding: 8px 14px; width: auto; font-size: 0.78rem; border-radius: 12px; border: 1px solid var(--linen); }
+        button:active { transform: scale(0.99); opacity: 0.9; }
+        button.secondary { background: var(--block-cream); color: var(--text-main); margin-top: 0; padding: 8px 14px; width: auto; font-size: 0.78rem; border-radius: 12px; border: 1px solid var(--linen); }
         button.action-link { background: transparent; color: var(--venice); width: auto; padding: 0; margin: 0; font-size: 0.85rem; font-weight: 700; }
         
-        /* Action Control Triggers */
+        /* Inline Item Controls Modifier Hooks */
         .inline-actions { display: flex; gap: 12px; margin-top: 8px; }
         .btn-inline { background: transparent; color: var(--text-muted); font-size: 0.72rem; width: auto; padding: 0; margin: 0; font-weight: 700; border: none; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; }
         .btn-inline.del { color: var(--danger); }
         .btn-inline.edit { color: var(--venice); }
 
-        /* Curved Capsule Progress Bars */
-        .progress-wrapper { margin-bottom: 20px; }
+        /* Capsule Tracking Progress Component Rails */
+        .progress-wrapper { margin-bottom: 22px; }
         .progress-wrapper:last-child { margin-bottom: 0; }
-        .progress-meta { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 6px; align-items: center; }
+        .progress-meta { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 8px; align-items: center; }
         .progress-bg { background: var(--bg-color); height: 12px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border); }
         .progress-bar { height: 100%; width: 0%; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 6px; }
 
-        /* General Transaction Lists */
+        /* Ledger Row Elements */
         .tx-list { list-style: none; }
         .tx-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--bg-color); font-size: 0.95rem; }
         .tx-item:last-child { border-bottom: none; }
         
-        /* Pill Badges */
-        .tx-cat-tag { font-size: 0.65rem; background: var(--linen-light); padding: 4px 12px; border-radius: 20px; color: var(--text-main); display: inline-block; margin-top: 6px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-        .tx-cat-tag.nn { background: var(--accent-light); color: var(--text-main); border: 1px solid var(--venice); }
+        /* Capsule Tags */
+        .tx-cat-tag { font-size: 0.65rem; background: var(--block-cream); padding: 4px 12px; border-radius: 20px; color: var(--text-main); display: inline-block; margin-top: 6px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .tx-cat-tag.nn { background: var(--block-blue); color: var(--text-main); border: 1px solid rgba(136,148,183,0.3); }
         .pot-eta { font-size: 0.78rem; color: var(--text-muted); margin-top: 6px; font-style: italic; }
 
         /* Stylized Floating Bottom Navigation Dock */
@@ -104,63 +110,57 @@
 <body>
     <div class="container">
         
-        <header style="margin-bottom: 24px;">
+        <header style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
             <h1>lifestyle archive</h1>
             <div id="fluid-balance" style="font-weight: 700; color: var(--success); font-size: 0.95rem; background: var(--card-bg); padding: 6px 14px; border-radius: 14px; border: 1px solid var(--border);">$0</div>
         </header>
 
-        <!-- Segment View Switcher -->
         <div class="view-toggle">
             <button id="toggle-month" class="toggle-btn active" onclick="switchView('month')">Month View</button>
             <button id="toggle-year" class="toggle-btn" onclick="switchView('year')">Cycle View (12M)</button>
         </div>
 
-        <!-- Dropdown Timeline Filter -->
         <div id="month-filter-wrap" class="month-select-wrapper">
             <select id="global-month-filter" class="nav-select" onchange="render()"></select>
         </div>
 
-        <!-- Metric Component Displays -->
         <div class="metrics-grid">
             <div class="mini-stat span-2">
                 <div class="stat-lbl"><span class="view-label-ctx">Month</span> Choice Allowance</div>
                 <div class="stat-val" id="dash-choice-cash">$0.00</div>
             </div>
-            <div class="mini-stat" style="background: var(--linen-light);">
+            <div class="mini-stat" style="background-color: var(--block-blue); border-color: rgba(136,148,183,0.2);">
                 <div class="stat-lbl">Fluid Balance</div>
                 <div class="stat-val" id="dash-balance">$0.00</div>
             </div>
-            <div class="mini-stat" style="background: var(--accent-light);">
+            <div class="mini-stat" style="background-color: var(--block-cream); border-color: rgba(221,197,169,0.4);">
                 <div class="stat-lbl">Essential Vault</div>
                 <div class="stat-val" id="dash-nn-vault" style="font-weight: 600;">$0.00</div>
             </div>
-            <div class="mini-stat">
+            <div class="mini-stat" style="background-color: var(--block-yellow); border-color: rgba(245,199,77,0.3);">
                 <div class="stat-lbl">Tax Escrow</div>
-                <div class="stat-val" id="dash-tax" style="color: var(--text-muted); font-weight: 500;">$0.00</div>
+                <div class="stat-val" id="dash-tax" style="font-weight: 600;">$0.00</div>
             </div>
-            <div class="mini-stat">
+            <div class="mini-stat" style="background-color: var(--block-green); border-color: rgba(110,133,115,0.2);">
+                <div class="stat-lbl"><span class="view-label-ctx">Month</span> Inflow</div>
+                <div class="stat-val" id="dash-inflow" style="color: var(--success); font-weight: 700;">$0.00</div>
+            </div>
+            <div class="mini-stat" style="background-color: var(--block-pink); border-color: rgba(214,140,140,0.2);">
                 <div class="stat-lbl"><span class="view-label-ctx">Month</span> Outflow</div>
-                <div class="stat-val" id="dash-outflow" style="color: var(--warning);">$0.00</div>
-            </div>
-            <div class="mini-stat" style="display:none;">
-                <!-- Internal script binding cache hook -->
-                <div id="dash-inflow"></div>
+                <div class="stat-val" id="dash-outflow" style="color: var(--danger); font-weight: 700;">$0.00</div>
             </div>
         </div>
 
-        <!-- Dynamic Year-by-Month Macro Breakdown Board -->
         <div class="card" id="cycle-breakdown-card" style="display: none;">
             <h2>cycle month-by-month summary</h2>
             <div id="cycle-months-list" style="margin-top: 10px;"></div>
         </div>
 
-        <!-- Visual Tracking Gauges -->
         <div class="card">
             <h2><span class="view-label-ctx">Month</span> spending targets</h2>
             <div id="category-caps-container"></div>
         </div>
 
-        <!-- Transaction Logger Container -->
         <div class="card" id="logger-section-anchor">
             <h2>Log Entry Transaction</h2>
             <div class="form-group">
@@ -174,7 +174,6 @@
             <button onclick="submitTransaction()">Record Entry</button>
         </div>
 
-        <!-- Templates Management Workspace -->
         <div class="card" id="recurring-card-manager">
             <h2>recurring templates 
                 <button class="action-link" onclick="applyRecurringToCurrentMonth()">Apply to Month</button>
@@ -188,7 +187,6 @@
             <ul id="recurring-list" class="tx-list"></ul>
         </div>
 
-        <!-- Savings Allocation Pots -->
         <div class="card">
             <h2>long-term savings pots</h2>
             <div class="form-group">
@@ -211,7 +209,6 @@
             <div id="pots-container" style="margin-top: 18px;"></div>
         </div>
 
-        <!-- Main Filtered Data Ledger -->
         <div class="card">
             <h2>dynamic operational ledger</h2>
             <ul id="ledger-container" class="tx-list"></ul>
@@ -219,7 +216,6 @@
 
     </div>
 
-    <!-- Floating Dock Inspired by mockups -->
     <div class="bottom-dock">
         <button class="dock-item active" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">Home</button>
         <button class="dock-center-btn" onclick="document.getElementById('logger-section-anchor').scrollIntoView({behavior: 'smooth'})">+</button>
@@ -670,7 +666,7 @@
                             <li class="tx-item" style="align-items: center;">
                                 <div>
                                     <div><strong>${item.desc.toLowerCase()}</strong></div>
-                                    <span class="tx-cat-tag" style="background:var(--accent-light); color:var(--text-main);">Net Pay</span>
+                                    <span class="tx-cat-tag" style="background:var(--block-blue); color:var(--text-main);">Net Pay</span>
                                     ${inlineActionMarkup}
                                 </div>
                                 <span style="color:var(--success); font-weight:600; font-size: 1rem;">+$${item.net.toFixed(2)}</span>
