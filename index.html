@@ -780,6 +780,7 @@
                 });
             }
 
+            // GAMIFICATION INJECTION: Cozy Progression rendering for Savings Pots
             const potsContainer = document.getElementById('pots-container');
             potsContainer.innerHTML = '';
             state.pots.forEach((pot) => {
@@ -787,19 +788,49 @@
                 const remainingAmount = pot.target - pot.current;
                 let projectionText = remainingAmount <= 0 ? 'Goal fully achieved! 🎉' : (pot.monthly && pot.monthly > 0 ? `Est. completion: <strong>${Math.ceil(remainingAmount / pot.monthly)} months</strong>` : 'Assign a monthly plan.');
 
+                // Determine Cozy Stage based on Percentage
+                let cozyIcon = "🌱";
+                let cozyStage = "Seedling Stage";
+                let iconBg = "rgba(110,133,115,0.15)"; 
+                
+                if (pct >= 100) { 
+                    cozyIcon = "🏡"; 
+                    cozyStage = "Fully Settled!"; 
+                    iconBg = "rgba(245,199,77,0.2)"; 
+                } else if (pct >= 75) { 
+                    cozyIcon = "🌸"; 
+                    cozyStage = "Blooming Phase"; 
+                    iconBg = "rgba(245,211,211,0.5)"; 
+                } else if (pct >= 50) { 
+                    cozyIcon = "🪴"; 
+                    cozyStage = "Taking Root"; 
+                    iconBg = "rgba(136,148,183,0.15)"; 
+                } else if (pct >= 25) { 
+                    cozyIcon = "🌿"; 
+                    cozyStage = "Growing Well"; 
+                    iconBg = "rgba(221,197,169,0.3)"; 
+                }
+
                 potsContainer.innerHTML += `
-                    <div class="progress-wrapper" style="border-left: 3px solid var(--venice); padding-left:12px; margin-bottom:18px;">
-                        <div class="progress-meta">
-                            <strong style="font-weight:600;">${pot.name.toLowerCase()}</strong>
-                            <span style="font-size:0.82rem; font-weight: 600;">$${pot.current.toFixed(0)} / $${pot.target.toFixed(0)}</span>
+                    <div class="progress-wrapper" style="background: var(--bg-color); padding: 18px; border-radius: 24px; border: 1px solid var(--border); margin-bottom: 20px;">
+                        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 14px;">
+                            <div style="font-size: 2rem; background: ${iconBg}; width: 54px; height: 54px; display: flex; align-items: center; justify-content: center; border-radius: 18px;">${cozyIcon}</div>
+                            <div style="flex: 1;">
+                                <strong style="font-weight:700; font-size: 1.05rem; display: block; letter-spacing: -0.3px;">${pot.name.toLowerCase()}</strong>
+                                <span style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">${cozyStage}</span>
+                            </div>
+                            <div style="text-align: right;">
+                                <span style="font-size:0.95rem; font-weight: 700; display: block;">$${pot.current.toFixed(0)}</span>
+                                <span style="font-size:0.75rem; font-weight: 600; color: var(--text-muted);">/ $${pot.target.toFixed(0)}</span>
+                            </div>
                         </div>
-                        <div class="progress-bg"><div class="progress-bar" style="width: ${pct}%; background: var(--venice);"></div></div>
-                        <div class="pot-eta">${projectionText}</div>
-                        <div class="inline-actions" style="margin-bottom: 6px;">
+                        <div class="progress-bg" style="background: var(--card-bg); height: 14px; border-radius: 8px;"><div class="progress-bar" style="width: ${pct}%; background: var(--venice); border-radius: 8px;"></div></div>
+                        <div class="pot-eta" style="margin-top: 10px;">${projectionText}</div>
+                        <div class="inline-actions" style="margin-top: 12px; margin-bottom: 6px;">
                             <button class="btn-inline edit" onclick="editPot(${pot.id})">Modify Limits</button>
                             <button class="btn-inline del" onclick="deletePot(${pot.id})">Wipe Pot</button>
                         </div>
-                        <button class="secondary" style="margin-top:6px; background:transparent; color:var(--venice); border-color:var(--venice);" onclick="fundPot(${pot.id})">+ Allocate Cash</button>
+                        <button class="secondary" style="margin-top:8px; background:var(--card-bg); color:var(--text-main); border: 1px solid var(--border); width: 100%; padding: 14px; border-radius: 16px; font-weight: 600;" onclick="fundPot(${pot.id})">+ Allocate Cash to Pot</button>
                     </div>`;
             });
 
