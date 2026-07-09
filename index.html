@@ -58,7 +58,7 @@
         /* Premium Curved Layout Container Widgets */
         .card { background: var(--card-bg); border-radius: 28px; padding: 24px; margin-bottom: 20px; box-shadow: 0 8px 24px rgba(35,39,51,0.02); border: 1px solid var(--border); overflow: hidden; }
         
-        /* Perfectly Balanced Grid Component Layouts */
+        /* Grid Component Layouts */
         .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px; }
         .mini-stat { background: var(--card-bg); border-radius: 24px; padding: 18px; border: 1px solid var(--border); transition: transform 0.2s; }
         .stat-lbl { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); font-weight: 700; }
@@ -205,19 +205,23 @@
             <h2>long-term savings pots</h2>
             <div class="form-group">
                 <label>Designation Name</label>
-                <input type="text" id="pot-name" placeholder="e.g., New Car Fund">
+                <input type="text" id="pot-name" placeholder="e.g., Cold Savings Runway">
             </div>
             <div class="form-group">
-                <div style="display: flex; gap: 8px;">
-                    <div style="flex: 1;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 4px;">
+                    <div>
                         <label>Target Goal ($)</label>
                         <input type="number" id="pot-target" placeholder="15000">
                     </div>
-                    <div style="flex: 1;">
-                        <label>Monthly Plan ($)</label>
-                        <input type="number" id="pot-monthly" placeholder="500">
+                    <div>
+                        <label>Already Saved ($)</label>
+                        <input type="number" id="pot-starting" placeholder="5000" value="0">
                     </div>
                 </div>
+            </div>
+            <div class="form-group">
+                <label>Planned Monthly Contribution ($)</label>
+                <input type="number" id="pot-monthly" placeholder="500">
             </div>
             <button style="background: var(--text-main);" onclick="createNewPot()">Initialize Pot</button>
             <div id="pots-container" style="margin-top: 18px;"></div>
@@ -482,10 +486,15 @@
         function createNewPot() {
             const name = document.getElementById('pot-name').value.trim();
             const target = parseFloat(document.getElementById('pot-target').value);
+            const starting = parseFloat(document.getElementById('pot-starting').value) || 0;
             const monthly = parseFloat(document.getElementById('pot-monthly').value) || 0;
             if(!name || !target || target <= 0) return;
-            state.pots.push({ id: Date.now(), name, target, monthly, current: 0 });
-            document.getElementById('pot-name').value = ''; document.getElementById('pot-target').value = ''; document.getElementById('pot-monthly').value = '';
+            
+            state.pots.push({ id: Date.now(), name, target, monthly, current: starting });
+            document.getElementById('pot-name').value = ''; 
+            document.getElementById('pot-target').value = ''; 
+            document.getElementById('pot-starting').value = '0';
+            document.getElementById('pot-monthly').value = '';
             save();
         }
 
@@ -493,8 +502,32 @@
             const pot = state.pots.find(p => p.id === id);
             if(!pot) return;
             const allocation = parseFloat(prompt(`Transfer available fluid cash assets into ${pot.name}:`));
-            if(!allocation || allocation <= 0 || allocation > state.globalBalance) { alert("Operation aborted."); return; }
-            state.globalBalance -= allocation; pot.current += allocation;
+            if(!allocation || allocation <= 0 || allocation > state.globalBalance) { alert("Invalid amount or insufficient fluid balance."); return; }
+            
+            const source = prompt(`Where should this $${allocation} come from?\nType '1' for General Fluid Balance\nType '2' for This Month's Choice Allowance`, "1");
+            
+            if (source === '2') {
+                const activeMonth = document.getElementById('global-month-filter').value;
+                const dateStr = new Date().toLocaleDateString();
+                state.globalBalance -= allocation; 
+                pot.current += allocation;
+                
+                state.ledger.unshift({ 
+                    id: Date.now(), 
+                    type: 'expense', 
+                    desc: `pot fund: ${pot.name}`, 
+                    amt: allocation, 
+                    cat: 'Choice Transfer', 
+                    date: dateStr, 
+                    monthKey: activeMonth 
+                });
+            } else if (source === '1') {
+                state.globalBalance -= allocation; 
+                pot.current += allocation;
+            } else {
+                alert("Operation aborted. Invalid option selected.");
+                return;
+            }
             save();
         }
 
@@ -530,11 +563,6 @@
             let categorySpendingMap = {};
             state.categoryTargets.forEach(c => categorySpendingMap[c.name] = 0);
 
-            targetedLedgerDataset.forEach(item => {
-                if(item.type === 'income') { totalInflow += item.net; } 
-                else { totalOutflow += item.amt; if(categorySpendingMap[item.cat] !== undefined) { categorySpendingMap[item.cat] += item.amt; } }
-            });
-
             let nonNegotiableVaultTotal = 0;
             let choiceExpensesLogged = 0;
 
@@ -543,8 +571,24 @@
                 const activeLimit = isYearMode ? baseLimit * 12 : baseLimit;
                 if(cat.nonNegotiable) {
                     nonNegotiableVaultTotal += activeLimit;
-                } else {
-                    choiceExpensesLogged += categorySpendingMap[cat.name];
+                }
+            });
+
+            targetedLedgerDataset.forEach(item => {
+                if(item.type === 'income') { 
+                    totalInflow += item.net; 
+                } else { 
+                    totalOutflow += item.amt; 
+                    if(categorySpendingMap[item.cat] !== undefined) { 
+                        categorySpendingMap[item.cat] += item.amt; 
+                    } 
+                    
+                    const matchingCat = state.categoryTargets.find(c => c.name === item.cat);
+                    if (matchingCat && matchingCat.nonNegotiable) {
+                        // Fixed target tracking bypass
+                    } else {
+                        choiceExpensesLogged += item.amt;
+                    }
                 }
             });
 
@@ -672,7 +716,7 @@
                             <li class="tx-item" style="align-items: center;">
                                 <div>
                                     <div><strong>${item.desc.toLowerCase()}</strong></div>
-                                    <span class="tx-cat-tag ${isNN ? 'nn' : ''}">${item.cat}</span>
+                                    <span class="tx-cat-tag ${isNN ? 'nn' : (item.cat === 'Choice Transfer' ? 'nn' : '')}">${item.cat}</span>
                                     ${inlineActionMarkup}
                                 </div>
                                 <span style="color:var(--text-main); font-weight:600; font-size: 1rem;">-$${item.amt.toFixed(2)}</span>
