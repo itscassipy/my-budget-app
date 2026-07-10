@@ -19,7 +19,7 @@
             
             /* Dynamic Base Palette */
             --bg-color: #FAF6EE; --card-bg: #FFFFFF; --text-main: #1C1E24; --text-muted: #727B8E; --border: #EFE9DE; --linen: #DDC5A9;
-            --dock-glass: rgba(250, 246, 238, 0.75); /* Default Afternoon Glass */
+            --dock-glass: rgba(250, 246, 238, 0.75); 
             
             /* Dynamic Gradients */
             --hero-gradient: linear-gradient(135deg, #FFFDF9 0%, #F6EFE5 100%);
@@ -80,6 +80,7 @@
         .form-group { margin-bottom: 16px; }
         label { display: block; font-size: 0.75rem; color: var(--text-muted); font-weight: 700; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; transition: color 0.8s ease; }
         input, select.form-input { width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 16px; font-size: 0.95rem; background: var(--bg-color); color: var(--text-main); outline: none; transition: all 0.3s ease; }
+        input[type="date"] { font-family: -apple-system, sans-serif; }
         input:focus, select.form-input:focus { border-color: var(--venice); background: var(--card-bg); box-shadow: 0 0 0 3px rgba(136,148,183,0.1); }
         button { width: 100%; padding: 16px; background: var(--venice); color: white; border: none; border-radius: 18px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
         button:active { transform: scale(0.99); opacity: 0.9; }
@@ -108,7 +109,7 @@
         .tx-cat-tag.nn { background: var(--block-blue); color: #1C1E24; border: 1px solid rgba(136,148,183,0.3); }
         .pot-eta { font-size: 0.78rem; color: var(--text-muted); margin-top: 6px; font-style: italic; }
 
-        /* Gamification: Soft-Fail Modal */
+        /* Modals */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: none; justify-content: center; align-items: center; z-index: 2000; padding: 16px; transition: opacity 0.3s ease; }
         .modal-card { background: var(--card-bg); border-radius: 28px; padding: 24px; width: 100%; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); border: 1px solid var(--border); }
         .modal-card h3 { font-family: "Georgia", Georgia, serif; font-style: italic; font-size: 1.4rem; color: var(--danger); margin-bottom: 12px; }
@@ -128,57 +129,11 @@
         @keyframes pop { 0% { transform: scale(0.8); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
 
         /* Floating Glass Pill Dock */
-        .bottom-dock { 
-            position: fixed; 
-            bottom: 24px; 
-            left: 50%; 
-            transform: translateX(-50%); 
-            width: 90%; 
-            max-width: 380px; 
-            background: var(--dock-glass); 
-            backdrop-filter: blur(12px); 
-            -webkit-backdrop-filter: blur(12px); 
-            height: auto; 
-            border-radius: 40px; 
-            display: flex; 
-            justify-content: space-around; 
-            align-items: center; 
-            z-index: 1000; 
-            padding: 8px 12px; 
-            border: 1px solid var(--border); 
-            box-shadow: 0 12px 32px rgba(0,0,0,0.08); 
-            transition: all 0.8s ease; 
-        }
-        .dock-item { 
-            color: var(--text-muted); 
-            font-size: 0.65rem; 
-            font-weight: 700; 
-            text-transform: uppercase; 
-            letter-spacing: 0.5px; 
-            border: none; 
-            background: transparent; 
-            cursor: pointer; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            padding: 8px 16px; 
-            border-radius: 24px; 
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-            gap: 2px; 
-        }
-        .dock-item span { 
-            font-size: 1.2rem; 
-            transition: transform 0.3s ease; 
-        }
-        .dock-item.active { 
-            color: var(--text-main); 
-            background: var(--card-bg); 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.04); 
-        }
-        .dock-item.active span { 
-            transform: translateY(-2px) scale(1.1); 
-        }
+        .bottom-dock { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 380px; background: var(--dock-glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); height: auto; border-radius: 40px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding: 8px 12px; border: 1px solid var(--border); box-shadow: 0 12px 32px rgba(0,0,0,0.08); transition: all 0.8s ease; }
+        .dock-item { color: var(--text-muted); font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border: none; background: transparent; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 16px; border-radius: 24px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); gap: 2px; }
+        .dock-item span { font-size: 1.2rem; transition: transform 0.3s ease; }
+        .dock-item.active { color: var(--text-main); background: var(--card-bg); box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
+        .dock-item.active span { transform: translateY(-2px) scale(1.1); }
     </style>
 </head>
 <body>
@@ -189,6 +144,7 @@
             <div id="fluid-balance" style="font-weight: 700; color: var(--success); font-size: 0.95rem; background: var(--card-bg); padding: 6px 14px; border-radius: 14px; border: 1px solid var(--border); transition: all 0.8s ease;">$0</div>
         </header>
 
+        <!-- Global Context Controls (Always Visible) -->
         <div class="view-toggle">
             <button id="toggle-month" class="toggle-btn active" onclick="switchView('month')">Month View</button>
             <button id="toggle-year" class="toggle-btn" onclick="switchView('year')">Cycle View (12M)</button>
@@ -203,8 +159,20 @@
             </div>
         </div>
 
+        <!-- ==================== TAB 1: HOME ==================== -->
         <div id="tab-home" class="tab-content active">
             
+            <!-- Cycle Refresh Tracker -->
+            <div class="card" style="padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; border-color: var(--venice); background: var(--waiting-gradient);">
+                <div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Next Pay Cycle Refresh</div>
+                    <div style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-top: 4px; display: flex; align-items: center; gap: 8px;">
+                        <span id="refresh-countdown">-- days</span>
+                    </div>
+                </div>
+                <button class="secondary" style="margin: 0; background: var(--card-bg);" onclick="openRefreshSettings()">Edit Timeline</button>
+            </div>
+
             <div class="card" style="padding: 18px 22px; background: var(--daily-gradient);">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                     <h2 style="margin: 0; font-size: 1.1rem;">cozy daily check-in</h2>
@@ -241,6 +209,7 @@
             </div>
         </div>
 
+        <!-- ==================== TAB 2: LOG ==================== -->
         <div id="tab-log" class="tab-content">
             <div class="card">
                 <h2>Log Entry Transaction</h2>
@@ -269,6 +238,7 @@
             </div>
         </div>
 
+        <!-- ==================== TAB 3: LEDGER ==================== -->
         <div id="tab-ledger" class="tab-content">
             <div class="card">
                 <h2>dynamic operational ledger</h2>
@@ -276,6 +246,7 @@
             </div>
         </div>
 
+        <!-- ==================== TAB 4: GARDEN ==================== -->
         <div id="tab-garden" class="tab-content">
             <div class="card">
                 <h2>long-term savings pots</h2>
@@ -317,6 +288,7 @@
 
     </div>
 
+    <!-- Navigation Dock -->
     <nav class="bottom-dock">
         <button class="dock-item active" onclick="switchTab('home', this)"><span>🏠</span> Home</button>
         <button class="dock-item" onclick="switchTab('log', this)"><span>📝</span> Log</button>
@@ -324,11 +296,12 @@
         <button class="dock-item" onclick="switchTab('garden', this)"><span>🪴</span> Garden</button>
     </nav>
 
+    <!-- Modals -->
+    <!-- Recalibration Modal -->
     <div class="modal-overlay" id="recalibration-modal">
         <div class="modal-card">
             <h3>optimization needed 🧩</h3>
             <p>This entry exceeds your available fluid balance by <strong id="recal-shortfall" style="color: var(--danger);">$0.00</strong>. How would you like to balance this puzzle?</p>
-            
             <div class="form-group" style="margin-bottom: 24px;">
                 <label>Option 1: Draw from a Savings Pot</label>
                 <div style="display: flex; gap: 8px;">
@@ -336,7 +309,6 @@
                     <button style="width: auto; padding: 0 16px; background: var(--success);" onclick="recalibrateWithPot()">Use Pot</button>
                 </div>
             </div>
-
             <div style="display: flex; flex-direction: column; gap: 12px;">
                 <button style="background: var(--border); color: var(--text-main); border: 1px solid var(--border);" onclick="recalibrateWithDebt()">Option 2: Log as Debt (Pull from Future)</button>
                 <button style="background: transparent; color: var(--text-muted); border: 1px solid var(--border);" onclick="closeRecalibration()">Option 3: Cancel Entry (Save the Cash!)</button>
@@ -344,7 +316,52 @@
         </div>
     </div>
 
+    <!-- Cycle Refresh Settings Modal -->
+    <div class="modal-overlay" id="refresh-settings-modal">
+        <div class="modal-card">
+            <h3 style="color: var(--venice);">Pay Cycle Timeline 🗓️</h3>
+            <p>Set your paycheck timeline to trigger the end-of-cycle review.</p>
+            <div class="form-group">
+                <label>Next Paycheck Date</label>
+                <input type="date" id="refresh-date-input" class="form-input">
+            </div>
+            <div class="form-group">
+                <label>Pay Frequency</label>
+                <select id="refresh-freq-input" class="form-input">
+                    <option value="14">Bi-weekly (Every 14 Days)</option>
+                    <option value="30">Monthly (Every 30 Days)</option>
+                    <option value="7">Weekly (Every 7 Days)</option>
+                </select>
+            </div>
+            <button onclick="saveRefreshSettings()">Save Timeline</button>
+            <button class="secondary" style="width: 100%; margin-top: 10px;" onclick="closeRefreshSettings()">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Rollover Action Modal -->
+    <div class="modal-overlay" id="rollover-action-modal">
+        <div class="modal-card">
+            <h3 style="color: var(--shine); font-size: 1.6rem; font-style: normal;">Cycle Complete! 🎉</h3>
+            <p id="rollover-text-positive" style="display:none;">You made it to payday! You ended the cycle with <strong id="rollover-amt-display" style="color: var(--success); font-size: 1.2rem;">$0.00</strong> of unspent Choice Cash. Where should we sweep these funds before the new cycle begins?</p>
+            <p id="rollover-text-negative" style="display:none;">You made it to payday, but you ended the cycle in the red by <strong id="rollover-amt-display-neg" style="color: var(--danger); font-size: 1.2rem;">$0.00</strong>. This debt will be carried over.</p>
+            
+            <div id="rollover-options-container" class="form-group">
+                <label>Action for remaining funds</label>
+                <select id="rollover-dest-input" class="form-input">
+                    <option value="carry">Leave it as Fluid Cash (Carry Forward)</option>
+                    <!-- Pots will inject here -->
+                </select>
+            </div>
+            <button onclick="processRollover()" id="rollover-btn-action">Execute Transfer & Start New Cycle</button>
+        </div>
+    </div>
+
     <script>
+        // Ensure you get today's date formatted properly for default setup
+        const d = new Date();
+        d.setDate(d.getDate() + 14); // default 14 days out
+        const defaultDateStr = d.toISOString().split('T')[0];
+
         let state = JSON.parse(localStorage.getItem('cassidyProBudgetState')) || {
             globalBalance: 0,
             taxEscrowBalance: 0,
@@ -357,6 +374,9 @@
             stickers: { blossom: false, sprout: false, matcha: false, lantern: false, star: false },
             txCount: 0, 
             bonusTokens: 0, 
+            refreshSettings: { frequency: "14", nextRefreshDate: defaultDateStr },
+            rolloverPending: false,
+            lastRolloverAmount: 0,
             categoryTargets: [
                 { name: "Housing", limit: 1600, nonNegotiable: true },
                 { name: "Groceries", limit: 450, nonNegotiable: true },
@@ -388,7 +408,6 @@
         function triggerLootDrop() {
             state.bonusTokens = (state.bonusTokens || 0) + 1;
             showToast("✨ Lucky Drop! You found a Cozy Token! ✨");
-            
             const emojis = ['✨', '🌸', '🪙', '🌱'];
             for(let i=0; i<18; i++) {
                 const el = document.createElement('div');
@@ -450,25 +469,127 @@
             });
         }
 
-        /* --- Gamification: Real-Time Ambient Environments --- */
+        /* --- Cycle Refresh Management --- */
+        function openRefreshSettings() {
+            document.getElementById('refresh-date-input').value = state.refreshSettings.nextRefreshDate;
+            document.getElementById('refresh-freq-input').value = state.refreshSettings.frequency;
+            document.getElementById('refresh-settings-modal').style.display = 'flex';
+        }
+        function closeRefreshSettings() { document.getElementById('refresh-settings-modal').style.display = 'none'; }
+        
+        function saveRefreshSettings() {
+            state.refreshSettings.nextRefreshDate = document.getElementById('refresh-date-input').value;
+            state.refreshSettings.frequency = document.getElementById('refresh-freq-input').value;
+            save();
+            closeRefreshSettings();
+        }
+
+        function processRollover() {
+            if (state.lastRolloverAmount > 0) {
+                const dest = document.getElementById('rollover-dest-input').value;
+                if (dest !== 'carry') {
+                    // It's a pot ID
+                    const pot = state.pots.find(p => p.id == dest);
+                    if (pot) {
+                        pot.current += state.lastRolloverAmount;
+                        state.globalBalance -= state.lastRolloverAmount;
+                        
+                        const activeMonth = document.getElementById('global-month-filter').value;
+                        const dateStr = new Date().toLocaleDateString();
+                        state.ledger.unshift({ id: Date.now(), type: 'expense', desc: `End of Cycle Transfer to ${pot.name}`, amt: state.lastRolloverAmount, cat: 'Choice Transfer', date: dateStr, monthKey: activeMonth });
+                    }
+                }
+            }
+            // Clear pending status
+            state.rolloverPending = false;
+            document.getElementById('rollover-action-modal').style.display = 'none';
+            save();
+        }
+
+        function checkRefreshCycle(choiceCashRemaining) {
+            if (!state.refreshSettings || !state.refreshSettings.nextRefreshDate) return;
+            
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            
+            // Fix parsing cross-timezone by splitting the date string
+            const parts = state.refreshSettings.nextRefreshDate.split('-');
+            const refreshDate = new Date(parts[0], parts[1] - 1, parts[2]); 
+            refreshDate.setHours(0,0,0,0);
+            
+            const diffTime = refreshDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            const countdownEl = document.getElementById('refresh-countdown');
+            if (countdownEl) {
+                if (diffDays === 0) countdownEl.innerText = 'Today!';
+                else if (diffDays === 1) countdownEl.innerText = 'Tomorrow';
+                else if (diffDays > 1) countdownEl.innerText = `${diffDays} days`;
+                else countdownEl.innerText = 'Processing...';
+            }
+
+            // Trigger rollover logic if date has passed and we aren't already waiting for user input
+            if (diffDays <= 0 && !state.rolloverPending) {
+                state.rolloverPending = true;
+                state.lastRolloverAmount = choiceCashRemaining;
+                
+                // Advance the next refresh date automatically
+                const nextDate = new Date(refreshDate);
+                nextDate.setDate(nextDate.getDate() + parseInt(state.refreshSettings.frequency));
+                const yyyy = nextDate.getFullYear();
+                const mm = String(nextDate.getMonth() + 1).padStart(2, '0');
+                const dd = String(nextDate.getDate()).padStart(2, '0');
+                state.refreshSettings.nextRefreshDate = `${yyyy}-${mm}-${dd}`;
+                
+                save(); // Call save to re-render, which will then trigger the modal block below
+            }
+
+            // Display Modal if Pending
+            if (state.rolloverPending) {
+                const modal = document.getElementById('rollover-action-modal');
+                const positiveText = document.getElementById('rollover-text-positive');
+                const negativeText = document.getElementById('rollover-text-negative');
+                const optionsContainer = document.getElementById('rollover-options-container');
+                const btn = document.getElementById('rollover-btn-action');
+
+                if (state.lastRolloverAmount >= 0) {
+                    positiveText.style.display = 'block';
+                    negativeText.style.display = 'none';
+                    optionsContainer.style.display = 'block';
+                    document.getElementById('rollover-amt-display').innerText = `$${state.lastRolloverAmount.toFixed(2)}`;
+                    
+                    const select = document.getElementById('rollover-dest-input');
+                    select.innerHTML = '<option value="carry">Leave it as Fluid Cash (Carry Forward)</option>';
+                    state.pots.forEach(pot => {
+                        select.innerHTML += `<option value="${pot.id}">Sweep into "${pot.name}" Pot</option>`;
+                    });
+                    btn.innerText = "Execute Transfer & Start New Cycle";
+                } else {
+                    positiveText.style.display = 'none';
+                    negativeText.style.display = 'block';
+                    optionsContainer.style.display = 'none';
+                    document.getElementById('rollover-amt-display-neg').innerText = `$${Math.abs(state.lastRolloverAmount).toFixed(2)}`;
+                    btn.innerText = "Acknowledge & Start New Cycle";
+                }
+
+                modal.style.display = 'flex';
+            }
+        }
+
+        /* --- Ambient Environments --- */
         function applyAmbientTheme() {
             const hour = new Date().getHours();
             const root = document.documentElement;
-
             if (hour >= 6 && hour < 12) {
-                // Morning
                 root.style.setProperty('--bg-color', '#F9FAFB'); root.style.setProperty('--card-bg', '#FFFFFF'); root.style.setProperty('--text-main', '#111827'); root.style.setProperty('--text-muted', '#6B7280'); root.style.setProperty('--border', '#F3F4F6'); root.style.setProperty('--hero-gradient', 'linear-gradient(135deg, #FFFFFF 0%, #FEF3C7 100%)'); root.style.setProperty('--daily-gradient', 'linear-gradient(135deg, #FFFFFF 0%, #F9FAFB 100%)'); root.style.setProperty('--waiting-gradient', 'linear-gradient(to bottom, #FFFFFF, #F9FAFB)');
                 root.style.setProperty('--dock-glass', 'rgba(255, 255, 255, 0.7)');
             } else if (hour >= 12 && hour < 18) {
-                // Afternoon
                 root.style.setProperty('--bg-color', '#FAF6EE'); root.style.setProperty('--card-bg', '#FFFFFF'); root.style.setProperty('--text-main', '#1C1E24'); root.style.setProperty('--text-muted', '#727B8E'); root.style.setProperty('--border', '#EFE9DE'); root.style.setProperty('--hero-gradient', 'linear-gradient(135deg, #FFFDF9 0%, #F6EFE5 100%)'); root.style.setProperty('--daily-gradient', 'linear-gradient(135deg, #FFFFFF 0%, #FFFDF9 100%)'); root.style.setProperty('--waiting-gradient', 'linear-gradient(to bottom, #FFFFFF, #FAF6EE)');
                 root.style.setProperty('--dock-glass', 'rgba(250, 246, 238, 0.75)');
             } else if (hour >= 18 && hour < 21) {
-                // Evening
                 root.style.setProperty('--bg-color', '#FDF5F3'); root.style.setProperty('--card-bg', '#FFFFFF'); root.style.setProperty('--text-main', '#2A1A1A'); root.style.setProperty('--text-muted', '#8A7A7A'); root.style.setProperty('--border', '#F5E6E3'); root.style.setProperty('--hero-gradient', 'linear-gradient(135deg, #FFFFFF 0%, #FCE8E3 100%)'); root.style.setProperty('--daily-gradient', 'linear-gradient(135deg, #FFFFFF 0%, #FDF5F3 100%)'); root.style.setProperty('--waiting-gradient', 'linear-gradient(to bottom, #FFFFFF, #FDF5F3)');
                 root.style.setProperty('--dock-glass', 'rgba(253, 245, 243, 0.75)');
             } else {
-                // Night
                 root.style.setProperty('--bg-color', '#121620'); root.style.setProperty('--card-bg', '#1E2330'); root.style.setProperty('--text-main', '#EAECEF'); root.style.setProperty('--text-muted', '#8A94A6'); root.style.setProperty('--border', '#2A303F'); root.style.setProperty('--hero-gradient', 'linear-gradient(135deg, #1E2330 0%, #171A24 100%)'); root.style.setProperty('--daily-gradient', 'linear-gradient(135deg, #1E2330 0%, #151923 100%)'); root.style.setProperty('--waiting-gradient', 'linear-gradient(to bottom, #1E2330, #121620)');
                 root.style.setProperty('--dock-glass', 'rgba(30, 35, 48, 0.8)');
             }
@@ -478,6 +599,9 @@
             if (!state.stickers) state.stickers = { blossom: false, sprout: false, matcha: false, lantern: false, star: false };
             if (!state.txCount) state.txCount = 0;
             if (state.bonusTokens === undefined) state.bonusTokens = 0;
+            if (state.refreshSettings === undefined) state.refreshSettings = { frequency: "14", nextRefreshDate: defaultDateStr };
+            if (state.rolloverPending === undefined) state.rolloverPending = false;
+
             if (!Array.isArray(state.categoryTargets)) {
                 state.categoryTargets = [
                     { name: "Housing", limit: 1600, nonNegotiable: true },
@@ -502,7 +626,6 @@
             render();
         }
 
-        /* --- Gamification: Stamp Engine --- */
         function claimStamp(dateStr) {
             state.stamps[dateStr] = true;
             const totalStamps = Object.keys(state.stamps).length;
@@ -514,7 +637,6 @@
             const grid = document.getElementById('stamp-grid');
             if (!grid) return;
             grid.innerHTML = '';
-            
             const today = new Date();
             const currentDayIndex = today.getDay(); 
             const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -524,27 +646,16 @@
                 let d = new Date(today);
                 d.setDate(today.getDate() - currentDayIndex + i);
                 let dStr = d.toLocaleDateString('en-US');
-                
                 let isToday = (dStr === todayStr);
                 let hasStamp = state.stamps[dStr];
                 let isFuture = d > today;
-
                 let boxClass = 'stamp-box';
                 let content = '';
                 let clickAction = '';
 
-                if (hasStamp) {
-                    boxClass += ' claimed';
-                    content = '🌸';
-                } else if (isToday) {
-                    boxClass += ' today-active';
-                    content = '✨';
-                    clickAction = `onclick="claimStamp('${dStr}')"`;
-                } else if (isFuture) {
-                    content = '<span style="opacity:0.2;">•</span>';
-                } else {
-                    content = '';
-                }
+                if (hasStamp) { boxClass += ' claimed'; content = '🌸'; } 
+                else if (isToday) { boxClass += ' today-active'; content = '✨'; clickAction = `onclick="claimStamp('${dStr}')"`; } 
+                else if (isFuture) { content = '<span style="opacity:0.2;">•</span>'; } 
 
                 grid.innerHTML += `<div class="${boxClass}" ${clickAction}><div class="stamp-lbl">${dayNames[i]}</div><div style="line-height: 1;">${content}</div></div>`;
             }
@@ -611,11 +722,9 @@
         function executeOpticalReceiptScan(event) {
             const file = event.target.files[0];
             if (!file) return;
-
             const loader = document.getElementById('receipt-scan-loader');
             loader.style.display = "block";
             loader.innerText = "loading on-device scanning matrix...";
-
             document.getElementById('tx-type').value = 'expense';
             toggleFormContext();
 
@@ -683,7 +792,6 @@
             state.txCount += 1;
             if (state.txCount >= 1) unlockSticker('blossom');
             if (state.txCount >= 10) unlockSticker('lantern');
-            
             if (Math.random() < 0.25) triggerLootDrop();
         }
 
@@ -703,10 +811,7 @@
                     save();
                     toggleFormContext();
                 } else {
-                    if (amt > state.globalBalance) {
-                        triggerRecalibrationModal(desc, amt, cat);
-                        return; 
-                    }
+                    if (amt > state.globalBalance) { triggerRecalibrationModal(desc, amt, cat); return; }
                     state.globalBalance -= amt;
                     state.ledger.unshift({ id: Date.now(), type, desc, amt, cat, date: dateStr, monthKey: activeMonth });
                     trackTxMilestones(); 
@@ -723,12 +828,10 @@
                     const monthlyGross = grossInput / 12;
                     const monthlyTax = monthlyGross * rate;
                     const monthlyNet = monthlyGross - monthlyTax;
-
                     for(let i = 0; i < 12; i++) {
                         let d = new Date(2026, 6 + i, 1);
                         let monthStr = (d.getMonth() + 1).toString().padStart(2, '0');
                         let k = `${d.getFullYear()}-${monthStr}`;
-                        
                         state.globalBalance += monthlyNet; state.taxEscrowBalance += monthlyTax;
                         state.ledger.unshift({ id: Date.now() + Math.random(), type: 'income', desc: 'Annual Salary Allocation', gross: monthlyGross, tax: monthlyTax, net: monthlyNet, date: dateStr, monthKey: k });
                     }
@@ -748,53 +851,39 @@
             pendingOverbudgetTx = { desc, amt, cat };
             const shortfall = amt - state.globalBalance;
             document.getElementById('recal-shortfall').innerText = `$${shortfall.toFixed(2)}`;
-            
             const potSelect = document.getElementById('recal-pot-select');
             potSelect.innerHTML = '<option value="">-- Choose Pot --</option>';
             state.pots.forEach(pot => { potSelect.innerHTML += `<option value="${pot.id}">${pot.name.toLowerCase()} ($${pot.current.toFixed(0)})</option>`; });
             document.getElementById('recalibration-modal').style.display = 'flex';
         }
 
-        function closeRecalibration() {
-            pendingOverbudgetTx = null;
-            document.getElementById('recalibration-modal').style.display = 'none';
-        }
+        function closeRecalibration() { pendingOverbudgetTx = null; document.getElementById('recalibration-modal').style.display = 'none'; }
 
         function recalibrateWithDebt() {
             if(!pendingOverbudgetTx) return;
             const activeMonth = document.getElementById('global-month-filter').value;
             state.globalBalance -= pendingOverbudgetTx.amt; 
             state.ledger.unshift({ id: Date.now(), type: 'expense', desc: pendingOverbudgetTx.desc, amt: pendingOverbudgetTx.amt, cat: pendingOverbudgetTx.cat, date: new Date().toLocaleDateString(), monthKey: activeMonth });
-            trackTxMilestones();
-            save();
-            closeRecalibration();
-            toggleFormContext(); 
+            trackTxMilestones(); save(); closeRecalibration(); toggleFormContext(); 
         }
 
         function recalibrateWithPot() {
             if(!pendingOverbudgetTx) return;
             const potId = document.getElementById('recal-pot-select').value;
             if(!potId) { alert("Please select a pot from the dropdown first."); return; }
-            
             const pot = state.pots.find(p => p.id == potId);
             if(!pot) return;
             if (pot.current < pendingOverbudgetTx.amt) { alert(`There isn't enough in the "${pot.name}" pot to cover this entire purchase.`); return; }
-
             const activeMonth = document.getElementById('global-month-filter').value;
             pot.current -= pendingOverbudgetTx.amt;
             state.ledger.unshift({ id: Date.now(), type: 'expense', desc: `${pendingOverbudgetTx.desc} (from ${pot.name})`, amt: pendingOverbudgetTx.amt, cat: pendingOverbudgetTx.cat, date: new Date().toLocaleDateString(), monthKey: activeMonth });
-            
-            trackTxMilestones();
-            save();
-            closeRecalibration();
-            toggleFormContext();
+            trackTxMilestones(); save(); closeRecalibration(); toggleFormContext();
         }
 
         function processWishlistItem(id, action) {
             const index = state.wishlist.findIndex(item => item.id === id);
             if(index === -1) return;
             const item = state.wishlist[index];
-
             if(action === 'buy') {
                 const activeMonth = document.getElementById('global-month-filter').value;
                 if (item.amt > state.globalBalance) { triggerRecalibrationModal(item.desc, item.amt, item.cat); return; }
@@ -802,8 +891,7 @@
                 state.ledger.unshift({ id: Date.now(), type: 'expense', desc: item.desc, amt: item.amt, cat: item.cat, date: new Date().toLocaleDateString(), monthKey: activeMonth });
                 state.wishlist.splice(index, 1);
             } else if (action === 'pass') {
-                state.wishlist.splice(index, 1);
-                unlockSticker('matcha'); 
+                state.wishlist.splice(index, 1); unlockSticker('matcha'); 
             }
             save();
         }
@@ -813,16 +901,13 @@
             const container = document.getElementById('wishlist-container');
             if (!container || !card) return;
             container.innerHTML = '';
-
             if(state.wishlist.length === 0) { card.style.display = 'none'; return; }
             card.style.display = 'block';
             const now = Date.now();
-
             state.wishlist.forEach(item => {
                 const elapsedMs = now - item.timestamp;
                 const totalCooldownMs = 48 * 60 * 60 * 1000; 
                 const remainingMs = totalCooldownMs - elapsedMs;
-                
                 let timeText = ""; let locked = true;
                 if (remainingMs > 0) {
                     const hours = Math.floor(remainingMs / (1000 * 60 * 60)); const mins = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
@@ -830,11 +915,9 @@
                 } else {
                     timeText = `✅ Unlocked & ready`; locked = false;
                 }
-
                 const actionButtons = locked 
                     ? `<button disabled style="padding: 8px; font-size: 0.75rem; margin-top: 8px;">Cooling Down...</button>`
                     : `<div style="display: flex; gap: 8px; margin-top: 8px;"><button style="padding: 8px; font-size: 0.75rem; background: var(--success);" onclick="processWishlistItem(${item.id}, 'buy')">Approve & Buy</button><button style="padding: 8px; font-size: 0.75rem; background: var(--danger);" onclick="processWishlistItem(${item.id}, 'pass')">Pass & Save</button></div>`;
-
                 container.innerHTML += `
                     <li class="tx-item" style="flex-direction: column; align-items: flex-start; padding: 16px; background: var(--card-bg); border-radius: 16px; margin-bottom: 10px; border: 1px solid var(--border);">
                         <div style="display: flex; justify-content: space-between; width: 100%;">
@@ -843,23 +926,20 @@
                         </div>
                         <div style="font-size: 0.75rem; font-weight: 600; color: ${locked ? 'var(--warning)' : 'var(--success)'}; margin-top: 10px;">${timeText}</div>
                         <div style="width: 100%;">${actionButtons}</div>
-                    </li>
-                `;
+                    </li>`;
             });
         }
 
         function deleteTransaction(id) {
             const index = state.ledger.findIndex(item => item.id === id); if(index === -1) return;
             const item = state.ledger[index];
-            if(item.type === 'expense') state.globalBalance += item.amt; 
-            else { state.globalBalance -= item.net; state.taxEscrowBalance -= item.tax; }
+            if(item.type === 'expense') state.globalBalance += item.amt; else { state.globalBalance -= item.net; state.taxEscrowBalance -= item.tax; }
             state.ledger.splice(index, 1); save();
         }
 
         function editTransaction(id) {
             const item = state.ledger.find(item => item.id === id); if(!item) return;
             const nextDesc = prompt("Modify Description:", item.desc); if(nextDesc !== null && nextDesc.trim() !== '') item.desc = nextDesc.trim();
-
             if(item.type === 'expense') {
                 const nextAmt = parseFloat(prompt("Modify Expense Amount ($):", item.amt)); if(isNaN(nextAmt) || nextAmt <= 0) return;
                 state.globalBalance -= (nextAmt - item.amt); item.amt = nextAmt;
@@ -906,29 +986,22 @@
         function createNewPot() {
             const name = document.getElementById('pot-name').value.trim(); const target = parseFloat(document.getElementById('pot-target').value); const starting = parseFloat(document.getElementById('pot-starting').value) || 0; const monthly = parseFloat(document.getElementById('pot-monthly').value) || 0;
             if(!name || !target || target <= 0) return;
-            
             state.pots.push({ id: Date.now(), name, target, monthly, current: starting });
             document.getElementById('pot-name').value = ''; document.getElementById('pot-target').value = ''; document.getElementById('pot-starting').value = '0'; document.getElementById('pot-monthly').value = '';
-            
-            unlockSticker('sprout'); 
-            save();
+            unlockSticker('sprout'); save();
         }
 
         function fundPot(id) {
             const pot = state.pots.find(p => p.id === id); if(!pot) return;
             const allocation = parseFloat(prompt(`Transfer available fluid cash assets into ${pot.name}:`));
             if(!allocation || allocation <= 0 || allocation > state.globalBalance) { alert("Invalid amount or insufficient fluid balance."); return; }
-            
             const source = prompt(`Where should this $${allocation} come from?\nType '1' for General Fluid Balance\nType '2' for This Month's Choice Allowance`, "1");
             if (source === '2') {
                 const activeMonth = document.getElementById('global-month-filter').value; const dateStr = new Date().toLocaleDateString();
                 state.globalBalance -= allocation; pot.current += allocation;
                 state.ledger.unshift({ id: Date.now(), type: 'expense', desc: `pot fund: ${pot.name}`, amt: allocation, cat: 'Choice Transfer', date: dateStr, monthKey: activeMonth });
-            } else if (source === '1') {
-                state.globalBalance -= allocation; pot.current += allocation;
-            } else {
-                alert("Operation aborted. Invalid option selected."); return;
-            }
+            } else if (source === '1') { state.globalBalance -= allocation; pot.current += allocation; } 
+            else { alert("Operation aborted. Invalid option selected."); return; }
             save();
         }
 
@@ -957,8 +1030,8 @@
 
             const activeMonth = document.getElementById('global-month-filter').value;
             const isYearMode = state.currentViewMode === 'year';
-
             const topShowcase = document.getElementById('top-progression-showcase');
+            
             if (topShowcase) {
                 topShowcase.innerHTML = '';
                 if (state.pots.length > 0) {
@@ -981,9 +1054,7 @@
                                 <div class="progress-bg" style="background: var(--bg-color); height: 8px; border-radius: 4px; border: none;"><div class="progress-bar" style="width: ${pct}%; background: var(--venice); border-radius: 4px;"></div></div>
                             </div>`;
                     });
-                } else {
-                    topShowcase.style.display = 'none';
-                }
+                } else { topShowcase.style.display = 'none'; }
             }
 
             renderWishlist();
@@ -1108,6 +1179,9 @@
                     });
                 }
             }
+            
+            // Execute the refresh check at the very end of the render cycle
+            checkRefreshCycle(trueChoiceCashRemaining);
         }
 
         window.onload = init;
