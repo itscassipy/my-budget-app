@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Cassidy Budget">
     
-    <!-- Native iOS Home Screen App Icon Link (Points to image_8.png) -->
+    <!-- Native iOS Home Screen App Icon Link -->
     <link rel="apple-touch-icon" href="image_8.png">
     
     <!-- On-Device OCR Optical Scanning Engine Link -->
@@ -21,37 +21,44 @@
             --venice: #8894B7;
             --shine: #F5C74D;
             
-            /* Pastel Blocking Palette from Mockups */
-            --bg-color: #FAF6EE;        /* Clean organic warm cream background */
+            /* Pastel Blocking Palette */
+            --bg-color: #FAF6EE;        
             --card-bg: #FFFFFF;
-            --text-main: #1C1E24;      /* Strong deep obsidian navy */
+            --text-main: #1C1E24;      
             --text-muted: #727B8E;     
             
             /* Inspo Block Overrides */
-            --block-pink: #F5D3D3;     /* Soft terracotta rose */
-            --block-blue: #D3DCF5;     /* Soft lavender-blue Venice mist */
-            --block-yellow: #FBE6AD;   /* Warm butter Shine */
-            --block-green: #D3F5D9;    /* Botanical pale sage green */
-            --block-cream: #F6EFE5;    /* Soft whipped linen */
+            --block-pink: #F5D3D3;     
+            --block-blue: #D3DCF5;     
+            --block-yellow: #FBE6AD;   
+            --block-green: #D3F5D9;    
+            --block-cream: #F6EFE5;    
             
             --success: #527558;        
             --warning: #D18D34;        
             --danger: #BA6868;         
             --border: #EFE9DE;         
-            --dock-bg: #1A1D26;        /* Floating dark navigation bar anchor */
+            --dock-bg: #1A1D26;        
         }
         
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-main); padding: 24px 16px; padding-bottom: 120px; -webkit-font-smoothing: antialiased; }
         .container { max-width: 480px; margin: 0 auto; }
         
-        /* Editorial Premium Typography & Expanded Space Rules */
+        /* Editorial Premium Typography */
         header { margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; }
         header h1 { font-family: "Georgia", Georgia, serif; font-weight: 400; font-style: italic; font-size: 1.8rem; color: var(--text-main); letter-spacing: -0.5px; text-transform: lowercase; }
         h2 { font-family: "Georgia", Georgia, serif; font-style: italic; font-size: 1.25rem; font-weight: 400; margin-bottom: 20px; color: var(--text-main); display: flex; justify-content: space-between; align-items: center; }
         
-        /* Top Showcase Carousel Gamification */
-        .top-showcase-container { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 28px; scrollbar-width: none; scroll-snap-type: x mandatory; }
+        /* Gamification: Daily Stamp Card */
+        .stamp-box { width: 42px; height: 48px; border-radius: 12px; background: var(--bg-color); border: 1px dashed var(--linen); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 1.2rem; position: relative; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .stamp-box.claimed { background: var(--block-cream); border: 1px solid var(--linen); }
+        .stamp-box.today-active { background: var(--block-yellow); border: 1px solid var(--shine); cursor: pointer; animation: pulse 2s infinite; }
+        .stamp-lbl { font-size: 0.55rem; font-weight: 800; color: var(--text-muted); margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.06); box-shadow: 0 4px 12px rgba(245,199,77,0.4); } 100% { transform: scale(1); } }
+
+        /* Gamification: Top Showcase Carousel */
+        .top-showcase-container { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 24px; scrollbar-width: none; scroll-snap-type: x mandatory; }
         .top-showcase-container::-webkit-scrollbar { display: none; }
         .top-showcase-card { min-width: 260px; flex-shrink: 0; background: var(--card-bg); border-radius: 24px; padding: 16px; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(35,39,51,0.02); scroll-snap-align: center; }
 
@@ -134,6 +141,17 @@
             <h1>lucky girl cass</h1>
             <div id="fluid-balance" style="font-weight: 700; color: var(--success); font-size: 0.95rem; background: var(--card-bg); padding: 6px 14px; border-radius: 14px; border: 1px solid var(--border);">$0</div>
         </header>
+
+        <!-- Cozy Daily Check-In Punch Card -->
+        <div class="card" style="padding: 18px 22px; background: linear-gradient(135deg, var(--card-bg) 0%, #FFFDF9 100%);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h2 style="margin: 0; font-size: 1.1rem; color: var(--text-main);">cozy daily check-in</h2>
+                <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">This Week</span>
+            </div>
+            <div id="stamp-grid" style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+                <!-- JavaScript Injects Daily Stamps Here -->
+            </div>
+        </div>
 
         <!-- Top Gamification Read-Only Showcase Container -->
         <div id="top-progression-showcase" class="top-showcase-container" style="display: none;"></div>
@@ -264,7 +282,7 @@
 
     </div>
 
-    <!-- Floating Dock Inspired by mockups -->
+    <!-- Floating Dock -->
     <div class="bottom-dock">
         <button class="dock-item active" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">Home</button>
         <button class="dock-center-btn" onclick="document.getElementById('logger-section-anchor').scrollIntoView({behavior: 'smooth'})">+</button>
@@ -279,7 +297,8 @@
             pots: [],
             ledger: [], 
             recurringTemplates: [],
-            wishlist: [], // New state array for The Waiting Room
+            wishlist: [], 
+            stamps: {}, // NEW: Daily check-in tracking state object
             categoryTargets: [
                 { name: "Housing", limit: 1600, nonNegotiable: true },
                 { name: "Groceries", limit: 450, nonNegotiable: true },
@@ -307,6 +326,8 @@
                 ];
             }
             if (!Array.isArray(state.wishlist)) state.wishlist = [];
+            if (!state.stamps) state.stamps = {};
+
             state.pots.forEach((pot, index) => { if(!pot.id) pot.id = Date.now() + index; });
             populateMonthTimelineOptions();
             toggleFormContext();
@@ -315,6 +336,59 @@
             // Re-render countdowns every minute
             setInterval(renderWishlist, 60000); 
             render();
+        }
+
+        /* --- Gamification: Stamp Engine --- */
+        function claimStamp(dateStr) {
+            state.stamps[dateStr] = true;
+            save();
+        }
+
+        function renderStamps() {
+            const grid = document.getElementById('stamp-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            
+            const today = new Date();
+            const currentDayIndex = today.getDay(); // 0 is Sunday, 6 is Saturday
+            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const todayStr = today.toLocaleDateString('en-US');
+
+            for (let i = 0; i < 7; i++) {
+                // Calculate the date corresponding to this day of the current week (Sun-Sat)
+                let d = new Date(today);
+                d.setDate(today.getDate() - currentDayIndex + i);
+                let dStr = d.toLocaleDateString('en-US');
+                
+                let isToday = (dStr === todayStr);
+                let hasStamp = state.stamps[dStr];
+                let isFuture = d > today;
+
+                let boxClass = 'stamp-box';
+                let content = '';
+                let clickAction = '';
+
+                if (hasStamp) {
+                    boxClass += ' claimed';
+                    content = '🌸';
+                } else if (isToday) {
+                    boxClass += ' today-active';
+                    content = '✨'; // The pulsing star prompting the tap
+                    clickAction = `onclick="claimStamp('${dStr}')"`;
+                } else if (isFuture) {
+                    content = '<span style="opacity:0.2;">•</span>';
+                } else {
+                    // Past empty un-stamped box. No guilt trip or red X's!
+                    content = '';
+                }
+
+                grid.innerHTML += `
+                    <div class="${boxClass}" ${clickAction}>
+                        <div class="stamp-lbl">${dayNames[i]}</div>
+                        <div style="line-height: 1;">${content}</div>
+                    </div>
+                `;
+            }
         }
 
         function populateMonthTimelineOptions() {
@@ -510,7 +584,6 @@
             toggleFormContext();
         }
 
-        /* --- Wishlist Actions --- */
         function processWishlistItem(id, action) {
             const index = state.wishlist.findIndex(item => item.id === id);
             if(index === -1) return;
@@ -523,7 +596,6 @@
                 state.wishlist.splice(index, 1);
             } else if (action === 'pass') {
                 state.wishlist.splice(index, 1);
-                // Dopamine hit: Small alert congratulating the pass
                 alert("Passed! Your future self thanks you for keeping the runway intact.");
             }
             save();
@@ -713,10 +785,11 @@
         }
 
         function render() {
+            renderStamps(); // Render the new stamp grid
+
             const activeMonth = document.getElementById('global-month-filter').value;
             const isYearMode = state.currentViewMode === 'year';
 
-            // Top Gamification Read-Only Showcase Render Logic
             const topShowcase = document.getElementById('top-progression-showcase');
             topShowcase.innerHTML = '';
             
