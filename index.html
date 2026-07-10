@@ -90,13 +90,14 @@
         button:active { transform: scale(0.99); opacity: 0.9; }
         button.secondary { background: var(--block-cream); color: var(--text-main); margin-top: 0; padding: 8px 14px; width: auto; font-size: 0.78rem; border-radius: 12px; border: 1px solid var(--linen); }
         button.action-link { background: transparent; color: var(--venice); width: auto; padding: 0; margin: 0; font-size: 0.85rem; font-weight: 700; }
+        button:disabled { background: var(--bg-color); color: var(--text-muted); cursor: not-allowed; border: 1px solid var(--border); opacity: 0.7; }
         
         /* Receipt Scan Widget Styling Elements */
         .scan-trigger-pill { background: var(--block-yellow); color: var(--text-main); padding: 10px 14px; border-radius: 14px; display: inline-flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 700; border: 1px solid rgba(245,199,77,0.4); cursor: pointer; margin-bottom: 16px; width: auto; text-transform: uppercase; letter-spacing: 0.3px; }
         .scan-loading-txt { font-size: 0.82rem; color: var(--warning); font-weight: 600; font-style: italic; margin-bottom: 12px; display: none; }
 
         /* Inline Item Controls Modifier Hooks */
-        .inline-actions { display: flex; gap: 12px; margin-top: 8px; }
+        .inline-actions { display: flex; gap: 12px; margin-top: 8px; align-items: center; }
         .btn-inline { background: transparent; color: var(--text-muted); font-size: 0.72rem; width: auto; padding: 0; margin: 0; font-weight: 700; border: none; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; }
         .btn-inline.del { color: var(--danger); }
         .btn-inline.edit { color: var(--venice); }
@@ -154,7 +155,7 @@
             </div>
         </div>
 
-        <!-- Metric Component Displays with Pastel Block Overrides mapping to Mockup styles -->
+        <!-- Metric Component Displays -->
         <div class="metrics-grid">
             <div class="mini-stat" style="background-color: var(--block-blue); border-color: rgba(136,148,183,0.2);">
                 <div class="stat-lbl">Fluid Balance</div>
@@ -173,15 +174,8 @@
                 <div class="stat-val" id="dash-outflow" style="color: var(--danger); font-weight: 700;">$0.00</div>
             </div>
             <div class="mini-stat" style="display:none;">
-                <!-- Internal script binding cache hooks safely retained -->
                 <div id="dash-inflow"></div>
             </div>
-        </div>
-
-        <!-- Dynamic Year-by-Month Macro Breakdown Board -->
-        <div class="card" id="cycle-breakdown-card" style="display: none;">
-            <h2>cycle month-by-month summary</h2>
-            <div id="cycle-months-list" style="margin-top: 10px;"></div>
         </div>
 
         <!-- Visual Tracking Gauges -->
@@ -190,11 +184,10 @@
             <div id="category-caps-container"></div>
         </div>
 
-        <!-- Transaction Logger Container with Native OCR Scanner Integrated -->
+        <!-- Transaction Logger Container -->
         <div class="card" id="logger-section-anchor">
             <h2>Log Entry Transaction</h2>
             
-            <!-- Sleek Document Scanner Target -->
             <div style="margin-top: 10px;">
                 <div class="scan-trigger-pill" onclick="document.getElementById('native-ocr-input').click()">
                     📷 Scan Raw Receipt
@@ -206,12 +199,20 @@
             <div class="form-group">
                 <label>Transaction Blueprint Type</label>
                 <select id="tx-type" class="form-input" onchange="toggleFormContext()">
-                    <option value="expense">Expense / Bill Outflow</option>
+                    <option value="expense">Expense / Essential (Instant Log)</option>
+                    <option value="wishlist">Impulse / Want (48-Hour Cooldown)</option>
                     <option value="income">Paycheck / Inflow</option>
                 </select>
             </div>
             <div id="dynamic-form-fields"></div>
             <button onclick="submitTransaction()">Record Entry</button>
+        </div>
+        
+        <!-- The Waiting Room (48-Hour Wishlist) -->
+        <div class="card" id="waiting-room-card" style="display: none; background: linear-gradient(to bottom, #FFFFFF, var(--bg-color)); border-color: var(--venice);">
+            <h2>the waiting room ⏳</h2>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4;">Impulse buys are cooling down. You cannot clear these to your operational ledger until the 48-hour emotional lock lifts.</p>
+            <ul id="wishlist-container" class="tx-list"></ul>
         </div>
 
         <!-- Templates Management Workspace -->
@@ -278,6 +279,7 @@
             pots: [],
             ledger: [], 
             recurringTemplates: [],
+            wishlist: [], // New state array for The Waiting Room
             categoryTargets: [
                 { name: "Housing", limit: 1600, nonNegotiable: true },
                 { name: "Groceries", limit: 450, nonNegotiable: true },
@@ -304,10 +306,14 @@
                     { name: "Miscellaneous", limit: 200, nonNegotiable: false }
                 ];
             }
+            if (!Array.isArray(state.wishlist)) state.wishlist = [];
             state.pots.forEach((pot, index) => { if(!pot.id) pot.id = Date.now() + index; });
             populateMonthTimelineOptions();
             toggleFormContext();
             populateCategorySelectFields();
+            
+            // Re-render countdowns every minute
+            setInterval(renderWishlist, 60000); 
             render();
         }
 
@@ -346,7 +352,7 @@
         function toggleFormContext() {
             const type = document.getElementById('tx-type').value;
             const container = document.getElementById('dynamic-form-fields');
-            if(type === 'expense') {
+            if(type === 'expense' || type === 'wishlist') {
                 container.innerHTML = `
                     <div class="form-group"><label>Description</label><input type="text" id="field-desc" placeholder="e.g., Central Market"></div>
                     <div class="form-group"><label>Amount ($)</label><input type="number" id="field-amount" placeholder="0.00"></div>
@@ -374,7 +380,7 @@
             input.placeholder = freq === 'annual' ? "e.g., 75000" : "e.g., 6250";
         }
 
-        /* Pure Client-Side Receipt Extraction & Parsing Engine */
+        /* Pure Client-Side Receipt Extraction Engine */
         function executeOpticalReceiptScan(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -409,43 +415,32 @@
             let detectedAmount = 0;
             let detectedCategory = "Miscellaneous";
             let detectedDescription = "";
-
             const priceRegex = /\d+\.\d{2}/g;
             const fallbackPrices = text.match(priceRegex) || [];
 
             for (let line of lines) {
                 if (line.includes('total') || line.includes('due') || line.includes('amount') || line.includes('balance')) {
                     let numbers = line.match(priceRegex);
-                    if (numbers && numbers.length > 0) {
-                        detectedAmount = parseFloat(numbers[numbers.length - 1]);
-                        break;
-                    }
+                    if (numbers && numbers.length > 0) { detectedAmount = parseFloat(numbers[numbers.length - 1]); break; }
                 }
             }
 
             if (detectedAmount === 0 && fallbackPrices.length > 0) {
                 let sortedPrices = fallbackPrices.map(p => parseFloat(p)).filter(p => p < 999);
-                if (sortedPrices.length > 0) {
-                    detectedAmount = Math.max(...sortedPrices);
-                }
+                if (sortedPrices.length > 0) { detectedAmount = Math.max(...sortedPrices); }
             }
 
             const corpus = text.toLowerCase();
             if (corpus.match(/(market|grocery|heb|kroger|central market|walmart|target|whole foods|trader|safeway|costco|aldi|food)/)) {
-                detectedCategory = "Groceries";
-                detectedDescription = "grocery pickup store scan";
+                detectedCategory = "Groceries"; detectedDescription = "grocery pickup store scan";
             } else if (corpus.match(/(uber|lyft|gas|shell|exxon|chevron|fuel|texaco|speedway|qt|clean|parking|toll|transit)/)) {
-                detectedCategory = "Transport";
-                detectedDescription = "commute transport line check";
+                detectedCategory = "Transport"; detectedDescription = "commute transport line check";
             } else if (corpus.match(/(cafe|restaurant|starbucks|dunkin|spotify|netflix|hulu|cinema|movie|bar|pub|bites|dine|concert|ticket)/)) {
-                detectedCategory = "Entertainment";
-                detectedDescription = "lifestyle experience out";
+                detectedCategory = "Entertainment"; detectedDescription = "lifestyle experience out";
             } else if (corpus.match(/(electric|water|gas|internet|spectrum|att|verizon|tmobile|utility|power|waste|trash)/)) {
-                detectedCategory = "Utilities";
-                detectedDescription = "fixed service invoice billing";
+                detectedCategory = "Utilities"; detectedDescription = "fixed service invoice billing";
             } else if (corpus.match(/(rent|mortgage|hoa|maintenance|lease)/)) {
-                detectedCategory = "Housing";
-                detectedDescription = "housing structural line cost";
+                detectedCategory = "Housing"; detectedDescription = "housing structural line cost";
             } else {
                 detectedDescription = "scanned vendor log";
             }
@@ -457,20 +452,14 @@
 
         function toggleCategoryPrioritization(name) {
             const cat = state.categoryTargets.find(c => c.name === name);
-            if(cat) {
-                cat.nonNegotiable = !cat.nonNegotiable;
-                save();
-            }
+            if(cat) { cat.nonNegotiable = !cat.nonNegotiable; save(); }
         }
 
         function editCategoryLimit(name) {
             const cat = state.categoryTargets.find(c => c.name === name);
             if(cat) {
                 const nextLimit = parseFloat(prompt(`Modify plan cap target for ${cat.name}:`, cat.limit));
-                if(!isNaN(nextLimit) && nextLimit >= 0) {
-                    cat.limit = nextLimit;
-                    save();
-                }
+                if(!isNaN(nextLimit) && nextLimit >= 0) { cat.limit = nextLimit; save(); }
             }
         }
 
@@ -479,14 +468,18 @@
             const activeMonth = document.getElementById('global-month-filter').value;
             const dateStr = new Date().toLocaleDateString();
 
-            if(type === 'expense') {
+            if(type === 'expense' || type === 'wishlist') {
                 const desc = document.getElementById('field-desc').value.trim();
                 const amt = parseFloat(document.getElementById('field-amount').value);
                 const cat = document.getElementById('field-cat').value;
                 if(!desc || !amt || amt <= 0) return;
 
-                state.globalBalance -= amt;
-                state.ledger.unshift({ id: Date.now(), type, desc, amt, cat, date: dateStr, monthKey: activeMonth });
+                if (type === 'wishlist') {
+                    state.wishlist.push({ id: Date.now(), desc, amt, cat, timestamp: Date.now() });
+                } else {
+                    state.globalBalance -= amt;
+                    state.ledger.unshift({ id: Date.now(), type, desc, amt, cat, date: dateStr, monthKey: activeMonth });
+                }
             } else {
                 const freq = document.getElementById('field-freq').value;
                 const grossInput = parseFloat(document.getElementById('field-gross').value);
@@ -503,20 +496,37 @@
                         let monthStr = (d.getMonth() + 1).toString().padStart(2, '0');
                         let k = `${d.getFullYear()}-${monthStr}`;
                         
-                        state.globalBalance += monthlyNet;
-                        state.taxEscrowBalance += monthlyTax;
+                        state.globalBalance += monthlyNet; state.taxEscrowBalance += monthlyTax;
                         state.ledger.unshift({ id: Date.now() + Math.random(), type: 'income', desc: 'Annual Salary Allocation', gross: monthlyGross, tax: monthlyTax, net: monthlyNet, date: dateStr, monthKey: k });
                     }
                 } else {
                     const tax = grossInput * rate;
                     const net = grossInput - tax;
-                    state.globalBalance += net;
-                    state.taxEscrowBalance += tax;
+                    state.globalBalance += net; state.taxEscrowBalance += tax;
                     state.ledger.unshift({ id: Date.now(), type: 'income', desc: 'Paycheck Inflow', gross: grossInput, tax, net, date: dateStr, monthKey: activeMonth });
                 }
             }
             save();
             toggleFormContext();
+        }
+
+        /* --- Wishlist Actions --- */
+        function processWishlistItem(id, action) {
+            const index = state.wishlist.findIndex(item => item.id === id);
+            if(index === -1) return;
+            const item = state.wishlist[index];
+
+            if(action === 'buy') {
+                const activeMonth = document.getElementById('global-month-filter').value;
+                state.globalBalance -= item.amt;
+                state.ledger.unshift({ id: Date.now(), type: 'expense', desc: item.desc, amt: item.amt, cat: item.cat, date: new Date().toLocaleDateString(), monthKey: activeMonth });
+                state.wishlist.splice(index, 1);
+            } else if (action === 'pass') {
+                state.wishlist.splice(index, 1);
+                // Dopamine hit: Small alert congratulating the pass
+                alert("Passed! Your future self thanks you for keeping the runway intact.");
+            }
+            save();
         }
 
         function deleteTransaction(id) {
@@ -621,21 +631,11 @@
                 state.globalBalance -= allocation; 
                 pot.current += allocation;
                 
-                state.ledger.unshift({ 
-                    id: Date.now(), 
-                    type: 'expense', 
-                    desc: `pot fund: ${pot.name}`, 
-                    amt: allocation, 
-                    cat: 'Choice Transfer', 
-                    date: dateStr, 
-                    monthKey: activeMonth 
-                });
+                state.ledger.unshift({ id: Date.now(), type: 'expense', desc: `pot fund: ${pot.name}`, amt: allocation, cat: 'Choice Transfer', date: dateStr, monthKey: activeMonth });
             } else if (source === '1') {
-                state.globalBalance -= allocation; 
-                pot.current += allocation;
+                state.globalBalance -= allocation; pot.current += allocation;
             } else {
-                alert("Operation aborted. Invalid option selected.");
-                return;
+                alert("Operation aborted. Invalid option selected."); return;
             }
             save();
         }
@@ -654,6 +654,63 @@
             const pot = state.pots[index];
             if(confirm(`Wipe "${pot.name}" savings target completely?`)) { state.globalBalance += pot.current; state.pots.splice(index, 1); save(); }
         }
+        
+        function renderWishlist() {
+            const card = document.getElementById('waiting-room-card');
+            const container = document.getElementById('wishlist-container');
+            container.innerHTML = '';
+
+            if(state.wishlist.length === 0) {
+                card.style.display = 'none';
+                return;
+            }
+
+            card.style.display = 'block';
+            const now = Date.now();
+
+            state.wishlist.forEach(item => {
+                const elapsedMs = now - item.timestamp;
+                const totalCooldownMs = 48 * 60 * 60 * 1000; // 48 Hours
+                const remainingMs = totalCooldownMs - elapsedMs;
+                
+                let timeText = "";
+                let locked = true;
+
+                if (remainingMs > 0) {
+                    const hours = Math.floor(remainingMs / (1000 * 60 * 60));
+                    const mins = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
+                    timeText = `🔒 Locks lift in ${hours}h ${mins}m`;
+                } else {
+                    timeText = `✅ Unlocked & ready`;
+                    locked = false;
+                }
+
+                const actionButtons = locked 
+                    ? `<button disabled style="padding: 8px; font-size: 0.75rem; margin-top: 8px;">Cooling Down...</button>`
+                    : `<div style="display: flex; gap: 8px; margin-top: 8px;">
+                           <button style="padding: 8px; font-size: 0.75rem; background: var(--success);" onclick="processWishlistItem(${item.id}, 'buy')">Approve & Buy</button>
+                           <button style="padding: 8px; font-size: 0.75rem; background: var(--danger);" onclick="processWishlistItem(${item.id}, 'pass')">Pass & Save</button>
+                       </div>`;
+
+                container.innerHTML += `
+                    <li class="tx-item" style="flex-direction: column; align-items: flex-start; padding: 16px; background: var(--card-bg); border-radius: 16px; margin-bottom: 10px; border: 1px solid rgba(136,148,183,0.3);">
+                        <div style="display: flex; justify-content: space-between; width: 100%;">
+                            <div>
+                                <strong style="font-size: 0.95rem;">${item.desc.toLowerCase()}</strong>
+                                <br><span class="tx-cat-tag" style="background:var(--bg-color); margin-top: 4px;">${item.cat}</span>
+                            </div>
+                            <span style="font-weight:700; font-size: 1rem; color: var(--danger);">$${item.amt.toFixed(2)}</span>
+                        </div>
+                        <div style="font-size: 0.75rem; font-weight: 600; color: ${locked ? 'var(--warning)' : 'var(--success)'}; margin-top: 10px;">
+                            ${timeText}
+                        </div>
+                        <div style="width: 100%;">
+                            ${actionButtons}
+                        </div>
+                    </li>
+                `;
+            });
+        }
 
         function render() {
             const activeMonth = document.getElementById('global-month-filter').value;
@@ -667,7 +724,6 @@
                 topShowcase.style.display = 'flex';
                 state.pots.forEach((pot) => {
                     const pct = Math.min((pot.current / pot.target) * 100, 100);
-                    
                     let cozyIcon = "🌱"; let cozyStage = "Seedling Stage"; let iconBg = "rgba(110,133,115,0.15)"; 
                     if (pct >= 100) { cozyIcon = "🏡"; cozyStage = "Fully Settled!"; iconBg = "rgba(245,199,77,0.2)"; } 
                     else if (pct >= 75) { cozyIcon = "🌸"; cozyStage = "Blooming Phase"; iconBg = "rgba(245,211,211,0.5)"; } 
@@ -694,6 +750,8 @@
             } else {
                 topShowcase.style.display = 'none';
             }
+
+            renderWishlist();
 
             document.getElementById('dash-balance').innerText = `$${state.globalBalance.toFixed(2)}`;
             document.getElementById('dash-tax').innerText = `$${state.taxEscrowBalance.toFixed(2)}`;
@@ -730,7 +788,7 @@
                     
                     const matchingCat = state.categoryTargets.find(c => c.name === item.cat);
                     if (matchingCat && matchingCat.nonNegotiable) {
-                        // Core fixed calculation skips
+                        // Skip essentials
                     } else {
                         choiceExpensesLogged += item.amt;
                     }
@@ -746,34 +804,6 @@
             const choiceCashEl = document.getElementById('dash-choice-cash');
             choiceCashEl.innerText = `${trueChoiceCashRemaining >= 0 ? '' : '-'}$${Math.abs(trueChoiceCashRemaining).toFixed(2)}`;
             choiceCashEl.style.color = trueChoiceCashRemaining >= 0 ? 'var(--success)' : 'var(--danger)';
-
-            const breakdownCard = document.getElementById('cycle-breakdown-card');
-            if (isYearMode) {
-                breakdownCard.style.display = 'block';
-                const breakdownContainer = document.getElementById('cycle-months-list');
-                breakdownContainer.innerHTML = '';
-                
-                for(let i = 0; i <= 12; i++) {
-                    let d = new Date(2026, 6 + i, 1);
-                    let k = `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}`;
-                    let shortLabel = d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
-                    
-                    let mItems = state.ledger.filter(item => item.monthKey === k);
-                    let mIn = 0; let mOut = 0;
-                    mItems.forEach(item => { if(item.type === 'income') mIn += item.net; else mOut += item.amt; });
-                    let mLeft = mIn - mOut;
-
-                    breakdownContainer.innerHTML += `
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--bg-color); font-size: 0.85rem;">
-                            <strong style="width: 65px; color: var(--text-main);">${shortLabel}</strong>
-                            <span style="color: var(--success); flex: 1; text-align: right; padding-right: 12px;">+$${mIn.toFixed(0)}</span>
-                            <span style="color: var(--warning); flex: 1; text-align: right; padding-right: 12px;">-$${mOut.toFixed(0)}</span>
-                            <strong style="color: ${mLeft >= 0 ? 'var(--success)' : 'var(--danger)'}; width: 85px; text-align: right;">$${mLeft.toFixed(0)} left</strong>
-                        </div>`;
-                }
-            } else {
-                breakdownCard.style.display = 'none';
-            }
 
             const capsContainer = document.getElementById('category-caps-container');
             capsContainer.innerHTML = '';
@@ -824,7 +854,6 @@
                 });
             }
 
-            // Gamification rendering for Savings Pots (Management Section)
             const potsContainer = document.getElementById('pots-container');
             potsContainer.innerHTML = '';
             state.pots.forEach((pot) => {
@@ -832,7 +861,6 @@
                 const remainingAmount = pot.target - pot.current;
                 let projectionText = remainingAmount <= 0 ? 'Goal fully achieved! 🎉' : (pot.monthly && pot.monthly > 0 ? `Est. completion: <strong>${Math.ceil(remainingAmount / pot.monthly)} months</strong>` : 'Assign a monthly plan.');
 
-                // Determine Cozy Stage based on Percentage for the main management view as well
                 let cozyIcon = "🌱"; let cozyStage = "Seedling Stage"; let iconBg = "rgba(110,133,115,0.15)"; 
                 if (pct >= 100) { cozyIcon = "🏡"; cozyStage = "Fully Settled!"; iconBg = "rgba(245,199,77,0.2)"; } 
                 else if (pct >= 75) { cozyIcon = "🌸"; cozyStage = "Blooming Phase"; iconBg = "rgba(245,211,211,0.5)"; } 
