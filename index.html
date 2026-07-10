@@ -4,103 +4,1030 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Cassidy's Budget</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Cassidy Budget">
+    
     <link rel="apple-touch-icon" href="image_8.png">
     <script src="https://unpkg.com/tesseract.js@5.1.0/dist/tesseract.min.js"></script>
     <style>
         :root {
-            --venice: #8894B7; --shine: #F5C74D; --success: #527558; --warning: #D18D34; --danger: #BA6868; 
-            --block-pink: #F5D3D3; --block-blue: #D3DCF5; --block-yellow: #FBE6AD; --block-green: #D3F5D9; --block-cream: #F6EFE5;
-            --bg-color: #FAF6EE; --card-bg: #FFFFFF; --text-main: #1C1E24; --text-muted: #727B8E; --border: #EFE9DE; --linen: #DDC5A9;
-            --dock-bg: #1A1D26; --dock-text: #A0AEC0;
+            /* Core Accents */
+            --venice: #8894B7;
+            --shine: #F5C74D;
+            --success: #527558;        
+            --warning: #D18D34;        
+            --danger: #BA6868; 
+            --block-pink: #F5D3D3;     
+            --block-blue: #D3DCF5;     
+            --block-yellow: #FBE6AD;   
+            --block-green: #D3F5D9;    
+            --block-cream: #F6EFE5;  
+
+            /* Dynamic Base Palette */
+            --bg-color: #FAF6EE;        
+            --card-bg: #FFFFFF;
+            --text-main: #1C1E24;      
+            --text-muted: #727B8E; 
+            --border: #EFE9DE;
+            --linen: #DDC5A9;
+            --dock-bg: #1A1D26;  
+            --dock-text: #A0AEC0;
+            
+            /* Dynamic Gradients */
             --hero-gradient: linear-gradient(135deg, #FFFDF9 0%, #F6EFE5 100%);
             --daily-gradient: linear-gradient(135deg, #FFFFFF 0%, #FFFDF9 100%);
             --waiting-gradient: linear-gradient(to bottom, #FFFFFF, #FAF6EE);
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-main); padding: 24px 16px; padding-bottom: 120px; transition: background-color 0.8s ease; }
-        .container { max-width: 480px; margin: 0 auto; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .card { background: var(--card-bg); border-radius: 28px; padding: 24px; margin-bottom: 20px; border: 1px solid var(--border); transition: 0.8s ease; }
-        .bottom-dock { position: fixed; bottom: 0; left: 0; right: 0; background: var(--dock-bg); height: 80px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding-bottom: 12px; }
-        .dock-item { color: var(--dock-text); font-size: 0.7rem; font-weight: 700; border: none; background: transparent; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding: 24px 16px; padding-bottom: 120px; -webkit-font-smoothing: antialiased; transition: background-color 0.8s ease, color 0.8s ease; overflow-x: hidden; }
+        .container { max-width: 480px; margin: 0 auto; position: relative; }
+        
+        /* Editorial Premium Typography */
+        header { margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; }
+        header h1 { font-family: "Georgia", Georgia, serif; font-weight: 400; font-style: italic; font-size: 1.8rem; color: var(--text-main); letter-spacing: -0.5px; text-transform: lowercase; transition: color 0.8s ease; display: flex; align-items: center; gap: 8px; }
+        h2 { font-family: "Georgia", Georgia, serif; font-style: italic; font-size: 1.25rem; font-weight: 400; margin-bottom: 20px; color: var(--text-main); display: flex; justify-content: space-between; align-items: center; transition: color 0.8s ease; }
+        
+        /* Gamification Feature 5: Token Badge & Confetti */
+        .token-badge { background: var(--block-yellow); color: #1C1E24; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; font-family: -apple-system, sans-serif; font-style: normal; display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--shine); box-shadow: 0 4px 12px rgba(245,199,77,0.2); transition: all 0.3s ease; }
+        .confetti-particle { position: fixed; pointer-events: none; z-index: 9999; font-size: 1.8rem; animation: floatUp 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+        @keyframes floatUp { 0% { transform: translateY(0) scale(0.5); opacity: 1; } 100% { transform: translateY(-120px) scale(1.2) rotate(25deg); opacity: 0; } }
+
+        /* Gamification Feature 2: Daily Stamp Card */
+        .stamp-box { width: 42px; height: 48px; border-radius: 12px; background: var(--bg-color); border: 1px dashed var(--linen); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 1.2rem; position: relative; transition: all 0.3s ease; }
+        .stamp-box.claimed { background: var(--block-cream); border: 1px solid var(--linen); }
+        .stamp-box.today-active { background: var(--block-yellow); border: 1px solid var(--shine); cursor: pointer; animation: pulse 2s infinite; }
+        .stamp-lbl { font-size: 0.55rem; font-weight: 800; color: var(--text-muted); margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.06); box-shadow: 0 4px 12px rgba(245,199,77,0.4); } 100% { transform: scale(1); } }
+
+        /* Top Showcase Carousel */
+        .top-showcase-container { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 24px; scrollbar-width: none; scroll-snap-type: x mandatory; }
+        .top-showcase-container::-webkit-scrollbar { display: none; }
+        .top-showcase-card { min-width: 260px; flex-shrink: 0; background: var(--card-bg); border-radius: 24px; padding: 16px; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.04); scroll-snap-align: center; transition: background-color 0.8s ease, border-color 0.8s ease; }
+
+        /* Gamification Feature 3: Soft-Fail Modal */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: none; justify-content: center; align-items: center; z-index: 2000; padding: 16px; transition: opacity 0.3s ease; }
+        .modal-card { background: var(--card-bg); border-radius: 28px; padding: 24px; width: 100%; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); border: 1px solid var(--border); }
+        .modal-card h3 { font-family: "Georgia", Georgia, serif; font-style: italic; font-size: 1.4rem; color: var(--danger); margin-bottom: 12px; }
+        .modal-card p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px; }
+
+        /* Gamification Feature 4: Toast Notifications */
+        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-150px); background: var(--card-bg); color: var(--text-main); padding: 14px 24px; border-radius: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); border: 2px solid var(--shine); font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 10px; z-index: 3000; transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); white-space: nowrap; }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+
+        /* Gamification Feature 4: Sticker Grid */
+        .sticker-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 14px; margin-top: 10px; }
+        .sticker-slot { background: var(--bg-color); border: 1px dashed var(--border); border-radius: 18px; height: 60px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; position: relative; transition: all 0.3s ease; }
+        .sticker-slot.locked { filter: grayscale(100%); opacity: 0.3; }
+        .sticker-slot.unlocked { background: var(--card-bg); border: 1px solid var(--venice); box-shadow: 0 4px 14px rgba(136,148,183,0.2); animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .sticker-tooltip { position: absolute; bottom: -24px; font-size: 0.6rem; text-transform: uppercase; font-weight: 800; color: var(--text-muted); opacity: 0; transition: opacity 0.2s; white-space: nowrap; background: var(--card-bg); padding: 4px 8px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 1px solid var(--border); pointer-events: none; z-index: 10;}
+        .sticker-slot:hover .sticker-tooltip { opacity: 1; }
+        @keyframes pop { 0% { transform: scale(0.8); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
+
+        /* Layout Elements */
+        .hero-inline-row { display: flex; gap: 14px; align-items: stretch; margin-bottom: 20px; width: 100%; }
+        .view-toggle { display: flex; background: var(--border); padding: 4px; border-radius: 20px; margin-bottom: 24px; transition: background-color 0.8s ease; }
+        .toggle-btn { flex: 1; text-align: center; padding: 12px; border-radius: 16px; font-size: 0.88rem; font-weight: 600; border: none; background: transparent; cursor: pointer; color: var(--text-muted); transition: all 0.3s ease; }
+        .toggle-btn.active { background: var(--card-bg); color: var(--text-main); box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
+
+        .month-select-wrapper { display: flex; align-items: center; justify-content: center; }
+        select.nav-select { height: 100%; padding: 0 16px; border-radius: 24px; border: 1px solid var(--border); background: var(--card-bg); font-weight: 600; font-size: 0.88rem; color: var(--text-main); outline: none; box-shadow: 0 4px 12px rgba(0,0,0,0.04); -webkit-appearance: none; min-width: 120px; text-align: center; transition: all 0.8s ease; }
+
+        .card { background: var(--card-bg); border-radius: 28px; padding: 24px; margin-bottom: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.03); border: 1px solid var(--border); overflow: hidden; transition: background-color 0.8s ease, border-color 0.8s ease; }
+        
+        .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px; }
+        .mini-stat { background: var(--card-bg); border-radius: 24px; padding: 18px; border: 1px solid var(--border); transition: transform 0.2s, background-color 0.8s ease; }
+        .stat-lbl { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); font-weight: 700; transition: color 0.8s ease; }
+        .stat-val { font-size: 1.4rem; font-weight: 700; margin-top: 6px; color: var(--text-main); letter-spacing: -0.5px; transition: color 0.8s ease; }
+        
+        .choice-hero-box { flex: 1; background: var(--hero-gradient); border: 1px solid var(--border); border-radius: 24px; padding: 18px; transition: background 0.8s ease; }
+        .choice-hero-box .stat-val { font-family: "Georgia", Georgia, serif; font-style: italic; font-size: 2.1rem; font-weight: 400; color: var(--text-main); margin-top: 4px; }
+
+        .form-group { margin-bottom: 16px; }
+        label { display: block; font-size: 0.75rem; color: var(--text-muted); font-weight: 700; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; transition: color 0.8s ease; }
+        input, select.form-input { width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 16px; font-size: 0.95rem; background: var(--bg-color); color: var(--text-main); outline: none; transition: all 0.3s ease; }
+        input:focus, select.form-input:focus { border-color: var(--venice); background: var(--card-bg); box-shadow: 0 0 0 3px rgba(136,148,183,0.1); }
+        
+        button { width: 100%; padding: 16px; background: var(--venice); color: white; border: none; border-radius: 18px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+        button:active { transform: scale(0.99); opacity: 0.9; }
+        button.secondary { background: var(--border); color: var(--text-main); margin-top: 0; padding: 8px 14px; width: auto; font-size: 0.78rem; border-radius: 12px; border: 1px solid var(--border); }
+        button.action-link { background: transparent; color: var(--venice); width: auto; padding: 0; margin: 0; font-size: 0.85rem; font-weight: 700; }
+        button:disabled { background: var(--bg-color); color: var(--text-muted); cursor: not-allowed; border: 1px solid var(--border); opacity: 0.7; }
+        
+        .scan-trigger-pill { background: var(--block-yellow); color: #1C1E24; padding: 10px 14px; border-radius: 14px; display: inline-flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 700; border: 1px solid rgba(245,199,77,0.4); cursor: pointer; margin-bottom: 16px; width: auto; text-transform: uppercase; letter-spacing: 0.3px; }
+        .scan-loading-txt { font-size: 0.82rem; color: var(--warning); font-weight: 600; font-style: italic; margin-bottom: 12px; display: none; }
+
+        .inline-actions { display: flex; gap: 12px; margin-top: 8px; align-items: center; }
+        .btn-inline { background: transparent; color: var(--text-muted); font-size: 0.72rem; width: auto; padding: 0; margin: 0; font-weight: 700; border: none; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; }
+        .btn-inline.del { color: var(--danger); }
+        .btn-inline.edit { color: var(--venice); }
+
+        .progress-wrapper { margin-bottom: 22px; }
+        .progress-wrapper:last-child { margin-bottom: 0; }
+        .progress-meta { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 8px; align-items: center; }
+        .progress-bg { background: var(--bg-color); height: 12px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border); transition: background-color 0.8s ease; }
+        .progress-bar { height: 100%; width: 0%; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 6px; }
+
+        .tx-list { list-style: none; }
+        .tx-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--border); font-size: 0.95rem; transition: border-color 0.8s ease; }
+        .tx-item:last-child { border-bottom: none; }
+        
+        .tx-cat-tag { font-size: 0.65rem; background: var(--border); padding: 4px 12px; border-radius: 20px; color: var(--text-main); display: inline-block; margin-top: 6px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.8s ease; }
+        .tx-cat-tag.nn { background: var(--block-blue); color: #1C1E24; border: 1px solid rgba(136,148,183,0.3); }
+        .pot-eta { font-size: 0.78rem; color: var(--text-muted); margin-top: 6px; font-style: italic; }
+
+        .bottom-dock { position: fixed; bottom: 16px; left: 16px; right: 16px; background: var(--dock-bg); height: 68px; border-radius: 24px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 8px 30px rgba(0,0,0,0.25); z-index: 1000; padding: 0 10px; transition: background-color 0.8s ease; }
+        .dock-item { color: var(--dock-text); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border: none; background: transparent; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 60px; height: 100%; transition: color 0.3s ease; }
         .dock-item.active { color: var(--shine); }
-        .token-badge { background: var(--block-yellow); color: #1C1E24; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; }
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 2000; }
-        .modal-card { background: var(--card-bg); border-radius: 28px; padding: 24px; width: 90%; max-width: 400px; }
-        .sticker-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
-        .sticker-slot { background: var(--bg-color); border: 1px dashed var(--border); border-radius: 12px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
-        .sticker-slot.unlocked { background: var(--card-bg); border: 1px solid var(--venice); }
+        .dock-center-btn { background: var(--shine); width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; color: #1C1E24; font-weight: 300; border: none; cursor: pointer; box-shadow: 0 4px 14px rgba(245,199,77,0.4); transform: translateY(-12px); transition: transform 0.2s; }
+        .dock-center-btn:active { transform: translateY(-10px) scale(0.95); }
     </style>
 </head>
 <body>
     <div class="container">
+        
         <header>
             <h1>lucky girl cass <span id="token-display" class="token-badge" style="display: none;">⭐ 0</span></h1>
-            <div id="fluid-balance" style="font-weight: 700; color: var(--success);">$0</div>
+            <div id="fluid-balance" style="font-weight: 700; color: var(--success); font-size: 0.95rem; background: var(--card-bg); padding: 6px 14px; border-radius: 14px; border: 1px solid var(--border); transition: all 0.8s ease;">$0</div>
         </header>
 
-        <div id="tab-home" class="tab-content active">
-            <div class="card"><h2>Daily Check-In</h2><div id="stamp-grid" style="display:flex; justify-content:space-between;"></div></div>
-            <div id="top-progression-showcase"></div>
+        <div class="card" style="padding: 18px 22px; background: var(--daily-gradient);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h2 style="margin: 0; font-size: 1.1rem;">cozy daily check-in</h2>
+                <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">This Week</span>
+            </div>
+            <div id="stamp-grid" style="display: flex; justify-content: space-between; align-items: center; gap: 8px;"></div>
+        </div>
+
+        <div id="top-progression-showcase" class="top-showcase-container" style="display: none;"></div>
+
+        <div class="view-toggle">
+            <button id="toggle-month" class="toggle-btn active" onclick="switchView('month')">Month View</button>
+            <button id="toggle-year" class="toggle-btn" onclick="switchView('year')">Cycle View (12M)</button>
+        </div>
+
+        <div class="hero-inline-row">
+            <div class="choice-hero-box">
+                <div class="stat-lbl"><span class="view-label-ctx">Month</span> Choice Allowance</div>
+                <div class="stat-val" id="dash-choice-cash">$0.00</div>
+            </div>
+            <div id="month-filter-wrap" class="month-select-wrapper">
+                <select id="global-month-filter" class="nav-select" onchange="render()"></select>
+            </div>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="mini-stat" style="background-color: var(--block-blue); border-color: rgba(136,148,183,0.2);">
+                <div class="stat-lbl" style="color: #4A5568;">Fluid Balance</div>
+                <div class="stat-val" id="dash-balance" style="color: #1C1E24;">$0.00</div>
+            </div>
+            <div class="mini-stat" style="background-color: var(--block-cream); border-color: rgba(221,197,169,0.4);">
+                <div class="stat-lbl" style="color: #4A5568;">Essential Vault</div>
+                <div class="stat-val" id="dash-nn-vault" style="color: #1C1E24; font-weight: 600;">$0.00</div>
+            </div>
+            <div class="mini-stat" style="background-color: var(--block-yellow); border-color: rgba(245,199,77,0.3);">
+                <div class="stat-lbl" style="color: #4A5568;">Tax Escrow</div>
+                <div class="stat-val" id="dash-tax" style="color: #1C1E24; font-weight: 600;">$0.00</div>
+            </div>
+            <div class="mini-stat" style="background-color: var(--block-pink); border-color: rgba(214,140,140,0.2);">
+                <div class="stat-lbl" style="color: #4A5568;"><span class="view-label-ctx">Month</span> Outflow</div>
+                <div class="stat-val" id="dash-outflow" style="color: var(--danger); font-weight: 700;">$0.00</div>
+            </div>
+            <div class="mini-stat" style="display:none;"><div id="dash-inflow"></div></div>
+        </div>
+
+        <div class="card">
+            <h2><span class="view-label-ctx">Month</span> spending targets</h2>
             <div id="category-caps-container"></div>
         </div>
 
-        <div id="tab-log" class="tab-content">
-            <div class="card">
-                <h2>Log Entry</h2>
+        <div class="card" id="logger-section-anchor">
+            <h2>Log Entry Transaction</h2>
+            
+            <div style="margin-top: 10px;">
+                <div class="scan-trigger-pill" onclick="document.getElementById('native-ocr-input').click()">📷 Scan Raw Receipt</div>
+                <div id="receipt-scan-loader" class="scan-loading-txt">reading paper asset layout... please wait...</div>
                 <input type="file" id="native-ocr-input" accept="image/*" capture="environment" style="display: none;" onchange="executeOpticalReceiptScan(event)">
-                <button onclick="document.getElementById('native-ocr-input').click()">📷 Scan Receipt</button>
-                <div id="dynamic-form-fields" style="margin-top:16px;"></div>
-                <button onclick="submitTransaction()">Record</button>
             </div>
-            <div id="waiting-room-card" class="card" style="display:none;"><h2>Waiting Room</h2><ul id="wishlist-container"></ul></div>
+
+            <div class="form-group">
+                <label>Transaction Blueprint Type</label>
+                <select id="tx-type" class="form-input" onchange="toggleFormContext()">
+                    <option value="expense">Expense / Essential (Instant Log)</option>
+                    <option value="wishlist">Impulse / Want (48-Hour Cooldown)</option>
+                    <option value="income">Paycheck / Inflow</option>
+                </select>
+            </div>
+            <div id="dynamic-form-fields"></div>
+            <button onclick="submitTransaction()">Record Entry</button>
+        </div>
+        
+        <div class="card" id="waiting-room-card" style="display: none; background: var(--waiting-gradient); border-color: var(--venice);">
+            <h2>the waiting room ⏳</h2>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4;">Impulse buys are cooling down. You cannot clear these to your operational ledger until the 48-hour emotional lock lifts.</p>
+            <ul id="wishlist-container" class="tx-list"></ul>
         </div>
 
-        <div id="tab-ledger" class="tab-content">
-            <div class="card"><h2>Ledger</h2><ul id="ledger-container"></ul></div>
+        <div class="card">
+            <h2>long-term savings pots</h2>
+            <div class="form-group">
+                <label>Designation Name</label>
+                <input type="text" id="pot-name" placeholder="e.g., Cold Savings Runway">
+            </div>
+            <div class="form-group">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 4px;">
+                    <div><label>Target Goal ($)</label><input type="number" id="pot-target" placeholder="15000"></div>
+                    <div><label>Already Saved ($)</label><input type="number" id="pot-starting" placeholder="5000" value="0"></div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Planned Monthly Contribution ($)</label>
+                <input type="number" id="pot-monthly" placeholder="500">
+            </div>
+            <button style="background: var(--text-main);" onclick="createNewPot()">Initialize Pot</button>
+            <div id="pots-container" style="margin-top: 18px;"></div>
         </div>
 
-        <div id="tab-garden" class="tab-content">
-            <div class="card"><h2>Savings Pots</h2><div id="pots-container"></div></div>
-            <div class="card"><h2>Stickers</h2><div id="sticker-grid-container" class="sticker-grid"></div></div>
+        <div class="card" id="sticker-drawer">
+            <h2>sticker compendium 📖</h2>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; line-height: 1.4;">Unlock beautiful cozy milestones as you build bulletproof digital habits.</p>
+            <div id="sticker-grid-container" class="sticker-grid"></div>
+        </div>
+
+        <div class="card" id="recurring-card-manager">
+            <h2>recurring templates 
+                <button class="action-link" onclick="applyRecurringToCurrentMonth()">Apply to Month</button>
+            </h2>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:14px; margin-top: 12px;">
+                <input type="text" id="rec-desc" placeholder="Rent, Spotify...">
+                <input type="number" id="rec-amt" placeholder="Amount ($)">
+                <select id="rec-cat" class="form-input"></select>
+                <button class="secondary" style="margin-top:0; width: 100%; padding: 12px;" onclick="addRecurringTemplate()">+ Save Template</button>
+            </div>
+            <ul id="recurring-list" class="tx-list"></ul>
+        </div>
+
+        <div class="card">
+            <h2>dynamic operational ledger</h2>
+            <ul id="ledger-container" class="tx-list"></ul>
+        </div>
+
+    </div>
+
+    <div class="bottom-dock">
+        <button class="dock-item active" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">Home</button>
+        <button class="dock-center-btn" onclick="document.getElementById('logger-section-anchor').scrollIntoView({behavior: 'smooth'})">+</button>
+        <button class="dock-item" onclick="document.getElementById('recurring-card-manager').scrollIntoView({behavior: 'smooth'})">Rules</button>
+    </div>
+
+    <div class="modal-overlay" id="recalibration-modal">
+        <div class="modal-card">
+            <h3>optimization needed 🧩</h3>
+            <p>This entry exceeds your available fluid balance by <strong id="recal-shortfall" style="color: var(--danger);">$0.00</strong>. How would you like to balance this puzzle?</p>
+            
+            <div class="form-group" style="margin-bottom: 24px;">
+                <label>Option 1: Draw from a Savings Pot</label>
+                <div style="display: flex; gap: 8px;">
+                    <select id="recal-pot-select" class="form-input"></select>
+                    <button style="width: auto; padding: 0 16px; background: var(--success);" onclick="recalibrateWithPot()">Use Pot</button>
+                </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <button style="background: var(--border); color: var(--text-main); border: 1px solid var(--border);" onclick="recalibrateWithDebt()">Option 2: Log as Debt (Pull from Future)</button>
+                <button style="background: transparent; color: var(--text-muted); border: 1px solid var(--border);" onclick="closeRecalibration()">Option 3: Cancel Entry (Save the Cash!)</button>
+            </div>
         </div>
     </div>
 
-    <nav class="bottom-dock">
-        <button class="dock-item active" onclick="switchTab('home', this)">🏠 Home</button>
-        <button class="dock-item" onclick="switchTab('log', this)">📝 Log</button>
-        <button class="dock-item" onclick="switchTab('ledger', this)">📊 Ledger</button>
-        <button class="dock-item" onclick="switchTab('garden', this)">🪴 Garden</button>
-    </nav>
-
     <script>
         let state = JSON.parse(localStorage.getItem('cassidyProBudgetState')) || {
-            globalBalance: 0, ledger: [], pots: [], wishlist: [], stickers: {}, txCount: 0, bonusTokens: 0, stamps: {}
+            globalBalance: 0,
+            taxEscrowBalance: 0,
+            currentViewMode: 'month',
+            pots: [],
+            ledger: [], 
+            recurringTemplates: [],
+            wishlist: [], 
+            stamps: {}, 
+            stickers: { blossom: false, sprout: false, matcha: false, lantern: false, star: false },
+            txCount: 0, 
+            bonusTokens: 0, // NEW: Loot Drop Token Economy
+            categoryTargets: [
+                { name: "Housing", limit: 1600, nonNegotiable: true },
+                { name: "Groceries", limit: 450, nonNegotiable: true },
+                { name: "Utilities", limit: 250, nonNegotiable: true },
+                { name: "Transport", limit: 350, nonNegotiable: false },
+                { name: "Entertainment", limit: 300, nonNegotiable: false },
+                { name: "Miscellaneous", limit: 200, nonNegotiable: false }
+            ]
         };
 
-        function switchTab(tabId, btn) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.dock-item').forEach(b => b.classList.remove('active'));
-            document.getElementById('tab-' + tabId).classList.add('active');
-            btn.classList.add('active');
-            render();
-        }
+        let pendingOverbudgetTx = null;
 
         function save() {
             localStorage.setItem('cassidyProBudgetState', JSON.stringify(state));
             render();
         }
 
-        function render() {
-            // Populate UI based on current active tab
-            document.getElementById('dash-balance').innerText = `$${state.globalBalance.toFixed(2)}`;
-            // Add your full render logic here
+        /* --- Gamification Feature 5: Variable Loot Drop --- */
+        function triggerLootDrop() {
+            state.bonusTokens = (state.bonusTokens || 0) + 1;
+            showToast("✨ Lucky Drop! You found a Cozy Token! ✨");
+            
+            const emojis = ['✨', '🌸', '🪙', '🌱'];
+            for(let i=0; i<18; i++) {
+                const el = document.createElement('div');
+                el.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+                el.className = 'confetti-particle';
+                // Randomly position horizontally and vertically around center screen
+                el.style.left = 40 + (Math.random() * 40 - 20) + 'vw';
+                el.style.top = 40 + (Math.random() * 40 - 20) + 'vh';
+                el.style.animationDelay = (Math.random() * 0.2) + 's';
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), 1500); // Clean up DOM
+            }
+        }
+
+        /* --- Gamification Feature 4: Sticker Engine --- */
+        const STICKER_DEX = {
+            blossom: { icon: '🌸', name: 'First Step', desc: 'Logged your very first transaction.' },
+            sprout: { icon: '🪴', name: 'Seed Planter', desc: 'Initialized your first savings pot.' },
+            matcha: { icon: '🍵', name: 'Mindful Saver', desc: 'Passed on an impulse buy in the Waiting Room.' },
+            lantern: { icon: '🏮', name: 'Illuminated', desc: 'Logged 10 total transactions.' },
+            star: { icon: '✨', name: 'Consistent', desc: 'Claimed 3 Daily Stamps.' }
+        };
+
+        function unlockSticker(id) {
+            if (!state.stickers[id]) {
+                state.stickers[id] = true;
+                save();
+                showToast(`New Sticker Unlocked: ${STICKER_DEX[id].icon} ${STICKER_DEX[id].name}`);
+            }
+        }
+
+        function showToast(msg) {
+            let toast = document.getElementById('toast-notification');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'toast-notification';
+                toast.className = 'toast';
+                document.body.appendChild(toast);
+            }
+            toast.innerHTML = msg; 
+            toast.classList.remove('show');
+            void toast.offsetWidth; 
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+
+        function renderStickers() {
+            const container = document.getElementById('sticker-grid-container');
+            container.innerHTML = '';
+            Object.keys(STICKER_DEX).forEach(key => {
+                const data = STICKER_DEX[key];
+                const unlocked = state.stickers[key];
+                container.innerHTML += `
+                    <div class="sticker-slot ${unlocked ? 'unlocked' : 'locked'}">
+                        ${data.icon}
+                        <div class="sticker-tooltip">${unlocked ? data.name : 'Hidden Secret'}</div>
+                    </div>
+                `;
+            });
+        }
+
+        /* --- Gamification: Real-Time Ambient Environments --- */
+        function applyAmbientTheme() {
+            const hour = new Date().getHours();
+            const root = document.documentElement;
+
+            if (hour >= 6 && hour < 12) {
+                root.style.setProperty('--bg-color', '#F9FAFB'); root.style.setProperty('--card-bg', '#FFFFFF'); root.style.setProperty('--text-main', '#111827'); root.style.setProperty('--text-muted', '#6B7280'); root.style.setProperty('--border', '#F3F4F6'); root.style.setProperty('--dock-bg', '#1F2937'); root.style.setProperty('--dock-text', '#9CA3AF'); root.style.setProperty('--hero-gradient', 'linear-gradient(135deg, #FFFFFF 0%, #FEF3C7 100%)'); root.style.setProperty('--daily-gradient', 'linear-gradient(135deg, #FFFFFF 0%, #F9FAFB 100%)'); root.style.setProperty('--waiting-gradient', 'linear-gradient(to bottom, #FFFFFF, #F9FAFB)');
+            } else if (hour >= 12 && hour < 18) {
+                root.style.setProperty('--bg-color', '#FAF6EE'); root.style.setProperty('--card-bg', '#FFFFFF'); root.style.setProperty('--text-main', '#1C1E24'); root.style.setProperty('--text-muted', '#727B8E'); root.style.setProperty('--border', '#EFE9DE'); root.style.setProperty('--dock-bg', '#1A1D26'); root.style.setProperty('--dock-text', '#A0AEC0'); root.style.setProperty('--hero-gradient', 'linear-gradient(135deg, #FFFDF9 0%, #F6EFE5 100%)'); root.style.setProperty('--daily-gradient', 'linear-gradient(135deg, #FFFFFF 0%, #FFFDF9 100%)'); root.style.setProperty('--waiting-gradient', 'linear-gradient(to bottom, #FFFFFF, #FAF6EE)');
+            } else if (hour >= 18 && hour < 21) {
+                root.style.setProperty('--bg-color', '#FDF5F3'); root.style.setProperty('--card-bg', '#FFFFFF'); root.style.setProperty('--text-main', '#2A1A1A'); root.style.setProperty('--text-muted', '#8A7A7A'); root.style.setProperty('--border', '#F5E6E3'); root.style.setProperty('--dock-bg', '#2A1A1A'); root.style.setProperty('--dock-text', '#D4C5C5'); root.style.setProperty('--hero-gradient', 'linear-gradient(135deg, #FFFFFF 0%, #FCE8E3 100%)'); root.style.setProperty('--daily-gradient', 'linear-gradient(135deg, #FFFFFF 0%, #FDF5F3 100%)'); root.style.setProperty('--waiting-gradient', 'linear-gradient(to bottom, #FFFFFF, #FDF5F3)');
+            } else {
+                root.style.setProperty('--bg-color', '#121620'); root.style.setProperty('--card-bg', '#1E2330'); root.style.setProperty('--text-main', '#EAECEF'); root.style.setProperty('--text-muted', '#8A94A6'); root.style.setProperty('--border', '#2A303F'); root.style.setProperty('--dock-bg', '#0B0D14'); root.style.setProperty('--dock-text', '#5C677D'); root.style.setProperty('--hero-gradient', 'linear-gradient(135deg, #1E2330 0%, #171A24 100%)'); root.style.setProperty('--daily-gradient', 'linear-gradient(135deg, #1E2330 0%, #151923 100%)'); root.style.setProperty('--waiting-gradient', 'linear-gradient(to bottom, #1E2330, #121620)');
+            }
         }
 
         function init() {
-            // Your initialization logic
+            if (!state.stickers) state.stickers = { blossom: false, sprout: false, matcha: false, lantern: false, star: false };
+            if (!state.txCount) state.txCount = 0;
+            if (state.bonusTokens === undefined) state.bonusTokens = 0;
+            if (!Array.isArray(state.categoryTargets)) {
+                state.categoryTargets = [
+                    { name: "Housing", limit: 1600, nonNegotiable: true },
+                    { name: "Groceries", limit: 450, nonNegotiable: true },
+                    { name: "Utilities", limit: 250, nonNegotiable: true },
+                    { name: "Transport", limit: 350, nonNegotiable: false },
+                    { name: "Entertainment", limit: 300, nonNegotiable: false },
+                    { name: "Miscellaneous", limit: 200, nonNegotiable: false }
+                ];
+            }
+            if (!Array.isArray(state.wishlist)) state.wishlist = [];
+            if (!state.stamps) state.stamps = {};
+
+            state.pots.forEach((pot, index) => { if(!pot.id) pot.id = Date.now() + index; });
+            populateMonthTimelineOptions();
+            toggleFormContext();
+            populateCategorySelectFields();
+            
+            applyAmbientTheme();
+            setInterval(applyAmbientTheme, 600000); 
+            setInterval(renderWishlist, 60000); 
             render();
+        }
+
+        /* --- Gamification Feature 2: Stamp Engine --- */
+        function claimStamp(dateStr) {
+            state.stamps[dateStr] = true;
+            const totalStamps = Object.keys(state.stamps).length;
+            if (totalStamps >= 3) unlockSticker('star');
+            save();
+        }
+
+        function renderStamps() {
+            const grid = document.getElementById('stamp-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            
+            const today = new Date();
+            const currentDayIndex = today.getDay(); 
+            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const todayStr = today.toLocaleDateString('en-US');
+
+            for (let i = 0; i < 7; i++) {
+                let d = new Date(today);
+                d.setDate(today.getDate() - currentDayIndex + i);
+                let dStr = d.toLocaleDateString('en-US');
+                
+                let isToday = (dStr === todayStr);
+                let hasStamp = state.stamps[dStr];
+                let isFuture = d > today;
+
+                let boxClass = 'stamp-box';
+                let content = '';
+                let clickAction = '';
+
+                if (hasStamp) {
+                    boxClass += ' claimed';
+                    content = '🌸';
+                } else if (isToday) {
+                    boxClass += ' today-active';
+                    content = '✨';
+                    clickAction = `onclick="claimStamp('${dStr}')"`;
+                } else if (isFuture) {
+                    content = '<span style="opacity:0.2;">•</span>';
+                } else {
+                    content = '';
+                }
+
+                grid.innerHTML += `<div class="${boxClass}" ${clickAction}><div class="stamp-lbl">${dayNames[i]}</div><div style="line-height: 1;">${content}</div></div>`;
+            }
+        }
+
+        function populateMonthTimelineOptions() {
+            const filter = document.getElementById('global-month-filter');
+            filter.innerHTML = '';
+            for(let i = 0; i <= 12; i++) {
+                let d = new Date(2026, 6 + i, 1); 
+                let monthStr = (d.getMonth() + 1).toString().padStart(2, '0');
+                let k = `${d.getFullYear()}-${monthStr}`;
+                let label = d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                let opt = new Option(label, k);
+                if(i === 0) opt.selected = true; 
+                filter.add(opt);
+            }
+        }
+
+        function populateCategorySelectFields() {
+            const select = document.getElementById('rec-cat');
+            select.innerHTML = state.categoryTargets.map(c => `<option value="${c.name}">${c.name}</option>`).join('') + `<option value="Income-Pay">Income-Pay</option>`;
+        }
+
+        function switchView(mode) {
+            state.currentViewMode = mode;
+            document.getElementById('toggle-month').classList.toggle('active', mode === 'month');
+            document.getElementById('toggle-year').classList.toggle('active', mode === 'year');
+            document.getElementById('month-filter-wrap').style.display = mode === 'month' ? 'flex' : 'none';
+            document.getElementById('recurring-card-manager').style.display = mode === 'month' ? 'block' : 'none';
+            document.querySelectorAll('.view-label-ctx').forEach(el => { el.innerText = mode === 'month' ? 'Month' : 'Cycle'; });
+            render();
+        }
+
+        function toggleFormContext() {
+            const type = document.getElementById('tx-type').value;
+            const container = document.getElementById('dynamic-form-fields');
+            if(type === 'expense' || type === 'wishlist') {
+                container.innerHTML = `
+                    <div class="form-group"><label>Description</label><input type="text" id="field-desc" placeholder="e.g., Central Market"></div>
+                    <div class="form-group"><label>Amount ($)</label><input type="number" id="field-amount" placeholder="0.00"></div>
+                    <div class="form-group"><label>Target Allocation Category</label>
+                        <select id="field-cat" class="form-input">
+                            ${state.categoryTargets.map(c => `<option value="${c.name}">${c.name}</option>`).join('')}
+                        </select>
+                    </div>`;
+            } else {
+                container.innerHTML = `
+                    <div class="form-group"><label>Pay Frequency Scope</label>
+                        <select id="field-freq" class="form-input" onchange="toggleIncomeRatePlaceholder()">
+                            <option value="monthly">Single Month Paycheck</option>
+                            <option value="annual">Annual Salary (Distribute over 12 Months)</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label id="income-amt-label">Gross Income Amount ($)</label><input type="number" id="field-gross" placeholder="e.g., 6250"></div>
+                    <div class="form-group"><label>Estimated Withholding Tax Rate (%)</label><input type="number" id="field-tax-rate" value="20"></div>`;
+            }
+        }
+
+        function toggleIncomeRatePlaceholder() {
+            const freq = document.getElementById('field-freq').value;
+            document.getElementById('field-gross').placeholder = freq === 'annual' ? "e.g., 75000" : "e.g., 6250";
+        }
+
+        function executeOpticalReceiptScan(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const loader = document.getElementById('receipt-scan-loader');
+            loader.style.display = "block";
+            loader.innerText = "loading on-device scanning matrix...";
+
+            document.getElementById('tx-type').value = 'expense';
+            toggleFormContext();
+
+            const reader = new FileReader();
+            reader.onload = function() {
+                Tesseract.recognize(reader.result, 'eng', { logger: m => { loader.innerText = `scanning layout lines: ${Math.round(m.progress * 100)}%`; } })
+                .then(({ data: { text } }) => { loader.style.display = "none"; parseReceiptTextLayoutMetrics(text); })
+                .catch(err => { console.error(err); loader.innerText = "OCR connection fault. Fill manually."; loader.style.color = "var(--danger)"; });
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function parseReceiptTextLayoutMetrics(text) {
+            const lines = text.toLowerCase().split('\n');
+            let detectedAmount = 0, detectedCategory = "Miscellaneous", detectedDescription = "";
+            const priceRegex = /\d+\.\d{2}/g;
+            const fallbackPrices = text.match(priceRegex) || [];
+
+            for (let line of lines) {
+                if (line.includes('total') || line.includes('due') || line.includes('amount') || line.includes('balance')) {
+                    let numbers = line.match(priceRegex);
+                    if (numbers && numbers.length > 0) { detectedAmount = parseFloat(numbers[numbers.length - 1]); break; }
+                }
+            }
+
+            if (detectedAmount === 0 && fallbackPrices.length > 0) {
+                let sortedPrices = fallbackPrices.map(p => parseFloat(p)).filter(p => p < 999);
+                if (sortedPrices.length > 0) { detectedAmount = Math.max(...sortedPrices); }
+            }
+
+            const corpus = text.toLowerCase();
+            if (corpus.match(/(market|grocery|heb|kroger|central market|walmart|target|whole foods|trader|safeway|costco|aldi|food)/)) {
+                detectedCategory = "Groceries"; detectedDescription = "grocery pickup store scan";
+            } else if (corpus.match(/(uber|lyft|gas|shell|exxon|chevron|fuel|texaco|speedway|qt|clean|parking|toll|transit)/)) {
+                detectedCategory = "Transport"; detectedDescription = "commute transport line check";
+            } else if (corpus.match(/(cafe|restaurant|starbucks|dunkin|spotify|netflix|hulu|cinema|movie|bar|pub|bites|dine|concert|ticket)/)) {
+                detectedCategory = "Entertainment"; detectedDescription = "lifestyle experience out";
+            } else if (corpus.match(/(electric|water|gas|internet|spectrum|att|verizon|tmobile|utility|power|waste|trash)/)) {
+                detectedCategory = "Utilities"; detectedDescription = "fixed service invoice billing";
+            } else if (corpus.match(/(rent|mortgage|hoa|maintenance|lease)/)) {
+                detectedCategory = "Housing"; detectedDescription = "housing structural line cost";
+            } else {
+                detectedDescription = "scanned vendor log";
+            }
+
+            if (document.getElementById('field-desc')) document.getElementById('field-desc').value = detectedDescription;
+            if (document.getElementById('field-amount')) document.getElementById('field-amount').value = detectedAmount > 0 ? detectedAmount.toFixed(2) : "";
+            if (document.getElementById('field-cat')) document.getElementById('field-cat').value = detectedCategory;
+        }
+
+        function toggleCategoryPrioritization(name) {
+            const cat = state.categoryTargets.find(c => c.name === name);
+            if(cat) { cat.nonNegotiable = !cat.nonNegotiable; save(); }
+        }
+
+        function editCategoryLimit(name) {
+            const cat = state.categoryTargets.find(c => c.name === name);
+            if(cat) {
+                const nextLimit = parseFloat(prompt(`Modify plan cap target for ${cat.name}:`, cat.limit));
+                if(!isNaN(nextLimit) && nextLimit >= 0) { cat.limit = nextLimit; save(); }
+            }
+        }
+
+        function trackTxMilestones() {
+            state.txCount += 1;
+            if (state.txCount >= 1) unlockSticker('blossom');
+            if (state.txCount >= 10) unlockSticker('lantern');
+            
+            // 25% Chance for Loot Drop on logging a successful Standard Tx
+            if (Math.random() < 0.25) {
+                triggerLootDrop();
+            }
+        }
+
+        function submitTransaction() {
+            const type = document.getElementById('tx-type').value;
+            const activeMonth = document.getElementById('global-month-filter').value;
+            const dateStr = new Date().toLocaleDateString();
+
+            if(type === 'expense' || type === 'wishlist') {
+                const desc = document.getElementById('field-desc').value.trim();
+                const amt = parseFloat(document.getElementById('field-amount').value);
+                const cat = document.getElementById('field-cat').value;
+                if(!desc || !amt || amt <= 0) return;
+
+                if (type === 'wishlist') {
+                    state.wishlist.push({ id: Date.now(), desc, amt, cat, timestamp: Date.now() });
+                    save();
+                    toggleFormContext();
+                } else {
+                    if (amt > state.globalBalance) {
+                        triggerRecalibrationModal(desc, amt, cat);
+                        return; 
+                    }
+                    state.globalBalance -= amt;
+                    state.ledger.unshift({ id: Date.now(), type, desc, amt, cat, date: dateStr, monthKey: activeMonth });
+                    trackTxMilestones(); 
+                    save();
+                    toggleFormContext();
+                }
+            } else {
+                const freq = document.getElementById('field-freq').value;
+                const grossInput = parseFloat(document.getElementById('field-gross').value);
+                const rate = parseFloat(document.getElementById('field-tax-rate').value) / 100;
+                if(!grossInput || grossInput <= 0) return;
+
+                if(freq === 'annual') {
+                    const monthlyGross = grossInput / 12;
+                    const monthlyTax = monthlyGross * rate;
+                    const monthlyNet = monthlyGross - monthlyTax;
+
+                    for(let i = 0; i < 12; i++) {
+                        let d = new Date(2026, 6 + i, 1);
+                        let monthStr = (d.getMonth() + 1).toString().padStart(2, '0');
+                        let k = `${d.getFullYear()}-${monthStr}`;
+                        
+                        state.globalBalance += monthlyNet; state.taxEscrowBalance += monthlyTax;
+                        state.ledger.unshift({ id: Date.now() + Math.random(), type: 'income', desc: 'Annual Salary Allocation', gross: monthlyGross, tax: monthlyTax, net: monthlyNet, date: dateStr, monthKey: k });
+                    }
+                } else {
+                    const tax = grossInput * rate;
+                    const net = grossInput - tax;
+                    state.globalBalance += net; state.taxEscrowBalance += tax;
+                    state.ledger.unshift({ id: Date.now(), type: 'income', desc: 'Paycheck Inflow', gross: grossInput, tax, net, date: dateStr, monthKey: activeMonth });
+                }
+                trackTxMilestones(); 
+                save();
+                toggleFormContext();
+            }
+        }
+
+        function triggerRecalibrationModal(desc, amt, cat) {
+            pendingOverbudgetTx = { desc, amt, cat };
+            const shortfall = amt - state.globalBalance;
+            document.getElementById('recal-shortfall').innerText = `$${shortfall.toFixed(2)}`;
+            
+            const potSelect = document.getElementById('recal-pot-select');
+            potSelect.innerHTML = '<option value="">-- Choose Pot --</option>';
+            state.pots.forEach(pot => { potSelect.innerHTML += `<option value="${pot.id}">${pot.name.toLowerCase()} ($${pot.current.toFixed(0)})</option>`; });
+            document.getElementById('recalibration-modal').style.display = 'flex';
+        }
+
+        function closeRecalibration() {
+            pendingOverbudgetTx = null;
+            document.getElementById('recalibration-modal').style.display = 'none';
+        }
+
+        function recalibrateWithDebt() {
+            if(!pendingOverbudgetTx) return;
+            const activeMonth = document.getElementById('global-month-filter').value;
+            state.globalBalance -= pendingOverbudgetTx.amt; 
+            state.ledger.unshift({ id: Date.now(), type: 'expense', desc: pendingOverbudgetTx.desc, amt: pendingOverbudgetTx.amt, cat: pendingOverbudgetTx.cat, date: new Date().toLocaleDateString(), monthKey: activeMonth });
+            trackTxMilestones();
+            save();
+            closeRecalibration();
+            toggleFormContext(); 
+        }
+
+        function recalibrateWithPot() {
+            if(!pendingOverbudgetTx) return;
+            const potId = document.getElementById('recal-pot-select').value;
+            if(!potId) { alert("Please select a pot from the dropdown first."); return; }
+            
+            const pot = state.pots.find(p => p.id == potId);
+            if(!pot) return;
+            if (pot.current < pendingOverbudgetTx.amt) { alert(`There isn't enough in the "${pot.name}" pot to cover this entire purchase.`); return; }
+
+            const activeMonth = document.getElementById('global-month-filter').value;
+            pot.current -= pendingOverbudgetTx.amt;
+            state.ledger.unshift({ id: Date.now(), type: 'expense', desc: `${pendingOverbudgetTx.desc} (from ${pot.name})`, amt: pendingOverbudgetTx.amt, cat: pendingOverbudgetTx.cat, date: new Date().toLocaleDateString(), monthKey: activeMonth });
+            
+            trackTxMilestones();
+            save();
+            closeRecalibration();
+            toggleFormContext();
+        }
+
+        function processWishlistItem(id, action) {
+            const index = state.wishlist.findIndex(item => item.id === id);
+            if(index === -1) return;
+            const item = state.wishlist[index];
+
+            if(action === 'buy') {
+                const activeMonth = document.getElementById('global-month-filter').value;
+                if (item.amt > state.globalBalance) { triggerRecalibrationModal(item.desc, item.amt, item.cat); return; }
+                state.globalBalance -= item.amt;
+                state.ledger.unshift({ id: Date.now(), type: 'expense', desc: item.desc, amt: item.amt, cat: item.cat, date: new Date().toLocaleDateString(), monthKey: activeMonth });
+                state.wishlist.splice(index, 1);
+            } else if (action === 'pass') {
+                state.wishlist.splice(index, 1);
+                unlockSticker('matcha'); 
+            }
+            save();
+        }
+
+        function renderWishlist() {
+            const card = document.getElementById('waiting-room-card');
+            const container = document.getElementById('wishlist-container');
+            container.innerHTML = '';
+
+            if(state.wishlist.length === 0) { card.style.display = 'none'; return; }
+            card.style.display = 'block';
+            const now = Date.now();
+
+            state.wishlist.forEach(item => {
+                const elapsedMs = now - item.timestamp;
+                const totalCooldownMs = 48 * 60 * 60 * 1000; 
+                const remainingMs = totalCooldownMs - elapsedMs;
+                
+                let timeText = ""; let locked = true;
+                if (remainingMs > 0) {
+                    const hours = Math.floor(remainingMs / (1000 * 60 * 60)); const mins = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
+                    timeText = `🔒 Locks lift in ${hours}h ${mins}m`;
+                } else {
+                    timeText = `✅ Unlocked & ready`; locked = false;
+                }
+
+                const actionButtons = locked 
+                    ? `<button disabled style="padding: 8px; font-size: 0.75rem; margin-top: 8px;">Cooling Down...</button>`
+                    : `<div style="display: flex; gap: 8px; margin-top: 8px;"><button style="padding: 8px; font-size: 0.75rem; background: var(--success);" onclick="processWishlistItem(${item.id}, 'buy')">Approve & Buy</button><button style="padding: 8px; font-size: 0.75rem; background: var(--danger);" onclick="processWishlistItem(${item.id}, 'pass')">Pass & Save</button></div>`;
+
+                container.innerHTML += `
+                    <li class="tx-item" style="flex-direction: column; align-items: flex-start; padding: 16px; background: var(--card-bg); border-radius: 16px; margin-bottom: 10px; border: 1px solid var(--border);">
+                        <div style="display: flex; justify-content: space-between; width: 100%;">
+                            <div><strong style="font-size: 0.95rem;">${item.desc.toLowerCase()}</strong><br><span class="tx-cat-tag" style="background:var(--bg-color); margin-top: 4px;">${item.cat}</span></div>
+                            <span style="font-weight:700; font-size: 1rem; color: var(--danger);">$${item.amt.toFixed(2)}</span>
+                        </div>
+                        <div style="font-size: 0.75rem; font-weight: 600; color: ${locked ? 'var(--warning)' : 'var(--success)'}; margin-top: 10px;">${timeText}</div>
+                        <div style="width: 100%;">${actionButtons}</div>
+                    </li>
+                `;
+            });
+        }
+
+        function deleteTransaction(id) {
+            const index = state.ledger.findIndex(item => item.id === id); if(index === -1) return;
+            const item = state.ledger[index];
+            if(item.type === 'expense') state.globalBalance += item.amt; 
+            else { state.globalBalance -= item.net; state.taxEscrowBalance -= item.tax; }
+            state.ledger.splice(index, 1); save();
+        }
+
+        function editTransaction(id) {
+            const item = state.ledger.find(item => item.id === id); if(!item) return;
+            const nextDesc = prompt("Modify Description:", item.desc); if(nextDesc !== null && nextDesc.trim() !== '') item.desc = nextDesc.trim();
+
+            if(item.type === 'expense') {
+                const nextAmt = parseFloat(prompt("Modify Expense Amount ($):", item.amt)); if(isNaN(nextAmt) || nextAmt <= 0) return;
+                state.globalBalance -= (nextAmt - item.amt); item.amt = nextAmt;
+            } else {
+                const nextGross = parseFloat(prompt("Modify Gross Pay Allocation Amount ($):", item.gross)); if(isNaN(nextGross) || nextGross <= 0) return;
+                const rate = item.tax / item.gross; 
+                state.globalBalance -= item.net; state.taxEscrowBalance -= item.tax;
+                item.gross = nextGross; item.tax = nextGross * rate; item.net = nextGross - item.tax;
+                state.globalBalance += item.net; state.taxEscrowBalance += item.tax;
+            }
+            save();
+        }
+
+        function addRecurringTemplate() {
+            const desc = document.getElementById('rec-desc').value.trim(); const amt = parseFloat(document.getElementById('rec-amt').value); const cat = document.getElementById('rec-cat').value;
+            if(!desc || !amt || amt <= 0) return;
+            state.recurringTemplates.push({ id: Date.now(), desc, amt, cat }); document.getElementById('rec-desc').value = ''; document.getElementById('rec-amt').value = ''; save();
+        }
+
+        function editRecurringTemplate(id) {
+            const template = state.recurringTemplates.find(r => r.id === id); if(!template) return;
+            const nextDesc = prompt("Modify Template Name:", template.desc); if(nextDesc) template.desc = nextDesc.trim();
+            const nextAmt = parseFloat(prompt("Modify Template Default Amount ($):", template.amt)); if(!isNaN(nextAmt) && nextAmt > 0) template.amt = nextAmt;
+            save();
+        }
+
+        function removeRecurringTemplate(id) { state.recurringTemplates = state.recurringTemplates.filter(r => r.id !== id); save(); }
+
+        function applyRecurringToCurrentMonth() {
+            const activeMonth = document.getElementById('global-month-filter').value; const dateStr = new Date().toLocaleDateString();
+            state.recurringTemplates.forEach(item => {
+                if(item.cat === 'Income-Pay') {
+                    const gross = item.amt; const tax = gross * 0.20; const net = gross - tax;
+                    state.globalBalance += net; state.taxEscrowBalance += tax;
+                    state.ledger.unshift({ id: Date.now() + Math.random(), type: 'income', desc: item.desc, gross, tax, net, date: dateStr, monthKey: activeMonth });
+                } else {
+                    state.globalBalance -= item.amt;
+                    state.ledger.unshift({ id: Date.now() + Math.random(), type: 'expense', desc: item.desc, amt: item.amt, cat: item.cat, date: dateStr, monthKey: activeMonth });
+                }
+            });
+            save();
+        }
+
+        function createNewPot() {
+            const name = document.getElementById('pot-name').value.trim(); const target = parseFloat(document.getElementById('pot-target').value); const starting = parseFloat(document.getElementById('pot-starting').value) || 0; const monthly = parseFloat(document.getElementById('pot-monthly').value) || 0;
+            if(!name || !target || target <= 0) return;
+            
+            state.pots.push({ id: Date.now(), name, target, monthly, current: starting });
+            document.getElementById('pot-name').value = ''; document.getElementById('pot-target').value = ''; document.getElementById('pot-starting').value = '0'; document.getElementById('pot-monthly').value = '';
+            
+            unlockSticker('sprout'); 
+            save();
+        }
+
+        function fundPot(id) {
+            const pot = state.pots.find(p => p.id === id); if(!pot) return;
+            const allocation = parseFloat(prompt(`Transfer available fluid cash assets into ${pot.name}:`));
+            if(!allocation || allocation <= 0 || allocation > state.globalBalance) { alert("Invalid amount or insufficient fluid balance."); return; }
+            
+            const source = prompt(`Where should this $${allocation} come from?\nType '1' for General Fluid Balance\nType '2' for This Month's Choice Allowance`, "1");
+            if (source === '2') {
+                const activeMonth = document.getElementById('global-month-filter').value; const dateStr = new Date().toLocaleDateString();
+                state.globalBalance -= allocation; pot.current += allocation;
+                state.ledger.unshift({ id: Date.now(), type: 'expense', desc: `pot fund: ${pot.name}`, amt: allocation, cat: 'Choice Transfer', date: dateStr, monthKey: activeMonth });
+            } else if (source === '1') {
+                state.globalBalance -= allocation; pot.current += allocation;
+            } else {
+                alert("Operation aborted. Invalid option selected."); return;
+            }
+            save();
+        }
+
+        function editPot(id) {
+            const pot = state.pots.find(p => p.id === id); if(!pot) return;
+            const nextName = prompt("Modify Pot Name:", pot.name); if(nextName) pot.name = nextName.trim();
+            const nextTarget = parseFloat(prompt("Modify Target Goal Amount ($):", pot.target)); if(!isNaN(nextTarget) && nextTarget > 0) pot.target = nextTarget;
+            const nextMonthly = parseFloat(prompt("Modify Planned Monthly Contribution ($):", pot.monthly)); if(!isNaN(nextMonthly) && nextMonthly >= 0) pot.monthly = nextMonthly;
+            save();
+        }
+
+        function deletePot(id) {
+            const index = state.pots.findIndex(p => p.id === id); if(index === -1) return; const pot = state.pots[index];
+            if(confirm(`Wipe "${pot.name}" savings target completely?`)) { state.globalBalance += pot.current; state.pots.splice(index, 1); save(); }
+        }
+        
+        function render() {
+            renderStamps(); 
+            renderStickers(); 
+
+            // Render Token Badge
+            const tokenDisplay = document.getElementById('token-display');
+            if (state.bonusTokens > 0) {
+                tokenDisplay.style.display = 'inline-flex';
+                tokenDisplay.innerText = `⭐ ${state.bonusTokens}`;
+            }
+
+            const activeMonth = document.getElementById('global-month-filter').value;
+            const isYearMode = state.currentViewMode === 'year';
+
+            const topShowcase = document.getElementById('top-progression-showcase');
+            topShowcase.innerHTML = '';
+            
+            if (state.pots.length > 0) {
+                topShowcase.style.display = 'flex';
+                state.pots.forEach((pot) => {
+                    const pct = Math.min((pot.current / pot.target) * 100, 100);
+                    let cozyIcon = "🌱"; let cozyStage = "Seedling Stage"; let iconBg = "rgba(110,133,115,0.15)"; 
+                    if (pct >= 100) { cozyIcon = "🏡"; cozyStage = "Fully Settled!"; iconBg = "rgba(245,199,77,0.2)"; } 
+                    else if (pct >= 75) { cozyIcon = "🌸"; cozyStage = "Blooming Phase"; iconBg = "rgba(245,211,211,0.5)"; } 
+                    else if (pct >= 50) { cozyIcon = "🪴"; cozyStage = "Taking Root"; iconBg = "rgba(136,148,183,0.15)"; } 
+                    else if (pct >= 25) { cozyIcon = "🌿"; cozyStage = "Growing Well"; iconBg = "rgba(221,197,169,0.3)"; }
+
+                    topShowcase.innerHTML += `
+                        <div class="top-showcase-card">
+                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                                <div style="font-size: 1.6rem; background: ${iconBg}; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 14px;">${cozyIcon}</div>
+                                <div style="flex: 1;"><strong style="font-weight:700; font-size: 0.9rem; display: block; letter-spacing: -0.2px;">${pot.name.toLowerCase()}</strong><span style="font-size: 0.65rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">${cozyStage}</span></div>
+                                <div style="text-align: right;"><span style="font-size:0.95rem; font-weight: 800; color: var(--text-main);">${Math.round(pct)}%</span></div>
+                            </div>
+                            <div class="progress-bg" style="background: var(--bg-color); height: 8px; border-radius: 4px; border: none;"><div class="progress-bar" style="width: ${pct}%; background: var(--venice); border-radius: 4px;"></div></div>
+                        </div>`;
+                });
+            } else {
+                topShowcase.style.display = 'none';
+            }
+
+            renderWishlist();
+
+            document.getElementById('dash-balance').innerText = `$${state.globalBalance.toFixed(2)}`;
+            document.getElementById('dash-tax').innerText = `$${state.taxEscrowBalance.toFixed(2)}`;
+            document.getElementById('fluid-balance').innerText = `$${state.globalBalance.toFixed(0)}`;
+
+            const targetedLedgerDataset = isYearMode ? state.ledger.filter(item => item.monthKey >= '2026-07' && item.monthKey <= '2027-07') : state.ledger.filter(item => item.monthKey === activeMonth);
+
+            let totalInflow = 0, totalOutflow = 0, categorySpendingMap = {};
+            state.categoryTargets.forEach(c => categorySpendingMap[c.name] = 0);
+            let nonNegotiableVaultTotal = 0, choiceExpensesLogged = 0;
+
+            state.categoryTargets.forEach(cat => {
+                const baseLimit = cat.limit; const activeLimit = isYearMode ? baseLimit * 12 : baseLimit;
+                if(cat.nonNegotiable) nonNegotiableVaultTotal += activeLimit;
+            });
+
+            targetedLedgerDataset.forEach(item => {
+                if(item.type === 'income') { totalInflow += item.net; } 
+                else { 
+                    totalOutflow += item.amt; 
+                    if(categorySpendingMap[item.cat] !== undefined) { categorySpendingMap[item.cat] += item.amt; } 
+                    const matchingCat = state.categoryTargets.find(c => c.name === item.cat);
+                    if (matchingCat && !matchingCat.nonNegotiable) { choiceExpensesLogged += item.amt; }
+                }
+            });
+
+            let trueChoiceCashRemaining = totalInflow - nonNegotiableVaultTotal - choiceExpensesLogged;
+            document.getElementById('dash-nn-vault').innerText = `$${nonNegotiableVaultTotal.toFixed(0)}`;
+            document.getElementById('dash-inflow').innerText = `$${totalInflow.toFixed(2)}`;
+            document.getElementById('dash-outflow').innerText = `$${totalOutflow.toFixed(2)}`;
+            
+            const choiceCashEl = document.getElementById('dash-choice-cash');
+            choiceCashEl.innerText = `${trueChoiceCashRemaining >= 0 ? '' : '-'}$${Math.abs(trueChoiceCashRemaining).toFixed(2)}`;
+            choiceCashEl.style.color = trueChoiceCashRemaining >= 0 ? 'var(--success)' : 'var(--danger)';
+
+            const capsContainer = document.getElementById('category-caps-container'); capsContainer.innerHTML = '';
+            state.categoryTargets.forEach(cat => {
+                const spent = categorySpendingMap[cat.name]; const limit = isYearMode ? cat.limit * 12 : cat.limit;
+                const pct = Math.min((spent / limit) * 100, 100);
+                let color = 'var(--success)'; if(pct >= 90) color = 'var(--danger)'; else if(pct >= 75) color = 'var(--warning)';
+
+                capsContainer.innerHTML += `
+                    <div class="progress-wrapper">
+                        <div class="progress-meta">
+                            <div><strong style="font-weight: 600; font-size:0.88rem;">${cat.name.toLowerCase()}</strong><span class="tx-cat-tag ${cat.nonNegotiable ? 'nn' : ''}" style="margin-top:0; margin-left:6px; font-size:0.58rem; padding:2px 8px; border-radius:10px;">${cat.nonNegotiable ? 'Essential' : 'Choice'}</span></div>
+                            <span style="color: var(--text-muted); font-size:0.82rem; font-weight: 600;">$${spent.toFixed(0)} / $${limit}</span>
+                        </div>
+                        <div class="progress-bg"><div class="progress-bar" style="width: ${pct}%; background: ${color};"></div></div>
+                        <div class="inline-actions" style="margin-top: 6px; margin-bottom: 12px;"><button class="btn-inline edit" onclick="editCategoryLimit('${cat.name}')">Adjust Cap</button><button class="btn-inline" style="color: var(--text-muted);" onclick="toggleCategoryPrioritization('${cat.name}')">Swap Priority</button></div>
+                    </div>`;
+            });
+
+            if(!isYearMode) {
+                const recUl = document.getElementById('recurring-list'); recUl.innerHTML = '';
+                state.recurringTemplates.forEach(item => {
+                    recUl.innerHTML += `
+                        <li class="tx-item" style="padding: 10px 0; align-items: flex-start; flex-direction: column;">
+                            <div style="display:flex; justify-content:space-between; width:100%;"><div><strong>${item.desc.toLowerCase()}</strong> <span class="tx-cat-tag" style="background: var(--bg-color);">${item.cat}</span></div><span style="font-weight:600;">$${item.amt}</span></div>
+                            <div class="inline-actions"><button class="btn-inline edit" onclick="editRecurringTemplate(${item.id})">Edit</button><button class="btn-inline del" onclick="removeRecurringTemplate(${item.id})">Drop</button></div>
+                        </li>`;
+                });
+            }
+
+            const potsContainer = document.getElementById('pots-container'); potsContainer.innerHTML = '';
+            state.pots.forEach((pot) => {
+                const pct = Math.min((pot.current / pot.target) * 100, 100); const remainingAmount = pot.target - pot.current;
+                let projectionText = remainingAmount <= 0 ? 'Goal fully achieved! 🎉' : (pot.monthly && pot.monthly > 0 ? `Est. completion: <strong>${Math.ceil(remainingAmount / pot.monthly)} months</strong>` : 'Assign a monthly plan.');
+                let cozyIcon = "🌱"; let cozyStage = "Seedling Stage"; let iconBg = "rgba(110,133,115,0.15)"; 
+                if (pct >= 100) { cozyIcon = "🏡"; cozyStage = "Fully Settled!"; iconBg = "rgba(245,199,77,0.2)"; } else if (pct >= 75) { cozyIcon = "🌸"; cozyStage = "Blooming Phase"; iconBg = "rgba(245,211,211,0.5)"; } else if (pct >= 50) { cozyIcon = "🪴"; cozyStage = "Taking Root"; iconBg = "rgba(136,148,183,0.15)"; } else if (pct >= 25) { cozyIcon = "🌿"; cozyStage = "Growing Well"; iconBg = "rgba(221,197,169,0.3)"; }
+
+                potsContainer.innerHTML += `
+                    <div class="progress-wrapper" style="background: var(--card-bg); padding: 18px; border-radius: 24px; border: 1px solid var(--border); margin-bottom: 20px; transition: background-color 0.8s ease, border-color 0.8s ease;">
+                        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 14px;">
+                            <div style="font-size: 2rem; background: ${iconBg}; width: 54px; height: 54px; display: flex; align-items: center; justify-content: center; border-radius: 18px;">${cozyIcon}</div>
+                            <div style="flex: 1;"><strong style="font-weight:700; font-size: 1.05rem; display: block; letter-spacing: -0.3px;">${pot.name.toLowerCase()}</strong><span style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">${cozyStage}</span></div>
+                            <div style="text-align: right;"><span style="font-size:0.95rem; font-weight: 700; display: block;">$${pot.current.toFixed(0)}</span><span style="font-size:0.75rem; font-weight: 600; color: var(--text-muted);">/ $${pot.target.toFixed(0)}</span></div>
+                        </div>
+                        <div class="progress-bg" style="background: var(--bg-color); height: 14px; border-radius: 8px;"><div class="progress-bar" style="width: ${pct}%; background: var(--venice); border-radius: 8px;"></div></div>
+                        <div class="pot-eta" style="margin-top: 10px;">${projectionText}</div>
+                        <div class="inline-actions" style="margin-top: 12px; margin-bottom: 6px;"><button class="btn-inline edit" onclick="editPot(${pot.id})">Modify Limits</button><button class="btn-inline del" onclick="deletePot(${pot.id})">Wipe Pot</button></div>
+                        <button class="secondary" style="margin-top:8px; background:var(--bg-color); color:var(--text-main); border: 1px solid var(--border); width: 100%; padding: 14px; border-radius: 16px; font-weight: 600;" onclick="fundPot(${pot.id})">+ Allocate Cash to Pot</button>
+                    </div>`;
+            });
+
+            const ledgerUl = document.getElementById('ledger-container'); ledgerUl.innerHTML = '';
+            if(targetedLedgerDataset.length === 0) {
+                ledgerUl.innerHTML = `<li class="tx-item" style="color:var(--text-muted); justify-content:center; padding: 24px 0;">No active logs found for this window.</li>`;
+            } else {
+                targetedLedgerDataset.slice(0, 15).forEach(item => {
+                    const inlineActionMarkup = `<div class="inline-actions"><button class="btn-inline edit" onclick="editTransaction(${item.id})">Adjust</button><button class="btn-inline del" onclick="deleteTransaction(${item.id})">Delete</button></div>`;
+                    const isNN = state.categoryTargets.find(c => c.name === item.cat)?.nonNegotiable;
+                    if(item.type === 'expense') {
+                        ledgerUl.innerHTML += `<li class="tx-item" style="align-items: center;"><div><div><strong>${item.desc.toLowerCase()}</strong></div><span class="tx-cat-tag ${isNN ? 'nn' : (item.cat === 'Choice Transfer' ? 'nn' : '')}">${item.cat}</span>${inlineActionMarkup}</div><span style="color:var(--text-main); font-weight:600; font-size: 1rem;">-$${item.amt.toFixed(2)}</span></li>`;
+                    } else {
+                        ledgerUl.innerHTML += `<li class="tx-item" style="align-items: center;"><div><div><strong>${item.desc.toLowerCase()}</strong></div><span class="tx-cat-tag" style="background:var(--block-blue); color:#1C1E24;">Net Pay</span>${inlineActionMarkup}</div><span style="color:var(--success); font-weight:600; font-size: 1rem;">+$${item.net.toFixed(2)}</span></li>`;
+                    }
+                });
+            }
         }
 
         window.onload = init;
