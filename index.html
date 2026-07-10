@@ -62,6 +62,12 @@
         .top-showcase-container::-webkit-scrollbar { display: none; }
         .top-showcase-card { min-width: 260px; flex-shrink: 0; background: var(--card-bg); border-radius: 24px; padding: 16px; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(35,39,51,0.02); scroll-snap-align: center; }
 
+        /* Gamification: Soft-Fail Recalibration Modal */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(28,30,36,0.6); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 2000; padding: 16px; }
+        .modal-card { background: var(--card-bg); border-radius: 28px; padding: 24px; width: 100%; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); border: 1px solid var(--border); }
+        .modal-card h3 { font-family: "Georgia", Georgia, serif; font-style: italic; font-size: 1.4rem; color: var(--danger); margin-bottom: 12px; }
+        .modal-card p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px; }
+
         /* Inline Hero Combination Layout Container */
         .hero-inline-row { display: flex; gap: 14px; align-items: stretch; margin-bottom: 20px; width: 100%; }
         
@@ -142,7 +148,7 @@
             <div id="fluid-balance" style="font-weight: 700; color: var(--success); font-size: 0.95rem; background: var(--card-bg); padding: 6px 14px; border-radius: 14px; border: 1px solid var(--border);">$0</div>
         </header>
 
-        <!-- Cozy Daily Check-In Punch Card -->
+        <!-- Gamification Feature 2: Cozy Daily Check-In Punch Card -->
         <div class="card" style="padding: 18px 22px; background: linear-gradient(135deg, var(--card-bg) 0%, #FFFDF9 100%);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                 <h2 style="margin: 0; font-size: 1.1rem; color: var(--text-main);">cozy daily check-in</h2>
@@ -153,7 +159,7 @@
             </div>
         </div>
 
-        <!-- Top Gamification Read-Only Showcase Container -->
+        <!-- Gamification Feature (Original): Top Read-Only Showcase Container -->
         <div id="top-progression-showcase" class="top-showcase-container" style="display: none;"></div>
 
         <!-- Segment View Switcher -->
@@ -226,7 +232,7 @@
             <button onclick="submitTransaction()">Record Entry</button>
         </div>
         
-        <!-- The Waiting Room (48-Hour Wishlist) -->
+        <!-- Gamification Feature 1: The Waiting Room (48-Hour Wishlist) -->
         <div class="card" id="waiting-room-card" style="display: none; background: linear-gradient(to bottom, #FFFFFF, var(--bg-color)); border-color: var(--venice);">
             <h2>the waiting room ⏳</h2>
             <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4;">Impulse buys are cooling down. You cannot clear these to your operational ledger until the 48-hour emotional lock lifts.</p>
@@ -289,6 +295,27 @@
         <button class="dock-item" onclick="document.getElementById('recurring-card-manager').scrollIntoView({behavior: 'smooth'})">Rules</button>
     </div>
 
+    <!-- Gamification Feature 3: Soft-Fail Recalibration Modal -->
+    <div class="modal-overlay" id="recalibration-modal">
+        <div class="modal-card">
+            <h3>optimization needed 🧩</h3>
+            <p>This entry exceeds your available fluid balance by <strong id="recal-shortfall" style="color: var(--danger);">$0.00</strong>. How would you like to balance this puzzle?</p>
+            
+            <div class="form-group" style="margin-bottom: 24px;">
+                <label>Option 1: Draw from a Savings Pot</label>
+                <div style="display: flex; gap: 8px;">
+                    <select id="recal-pot-select" class="form-input"></select>
+                    <button style="width: auto; padding: 0 16px; background: var(--success);" onclick="recalibrateWithPot()">Use Pot</button>
+                </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <button style="background: var(--block-cream); color: var(--text-main); border: 1px solid var(--linen);" onclick="recalibrateWithDebt()">Option 2: Log as Debt (Pull from Future)</button>
+                <button style="background: transparent; color: var(--text-muted); border: 1px solid var(--border);" onclick="closeRecalibration()">Option 3: Cancel Entry (Save the Cash!)</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let state = JSON.parse(localStorage.getItem('cassidyProBudgetState')) || {
             globalBalance: 0,
@@ -298,7 +325,7 @@
             ledger: [], 
             recurringTemplates: [],
             wishlist: [], 
-            stamps: {}, // NEW: Daily check-in tracking state object
+            stamps: {}, 
             categoryTargets: [
                 { name: "Housing", limit: 1600, nonNegotiable: true },
                 { name: "Groceries", limit: 450, nonNegotiable: true },
@@ -308,6 +335,9 @@
                 { name: "Miscellaneous", limit: 200, nonNegotiable: false }
             ]
         };
+
+        // Temporary storage for an intercepted transaction
+        let pendingOverbudgetTx = null;
 
         function save() {
             localStorage.setItem('cassidyProBudgetState', JSON.stringify(state));
@@ -355,7 +385,6 @@
             const todayStr = today.toLocaleDateString('en-US');
 
             for (let i = 0; i < 7; i++) {
-                // Calculate the date corresponding to this day of the current week (Sun-Sat)
                 let d = new Date(today);
                 d.setDate(today.getDate() - currentDayIndex + i);
                 let dStr = d.toLocaleDateString('en-US');
@@ -373,12 +402,11 @@
                     content = '🌸';
                 } else if (isToday) {
                     boxClass += ' today-active';
-                    content = '✨'; // The pulsing star prompting the tap
+                    content = '✨';
                     clickAction = `onclick="claimStamp('${dStr}')"`;
                 } else if (isFuture) {
                     content = '<span style="opacity:0.2;">•</span>';
                 } else {
-                    // Past empty un-stamped box. No guilt trip or red X's!
                     content = '';
                 }
 
@@ -537,6 +565,7 @@
             }
         }
 
+        /* --- Gamification Feature 3: Soft-Fail Recalibration Engine --- */
         function submitTransaction() {
             const type = document.getElementById('tx-type').value;
             const activeMonth = document.getElementById('global-month-filter').value;
@@ -550,11 +579,22 @@
 
                 if (type === 'wishlist') {
                     state.wishlist.push({ id: Date.now(), desc, amt, cat, timestamp: Date.now() });
+                    save();
+                    toggleFormContext();
                 } else {
+                    // Feature 3 Overbudget Interception
+                    if (amt > state.globalBalance) {
+                        triggerRecalibrationModal(desc, amt, cat);
+                        return; // Halt execution, wait for user puzzle decision
+                    }
+                    
                     state.globalBalance -= amt;
                     state.ledger.unshift({ id: Date.now(), type, desc, amt, cat, date: dateStr, monthKey: activeMonth });
+                    save();
+                    toggleFormContext();
                 }
             } else {
+                // Income Logic
                 const freq = document.getElementById('field-freq').value;
                 const grossInput = parseFloat(document.getElementById('field-gross').value);
                 const rate = parseFloat(document.getElementById('field-tax-rate').value) / 100;
@@ -579,11 +619,77 @@
                     state.globalBalance += net; state.taxEscrowBalance += tax;
                     state.ledger.unshift({ id: Date.now(), type: 'income', desc: 'Paycheck Inflow', gross: grossInput, tax, net, date: dateStr, monthKey: activeMonth });
                 }
+                save();
+                toggleFormContext();
             }
+        }
+
+        // Feature 3: Modal Handlers
+        function triggerRecalibrationModal(desc, amt, cat) {
+            pendingOverbudgetTx = { desc, amt, cat };
+            const shortfall = amt - state.globalBalance;
+            document.getElementById('recal-shortfall').innerText = `$${shortfall.toFixed(2)}`;
+            
+            const potSelect = document.getElementById('recal-pot-select');
+            potSelect.innerHTML = '<option value="">-- Choose Pot --</option>';
+            state.pots.forEach(pot => {
+                potSelect.innerHTML += `<option value="${pot.id}">${pot.name.toLowerCase()} ($${pot.current.toFixed(0)})</option>`;
+            });
+
+            document.getElementById('recalibration-modal').style.display = 'flex';
+        }
+
+        function closeRecalibration() {
+            pendingOverbudgetTx = null;
+            document.getElementById('recalibration-modal').style.display = 'none';
+        }
+
+        function recalibrateWithDebt() {
+            if(!pendingOverbudgetTx) return;
+            const activeMonth = document.getElementById('global-month-filter').value;
+            
+            // Allow negative balance, standard execution
+            state.globalBalance -= pendingOverbudgetTx.amt; 
+            state.ledger.unshift({ id: Date.now(), type: 'expense', desc: pendingOverbudgetTx.desc, amt: pendingOverbudgetTx.amt, cat: pendingOverbudgetTx.cat, date: new Date().toLocaleDateString(), monthKey: activeMonth });
+            
             save();
+            closeRecalibration();
+            toggleFormContext(); 
+        }
+
+        function recalibrateWithPot() {
+            if(!pendingOverbudgetTx) return;
+            const potId = document.getElementById('recal-pot-select').value;
+            if(!potId) { alert("Please select a pot from the dropdown first."); return; }
+            
+            const pot = state.pots.find(p => p.id == potId);
+            if(!pot) return;
+            
+            if (pot.current < pendingOverbudgetTx.amt) {
+                alert(`There isn't enough in the "${pot.name}" pot to cover this entire purchase.`);
+                return;
+            }
+
+            const activeMonth = document.getElementById('global-month-filter').value;
+            pot.current -= pendingOverbudgetTx.amt;
+            
+            // Log it as an expense, appending the pot name for clarity
+            state.ledger.unshift({ 
+                id: Date.now(), 
+                type: 'expense', 
+                desc: `${pendingOverbudgetTx.desc} (from ${pot.name})`, 
+                amt: pendingOverbudgetTx.amt, 
+                cat: pendingOverbudgetTx.cat, 
+                date: new Date().toLocaleDateString(), 
+                monthKey: activeMonth 
+            });
+            
+            save();
+            closeRecalibration();
             toggleFormContext();
         }
 
+        /* --- Gamification Feature 1: The Waiting Room Handlers --- */
         function processWishlistItem(id, action) {
             const index = state.wishlist.findIndex(item => item.id === id);
             if(index === -1) return;
@@ -591,6 +697,11 @@
 
             if(action === 'buy') {
                 const activeMonth = document.getElementById('global-month-filter').value;
+                // Run it through the Soft-Fail check just in case!
+                if (item.amt > state.globalBalance) {
+                    triggerRecalibrationModal(item.desc, item.amt, item.cat);
+                    return; 
+                }
                 state.globalBalance -= item.amt;
                 state.ledger.unshift({ id: Date.now(), type: 'expense', desc: item.desc, amt: item.amt, cat: item.cat, date: new Date().toLocaleDateString(), monthKey: activeMonth });
                 state.wishlist.splice(index, 1);
@@ -601,6 +712,64 @@
             save();
         }
 
+        function renderWishlist() {
+            const card = document.getElementById('waiting-room-card');
+            const container = document.getElementById('wishlist-container');
+            container.innerHTML = '';
+
+            if(state.wishlist.length === 0) {
+                card.style.display = 'none';
+                return;
+            }
+
+            card.style.display = 'block';
+            const now = Date.now();
+
+            state.wishlist.forEach(item => {
+                const elapsedMs = now - item.timestamp;
+                const totalCooldownMs = 48 * 60 * 60 * 1000; // 48 Hours
+                const remainingMs = totalCooldownMs - elapsedMs;
+                
+                let timeText = "";
+                let locked = true;
+
+                if (remainingMs > 0) {
+                    const hours = Math.floor(remainingMs / (1000 * 60 * 60));
+                    const mins = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
+                    timeText = `🔒 Locks lift in ${hours}h ${mins}m`;
+                } else {
+                    timeText = `✅ Unlocked & ready`;
+                    locked = false;
+                }
+
+                const actionButtons = locked 
+                    ? `<button disabled style="padding: 8px; font-size: 0.75rem; margin-top: 8px;">Cooling Down...</button>`
+                    : `<div style="display: flex; gap: 8px; margin-top: 8px;">
+                           <button style="padding: 8px; font-size: 0.75rem; background: var(--success);" onclick="processWishlistItem(${item.id}, 'buy')">Approve & Buy</button>
+                           <button style="padding: 8px; font-size: 0.75rem; background: var(--danger);" onclick="processWishlistItem(${item.id}, 'pass')">Pass & Save</button>
+                       </div>`;
+
+                container.innerHTML += `
+                    <li class="tx-item" style="flex-direction: column; align-items: flex-start; padding: 16px; background: var(--card-bg); border-radius: 16px; margin-bottom: 10px; border: 1px solid rgba(136,148,183,0.3);">
+                        <div style="display: flex; justify-content: space-between; width: 100%;">
+                            <div>
+                                <strong style="font-size: 0.95rem;">${item.desc.toLowerCase()}</strong>
+                                <br><span class="tx-cat-tag" style="background:var(--bg-color); margin-top: 4px;">${item.cat}</span>
+                            </div>
+                            <span style="font-weight:700; font-size: 1rem; color: var(--danger);">$${item.amt.toFixed(2)}</span>
+                        </div>
+                        <div style="font-size: 0.75rem; font-weight: 600; color: ${locked ? 'var(--warning)' : 'var(--success)'}; margin-top: 10px;">
+                            ${timeText}
+                        </div>
+                        <div style="width: 100%;">
+                            ${actionButtons}
+                        </div>
+                    </li>
+                `;
+            });
+        }
+
+        /* --- Standard Utilities --- */
         function deleteTransaction(id) {
             const index = state.ledger.findIndex(item => item.id === id);
             if(index === -1) return;
@@ -727,65 +896,9 @@
             if(confirm(`Wipe "${pot.name}" savings target completely?`)) { state.globalBalance += pot.current; state.pots.splice(index, 1); save(); }
         }
         
-        function renderWishlist() {
-            const card = document.getElementById('waiting-room-card');
-            const container = document.getElementById('wishlist-container');
-            container.innerHTML = '';
-
-            if(state.wishlist.length === 0) {
-                card.style.display = 'none';
-                return;
-            }
-
-            card.style.display = 'block';
-            const now = Date.now();
-
-            state.wishlist.forEach(item => {
-                const elapsedMs = now - item.timestamp;
-                const totalCooldownMs = 48 * 60 * 60 * 1000; // 48 Hours
-                const remainingMs = totalCooldownMs - elapsedMs;
-                
-                let timeText = "";
-                let locked = true;
-
-                if (remainingMs > 0) {
-                    const hours = Math.floor(remainingMs / (1000 * 60 * 60));
-                    const mins = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
-                    timeText = `🔒 Locks lift in ${hours}h ${mins}m`;
-                } else {
-                    timeText = `✅ Unlocked & ready`;
-                    locked = false;
-                }
-
-                const actionButtons = locked 
-                    ? `<button disabled style="padding: 8px; font-size: 0.75rem; margin-top: 8px;">Cooling Down...</button>`
-                    : `<div style="display: flex; gap: 8px; margin-top: 8px;">
-                           <button style="padding: 8px; font-size: 0.75rem; background: var(--success);" onclick="processWishlistItem(${item.id}, 'buy')">Approve & Buy</button>
-                           <button style="padding: 8px; font-size: 0.75rem; background: var(--danger);" onclick="processWishlistItem(${item.id}, 'pass')">Pass & Save</button>
-                       </div>`;
-
-                container.innerHTML += `
-                    <li class="tx-item" style="flex-direction: column; align-items: flex-start; padding: 16px; background: var(--card-bg); border-radius: 16px; margin-bottom: 10px; border: 1px solid rgba(136,148,183,0.3);">
-                        <div style="display: flex; justify-content: space-between; width: 100%;">
-                            <div>
-                                <strong style="font-size: 0.95rem;">${item.desc.toLowerCase()}</strong>
-                                <br><span class="tx-cat-tag" style="background:var(--bg-color); margin-top: 4px;">${item.cat}</span>
-                            </div>
-                            <span style="font-weight:700; font-size: 1rem; color: var(--danger);">$${item.amt.toFixed(2)}</span>
-                        </div>
-                        <div style="font-size: 0.75rem; font-weight: 600; color: ${locked ? 'var(--warning)' : 'var(--success)'}; margin-top: 10px;">
-                            ${timeText}
-                        </div>
-                        <div style="width: 100%;">
-                            ${actionButtons}
-                        </div>
-                    </li>
-                `;
-            });
-        }
-
+        /* --- Core Render Engine --- */
         function render() {
-            renderStamps(); // Render the new stamp grid
+            renderStamps(); 
 
             const activeMonth = document.getElementById('global-month-filter').value;
             const isYearMode = state.currentViewMode === 'year';
