@@ -46,10 +46,15 @@
         .container { max-width: 480px; margin: 0 auto; }
         
         /* Editorial Premium Typography & Expanded Space Rules */
-        header { margin-bottom: 42px; display: flex; justify-content: space-between; align-items: center; }
+        header { margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; }
         header h1 { font-family: "Georgia", Georgia, serif; font-weight: 400; font-style: italic; font-size: 1.8rem; color: var(--text-main); letter-spacing: -0.5px; text-transform: lowercase; }
         h2 { font-family: "Georgia", Georgia, serif; font-style: italic; font-size: 1.25rem; font-weight: 400; margin-bottom: 20px; color: var(--text-main); display: flex; justify-content: space-between; align-items: center; }
         
+        /* Top Showcase Carousel Gamification */
+        .top-showcase-container { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 28px; scrollbar-width: none; scroll-snap-type: x mandatory; }
+        .top-showcase-container::-webkit-scrollbar { display: none; }
+        .top-showcase-card { min-width: 260px; flex-shrink: 0; background: var(--card-bg); border-radius: 24px; padding: 16px; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(35,39,51,0.02); scroll-snap-align: center; }
+
         /* Inline Hero Combination Layout Container */
         .hero-inline-row { display: flex; gap: 14px; align-items: stretch; margin-bottom: 20px; width: 100%; }
         
@@ -128,6 +133,9 @@
             <h1>lucky girl cass</h1>
             <div id="fluid-balance" style="font-weight: 700; color: var(--success); font-size: 0.95rem; background: var(--card-bg); padding: 6px 14px; border-radius: 14px; border: 1px solid var(--border);">$0</div>
         </header>
+
+        <!-- Top Gamification Read-Only Showcase Container -->
+        <div id="top-progression-showcase" class="top-showcase-container" style="display: none;"></div>
 
         <!-- Segment View Switcher -->
         <div class="view-toggle">
@@ -651,6 +659,42 @@
             const activeMonth = document.getElementById('global-month-filter').value;
             const isYearMode = state.currentViewMode === 'year';
 
+            // Top Gamification Read-Only Showcase Render Logic
+            const topShowcase = document.getElementById('top-progression-showcase');
+            topShowcase.innerHTML = '';
+            
+            if (state.pots.length > 0) {
+                topShowcase.style.display = 'flex';
+                state.pots.forEach((pot) => {
+                    const pct = Math.min((pot.current / pot.target) * 100, 100);
+                    
+                    let cozyIcon = "🌱"; let cozyStage = "Seedling Stage"; let iconBg = "rgba(110,133,115,0.15)"; 
+                    if (pct >= 100) { cozyIcon = "🏡"; cozyStage = "Fully Settled!"; iconBg = "rgba(245,199,77,0.2)"; } 
+                    else if (pct >= 75) { cozyIcon = "🌸"; cozyStage = "Blooming Phase"; iconBg = "rgba(245,211,211,0.5)"; } 
+                    else if (pct >= 50) { cozyIcon = "🪴"; cozyStage = "Taking Root"; iconBg = "rgba(136,148,183,0.15)"; } 
+                    else if (pct >= 25) { cozyIcon = "🌿"; cozyStage = "Growing Well"; iconBg = "rgba(221,197,169,0.3)"; }
+
+                    topShowcase.innerHTML += `
+                        <div class="top-showcase-card">
+                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                                <div style="font-size: 1.6rem; background: ${iconBg}; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 14px;">${cozyIcon}</div>
+                                <div style="flex: 1;">
+                                    <strong style="font-weight:700; font-size: 0.9rem; display: block; letter-spacing: -0.2px;">${pot.name.toLowerCase()}</strong>
+                                    <span style="font-size: 0.65rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">${cozyStage}</span>
+                                </div>
+                                <div style="text-align: right;">
+                                    <span style="font-size:0.95rem; font-weight: 800; color: var(--text-main);">${Math.round(pct)}%</span>
+                                </div>
+                            </div>
+                            <div class="progress-bg" style="background: var(--bg-color); height: 8px; border-radius: 4px; border: none;">
+                                <div class="progress-bar" style="width: ${pct}%; background: var(--venice); border-radius: 4px;"></div>
+                            </div>
+                        </div>`;
+                });
+            } else {
+                topShowcase.style.display = 'none';
+            }
+
             document.getElementById('dash-balance').innerText = `$${state.globalBalance.toFixed(2)}`;
             document.getElementById('dash-tax').innerText = `$${state.taxEscrowBalance.toFixed(2)}`;
             document.getElementById('fluid-balance').innerText = `$${state.globalBalance.toFixed(0)}`;
@@ -780,7 +824,7 @@
                 });
             }
 
-            // GAMIFICATION INJECTION: Cozy Progression rendering for Savings Pots
+            // Gamification rendering for Savings Pots (Management Section)
             const potsContainer = document.getElementById('pots-container');
             potsContainer.innerHTML = '';
             state.pots.forEach((pot) => {
@@ -788,28 +832,12 @@
                 const remainingAmount = pot.target - pot.current;
                 let projectionText = remainingAmount <= 0 ? 'Goal fully achieved! 🎉' : (pot.monthly && pot.monthly > 0 ? `Est. completion: <strong>${Math.ceil(remainingAmount / pot.monthly)} months</strong>` : 'Assign a monthly plan.');
 
-                // Determine Cozy Stage based on Percentage
-                let cozyIcon = "🌱";
-                let cozyStage = "Seedling Stage";
-                let iconBg = "rgba(110,133,115,0.15)"; 
-                
-                if (pct >= 100) { 
-                    cozyIcon = "🏡"; 
-                    cozyStage = "Fully Settled!"; 
-                    iconBg = "rgba(245,199,77,0.2)"; 
-                } else if (pct >= 75) { 
-                    cozyIcon = "🌸"; 
-                    cozyStage = "Blooming Phase"; 
-                    iconBg = "rgba(245,211,211,0.5)"; 
-                } else if (pct >= 50) { 
-                    cozyIcon = "🪴"; 
-                    cozyStage = "Taking Root"; 
-                    iconBg = "rgba(136,148,183,0.15)"; 
-                } else if (pct >= 25) { 
-                    cozyIcon = "🌿"; 
-                    cozyStage = "Growing Well"; 
-                    iconBg = "rgba(221,197,169,0.3)"; 
-                }
+                // Determine Cozy Stage based on Percentage for the main management view as well
+                let cozyIcon = "🌱"; let cozyStage = "Seedling Stage"; let iconBg = "rgba(110,133,115,0.15)"; 
+                if (pct >= 100) { cozyIcon = "🏡"; cozyStage = "Fully Settled!"; iconBg = "rgba(245,199,77,0.2)"; } 
+                else if (pct >= 75) { cozyIcon = "🌸"; cozyStage = "Blooming Phase"; iconBg = "rgba(245,211,211,0.5)"; } 
+                else if (pct >= 50) { cozyIcon = "🪴"; cozyStage = "Taking Root"; iconBg = "rgba(136,148,183,0.15)"; } 
+                else if (pct >= 25) { cozyIcon = "🌿"; cozyStage = "Growing Well"; iconBg = "rgba(221,197,169,0.3)"; }
 
                 potsContainer.innerHTML += `
                     <div class="progress-wrapper" style="background: var(--bg-color); padding: 18px; border-radius: 24px; border: 1px solid var(--border); margin-bottom: 20px;">
