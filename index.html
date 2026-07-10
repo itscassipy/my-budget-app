@@ -19,7 +19,7 @@
             
             /* Dynamic Base Palette */
             --bg-color: #FAF6EE; --card-bg: #FFFFFF; --text-main: #1C1E24; --text-muted: #727B8E; --border: #EFE9DE; --linen: #DDC5A9;
-            --dock-bg: #1A1D26; --dock-text: #A0AEC0;
+            --dock-glass: rgba(250, 246, 238, 0.75); /* Default Afternoon Glass */
             
             /* Dynamic Gradients */
             --hero-gradient: linear-gradient(135deg, #FFFDF9 0%, #F6EFE5 100%);
@@ -127,11 +127,58 @@
         .sticker-slot:hover .sticker-tooltip { opacity: 1; }
         @keyframes pop { 0% { transform: scale(0.8); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
 
-        /* Floating Navigation Dock */
-        .bottom-dock { position: fixed; bottom: 0; left: 0; right: 0; background: var(--dock-bg); height: 80px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding: 0 10px 12px 10px; transition: background-color 0.8s ease; border-top: 1px solid rgba(255,255,255,0.05); }
-        .dock-item { color: var(--dock-text); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border: none; background: transparent; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 60px; height: 100%; transition: color 0.3s ease; gap: 4px; }
-        .dock-item.active { color: var(--shine); }
-        .dock-item span { font-size: 1.2rem; margin-bottom: 2px; }
+        /* Floating Glass Pill Dock */
+        .bottom-dock { 
+            position: fixed; 
+            bottom: 24px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            width: 90%; 
+            max-width: 380px; 
+            background: var(--dock-glass); 
+            backdrop-filter: blur(12px); 
+            -webkit-backdrop-filter: blur(12px); 
+            height: auto; 
+            border-radius: 40px; 
+            display: flex; 
+            justify-content: space-around; 
+            align-items: center; 
+            z-index: 1000; 
+            padding: 8px 12px; 
+            border: 1px solid var(--border); 
+            box-shadow: 0 12px 32px rgba(0,0,0,0.08); 
+            transition: all 0.8s ease; 
+        }
+        .dock-item { 
+            color: var(--text-muted); 
+            font-size: 0.65rem; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px; 
+            border: none; 
+            background: transparent; 
+            cursor: pointer; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 8px 16px; 
+            border-radius: 24px; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            gap: 2px; 
+        }
+        .dock-item span { 
+            font-size: 1.2rem; 
+            transition: transform 0.3s ease; 
+        }
+        .dock-item.active { 
+            color: var(--text-main); 
+            background: var(--card-bg); 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04); 
+        }
+        .dock-item.active span { 
+            transform: translateY(-2px) scale(1.1); 
+        }
     </style>
 </head>
 <body>
@@ -142,7 +189,6 @@
             <div id="fluid-balance" style="font-weight: 700; color: var(--success); font-size: 0.95rem; background: var(--card-bg); padding: 6px 14px; border-radius: 14px; border: 1px solid var(--border); transition: all 0.8s ease;">$0</div>
         </header>
 
-        <!-- Global Context Controls (Always Visible) -->
         <div class="view-toggle">
             <button id="toggle-month" class="toggle-btn active" onclick="switchView('month')">Month View</button>
             <button id="toggle-year" class="toggle-btn" onclick="switchView('year')">Cycle View (12M)</button>
@@ -157,7 +203,6 @@
             </div>
         </div>
 
-        <!-- ==================== TAB 1: HOME ==================== -->
         <div id="tab-home" class="tab-content active">
             
             <div class="card" style="padding: 18px 22px; background: var(--daily-gradient);">
@@ -196,7 +241,6 @@
             </div>
         </div>
 
-        <!-- ==================== TAB 2: LOG ==================== -->
         <div id="tab-log" class="tab-content">
             <div class="card">
                 <h2>Log Entry Transaction</h2>
@@ -225,7 +269,6 @@
             </div>
         </div>
 
-        <!-- ==================== TAB 3: LEDGER ==================== -->
         <div id="tab-ledger" class="tab-content">
             <div class="card">
                 <h2>dynamic operational ledger</h2>
@@ -233,7 +276,6 @@
             </div>
         </div>
 
-        <!-- ==================== TAB 4: GARDEN ==================== -->
         <div id="tab-garden" class="tab-content">
             <div class="card">
                 <h2>long-term savings pots</h2>
@@ -275,7 +317,6 @@
 
     </div>
 
-    <!-- Navigation Dock -->
     <nav class="bottom-dock">
         <button class="dock-item active" onclick="switchTab('home', this)"><span>🏠</span> Home</button>
         <button class="dock-item" onclick="switchTab('log', this)"><span>📝</span> Log</button>
@@ -283,7 +324,6 @@
         <button class="dock-item" onclick="switchTab('garden', this)"><span>🪴</span> Garden</button>
     </nav>
 
-    <!-- Gamification Feature: Soft-Fail Recalibration Modal -->
     <div class="modal-overlay" id="recalibration-modal">
         <div class="modal-card">
             <h3>optimization needed 🧩</h3>
@@ -416,13 +456,21 @@
             const root = document.documentElement;
 
             if (hour >= 6 && hour < 12) {
-                root.style.setProperty('--bg-color', '#F9FAFB'); root.style.setProperty('--card-bg', '#FFFFFF'); root.style.setProperty('--text-main', '#111827'); root.style.setProperty('--text-muted', '#6B7280'); root.style.setProperty('--border', '#F3F4F6'); root.style.setProperty('--dock-bg', '#1F2937'); root.style.setProperty('--dock-text', '#9CA3AF'); root.style.setProperty('--hero-gradient', 'linear-gradient(135deg, #FFFFFF 0%, #FEF3C7 100%)'); root.style.setProperty('--daily-gradient', 'linear-gradient(135deg, #FFFFFF 0%, #F9FAFB 100%)'); root.style.setProperty('--waiting-gradient', 'linear-gradient(to bottom, #FFFFFF, #F9FAFB)');
+                // Morning
+                root.style.setProperty('--bg-color', '#F9FAFB'); root.style.setProperty('--card-bg', '#FFFFFF'); root.style.setProperty('--text-main', '#111827'); root.style.setProperty('--text-muted', '#6B7280'); root.style.setProperty('--border', '#F3F4F6'); root.style.setProperty('--hero-gradient', 'linear-gradient(135deg, #FFFFFF 0%, #FEF3C7 100%)'); root.style.setProperty('--daily-gradient', 'linear-gradient(135deg, #FFFFFF 0%, #F9FAFB 100%)'); root.style.setProperty('--waiting-gradient', 'linear-gradient(to bottom, #FFFFFF, #F9FAFB)');
+                root.style.setProperty('--dock-glass', 'rgba(255, 255, 255, 0.7)');
             } else if (hour >= 12 && hour < 18) {
-                root.style.setProperty('--bg-color', '#FAF6EE'); root.style.setProperty('--card-bg', '#FFFFFF'); root.style.setProperty('--text-main', '#1C1E24'); root.style.setProperty('--text-muted', '#727B8E'); root.style.setProperty('--border', '#EFE9DE'); root.style.setProperty('--dock-bg', '#1A1D26'); root.style.setProperty('--dock-text', '#A0AEC0'); root.style.setProperty('--hero-gradient', 'linear-gradient(135deg, #FFFDF9 0%, #F6EFE5 100%)'); root.style.setProperty('--daily-gradient', 'linear-gradient(135deg, #FFFFFF 0%, #FFFDF9 100%)'); root.style.setProperty('--waiting-gradient', 'linear-gradient(to bottom, #FFFFFF, #FAF6EE)');
+                // Afternoon
+                root.style.setProperty('--bg-color', '#FAF6EE'); root.style.setProperty('--card-bg', '#FFFFFF'); root.style.setProperty('--text-main', '#1C1E24'); root.style.setProperty('--text-muted', '#727B8E'); root.style.setProperty('--border', '#EFE9DE'); root.style.setProperty('--hero-gradient', 'linear-gradient(135deg, #FFFDF9 0%, #F6EFE5 100%)'); root.style.setProperty('--daily-gradient', 'linear-gradient(135deg, #FFFFFF 0%, #FFFDF9 100%)'); root.style.setProperty('--waiting-gradient', 'linear-gradient(to bottom, #FFFFFF, #FAF6EE)');
+                root.style.setProperty('--dock-glass', 'rgba(250, 246, 238, 0.75)');
             } else if (hour >= 18 && hour < 21) {
-                root.style.setProperty('--bg-color', '#FDF5F3'); root.style.setProperty('--card-bg', '#FFFFFF'); root.style.setProperty('--text-main', '#2A1A1A'); root.style.setProperty('--text-muted', '#8A7A7A'); root.style.setProperty('--border', '#F5E6E3'); root.style.setProperty('--dock-bg', '#2A1A1A'); root.style.setProperty('--dock-text', '#D4C5C5'); root.style.setProperty('--hero-gradient', 'linear-gradient(135deg, #FFFFFF 0%, #FCE8E3 100%)'); root.style.setProperty('--daily-gradient', 'linear-gradient(135deg, #FFFFFF 0%, #FDF5F3 100%)'); root.style.setProperty('--waiting-gradient', 'linear-gradient(to bottom, #FFFFFF, #FDF5F3)');
+                // Evening
+                root.style.setProperty('--bg-color', '#FDF5F3'); root.style.setProperty('--card-bg', '#FFFFFF'); root.style.setProperty('--text-main', '#2A1A1A'); root.style.setProperty('--text-muted', '#8A7A7A'); root.style.setProperty('--border', '#F5E6E3'); root.style.setProperty('--hero-gradient', 'linear-gradient(135deg, #FFFFFF 0%, #FCE8E3 100%)'); root.style.setProperty('--daily-gradient', 'linear-gradient(135deg, #FFFFFF 0%, #FDF5F3 100%)'); root.style.setProperty('--waiting-gradient', 'linear-gradient(to bottom, #FFFFFF, #FDF5F3)');
+                root.style.setProperty('--dock-glass', 'rgba(253, 245, 243, 0.75)');
             } else {
-                root.style.setProperty('--bg-color', '#121620'); root.style.setProperty('--card-bg', '#1E2330'); root.style.setProperty('--text-main', '#EAECEF'); root.style.setProperty('--text-muted', '#8A94A6'); root.style.setProperty('--border', '#2A303F'); root.style.setProperty('--dock-bg', '#0B0D14'); root.style.setProperty('--dock-text', '#5C677D'); root.style.setProperty('--hero-gradient', 'linear-gradient(135deg, #1E2330 0%, #171A24 100%)'); root.style.setProperty('--daily-gradient', 'linear-gradient(135deg, #1E2330 0%, #151923 100%)'); root.style.setProperty('--waiting-gradient', 'linear-gradient(to bottom, #1E2330, #121620)');
+                // Night
+                root.style.setProperty('--bg-color', '#121620'); root.style.setProperty('--card-bg', '#1E2330'); root.style.setProperty('--text-main', '#EAECEF'); root.style.setProperty('--text-muted', '#8A94A6'); root.style.setProperty('--border', '#2A303F'); root.style.setProperty('--hero-gradient', 'linear-gradient(135deg, #1E2330 0%, #171A24 100%)'); root.style.setProperty('--daily-gradient', 'linear-gradient(135deg, #1E2330 0%, #151923 100%)'); root.style.setProperty('--waiting-gradient', 'linear-gradient(to bottom, #1E2330, #121620)');
+                root.style.setProperty('--dock-glass', 'rgba(30, 35, 48, 0.8)');
             }
         }
 
