@@ -75,7 +75,7 @@
         .top-showcase-container::-webkit-scrollbar { display: none; }
         .top-showcase-card { min-width: 260px; flex-shrink: 0; background: var(--card-bg); border-radius: 24px; padding: 16px; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.04); scroll-snap-align: center; transition: background-color 0.8s ease, border-color 0.8s ease; }
 
-        /* Inputs & Forms (Fixed iOS Overlay Bug) */
+        /* Inputs & Forms */
         .form-group { margin-bottom: 16px; width: 100%; }
         label { display: block; font-size: 0.75rem; color: var(--text-muted); font-weight: 700; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; transition: color 0.8s ease; }
         input, select.form-input { width: 100%; max-width: 100%; box-sizing: border-box; padding: 14px; border: 1px solid var(--border); border-radius: 16px; font-size: 0.95rem; background: var(--bg-color); color: var(--text-main); outline: none; transition: all 0.3s ease; margin: 0; }
@@ -108,7 +108,7 @@
         .tx-cat-tag.nn { background: var(--block-blue); color: #1C1E24; border: 1px solid rgba(136,148,183,0.3); }
         .pot-eta { font-size: 0.78rem; color: var(--text-muted); margin-top: 6px; font-style: italic; }
 
-        /* Modals (Fixed overflow logic) */
+        /* Modals */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: none; justify-content: center; align-items: center; z-index: 2000; padding: 16px; transition: opacity 0.3s ease; }
         .modal-card { background: var(--card-bg); border-radius: 28px; padding: 24px; width: 100%; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); border: 1px solid var(--border); box-sizing: border-box; overflow-x: hidden; }
         .modal-card h3 { font-family: "Georgia", Georgia, serif; font-style: italic; font-size: 1.4rem; color: var(--danger); margin-bottom: 12px; }
@@ -154,12 +154,12 @@
             </div>
         </div>
 
-        <!-- ==================== TAB 1: HOME (Goal-First Redesign) ==================== -->
+        <!-- ==================== TAB 1: HOME ==================== -->
         <div id="tab-home" class="tab-content active">
             
             <!-- Safe-To-Spend Hero Card -->
             <div class="choice-hero-box">
-                <div style="font-size: 0.75rem; font-weight: 800; color: var(--warning); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 4px;">Available Choice Cash</div>
+                <div style="font-size: 0.75rem; font-weight: 800; color: var(--warning); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 4px;">Guilt-Free "Wants" Allowance</div>
                 <div id="dash-choice-cash" style="font-size: 3.2rem; font-family: 'Georgia', serif; font-style: italic; font-weight: 400; color: var(--text-main); margin-bottom: 12px;">$0.00</div>
                 
                 <div id="hero-gamified-msg" style="font-size: 0.9rem; font-weight: 600; color: var(--success); margin-bottom: 24px; padding: 0 10px;">✨ You're pacing beautifully! Keep it cozy.</div>
@@ -175,7 +175,7 @@
 
             <div class="metrics-grid">
                 <div class="mini-stat" style="background-color: var(--block-cream); border-color: rgba(221,197,169,0.4);">
-                    <div class="stat-lbl" style="color: #4A5568;">Essential Vault</div>
+                    <div class="stat-lbl" style="color: #4A5568;">Protected "Needs"</div>
                     <div class="stat-val" id="dash-nn-vault" style="color: #1C1E24; font-weight: 600;">$0.00</div>
                 </div>
                 <div class="mini-stat" style="background-color: var(--block-yellow); border-color: rgba(245,199,77,0.3);">
@@ -221,7 +221,7 @@
                 <div class="form-group">
                     <label>Transaction Blueprint Type</label>
                     <select id="tx-type" class="form-input" onchange="toggleFormContext()">
-                        <option value="expense">Expense / Essential (Instant Log)</option>
+                        <option value="expense">Expense / Need (Instant Log)</option>
                         <option value="wishlist">Impulse / Want (48-Hour Cooldown)</option>
                         <option value="income">Paycheck / Inflow</option>
                     </select>
@@ -231,8 +231,8 @@
             </div>
             
             <div class="card" id="waiting-room-card" style="display: none; background: var(--waiting-gradient); border-color: var(--venice);">
-                <h2>the waiting room ⏳</h2>
-                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4;">Impulse buys are cooling down. You cannot clear these to your operational ledger until the 48-hour emotional lock lifts.</p>
+                <h2>the impulse waiting room ⏳</h2>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4;">Impulse wants are cooling down. You cannot clear these to your operational ledger until the 48-hour emotional lock lifts.</p>
                 <ul id="wishlist-container" class="tx-list"></ul>
             </div>
         </div>
@@ -248,10 +248,10 @@
         <!-- ==================== TAB 4: GARDEN ==================== -->
         <div id="tab-garden" class="tab-content">
             
-            <!-- NEW: Editable Categories Manager -->
+            <!-- Editable Categories Manager -->
             <div class="card" id="category-manager-card">
                 <h2>spending blueprint 📝</h2>
-                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4;">Design your financial architecture. Mark essential items to protect their funds from your Choice Cash allowance.</p>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4;">Design your financial architecture. Mark <strong>Needs</strong> to lock their funds away from your <strong>Wants</strong> allowance.</p>
                 
                 <ul id="editable-categories-list" class="tx-list" style="margin-bottom: 20px;"></ul>
                 
@@ -261,8 +261,8 @@
                     <div class="form-group"><input type="number" id="new-cat-limit" placeholder="Monthly Limit ($)"></div>
                     <div class="form-group" style="margin-bottom: 16px;">
                         <select id="new-cat-type" class="form-input">
-                            <option value="choice">Choice (Flexible / Fun)</option>
-                            <option value="essential">Essential (Non-Negotiable)</option>
+                            <option value="choice">Want (Flexible / Fun)</option>
+                            <option value="essential">Need (Survival & Commitments)</option>
                         </select>
                     </div>
                     <button class="secondary" style="background: var(--venice); color: white; width: 100%; padding: 14px; font-size: 0.9rem;" onclick="addNewCategory()">+ Create Target</button>
@@ -337,14 +337,13 @@
         </div>
     </div>
 
-    <!-- Cycle Refresh Settings Modal (FIXED OVERFLOW) -->
+    <!-- Cycle Refresh Settings Modal -->
     <div class="modal-overlay" id="refresh-settings-modal">
         <div class="modal-card">
             <h3 style="color: var(--venice);">Pay Cycle Timeline 🗓️</h3>
             <p>Set your paycheck timeline to trigger the end-of-cycle review.</p>
             <div class="form-group">
                 <label>Next Paycheck Date</label>
-                <!-- Input bounding box fixed with CSS additions -->
                 <input type="date" id="refresh-date-input" class="form-input">
             </div>
             <div class="form-group">
@@ -364,7 +363,7 @@
     <div class="modal-overlay" id="rollover-action-modal">
         <div class="modal-card">
             <h3 style="color: var(--shine); font-size: 1.6rem; font-style: normal;">Cycle Complete! 🎉</h3>
-            <p id="rollover-text-positive" style="display:none;">You made it to payday! You ended the cycle with <strong id="rollover-amt-display" style="color: var(--success); font-size: 1.2rem;">$0.00</strong> of unspent Choice Cash. Where should we sweep these funds before the new cycle begins?</p>
+            <p id="rollover-text-positive" style="display:none;">You made it to payday! You ended the cycle with <strong id="rollover-amt-display" style="color: var(--success); font-size: 1.2rem;">$0.00</strong> of unspent Guilt-Free Wants allowance. Where should we sweep these funds before the new cycle begins?</p>
             <p id="rollover-text-negative" style="display:none;">You made it to payday, but you ended the cycle in the red by <strong id="rollover-amt-display-neg" style="color: var(--danger); font-size: 1.2rem;">$0.00</strong>. This debt will be carried over.</p>
             
             <div id="rollover-options-container" class="form-group">
@@ -516,7 +515,7 @@
                         state.globalBalance -= state.lastRolloverAmount;
                         const activeMonth = document.getElementById('global-month-filter').value;
                         const dateStr = new Date().toLocaleDateString();
-                        state.ledger.unshift({ id: Date.now(), type: 'expense', desc: `End of Cycle Transfer to ${pot.name}`, amt: state.lastRolloverAmount, cat: 'Choice Transfer', date: dateStr, monthKey: activeMonth });
+                        state.ledger.unshift({ id: Date.now(), type: 'expense', desc: `End of Cycle Transfer to ${pot.name}`, amt: state.lastRolloverAmount, cat: 'Wants Transfer', date: dateStr, monthKey: activeMonth });
                     }
                 }
             }
@@ -1040,11 +1039,11 @@
             const pot = state.pots.find(p => p.id === id); if(!pot) return;
             const allocation = parseFloat(prompt(`Transfer available fluid cash assets into ${pot.name}:`));
             if(!allocation || allocation <= 0 || allocation > state.globalBalance) { alert("Invalid amount or insufficient fluid balance."); return; }
-            const source = prompt(`Where should this $${allocation} come from?\nType '1' for General Fluid Balance\nType '2' for This Month's Choice Allowance`, "1");
+            const source = prompt(`Where should this $${allocation} come from?\nType '1' for General Fluid Balance\nType '2' for This Month's Wants Allowance`, "1");
             if (source === '2') {
                 const activeMonth = document.getElementById('global-month-filter').value; const dateStr = new Date().toLocaleDateString();
                 state.globalBalance -= allocation; pot.current += allocation;
-                state.ledger.unshift({ id: Date.now(), type: 'expense', desc: `pot fund: ${pot.name}`, amt: allocation, cat: 'Choice Transfer', date: dateStr, monthKey: activeMonth });
+                state.ledger.unshift({ id: Date.now(), type: 'expense', desc: `pot fund: ${pot.name}`, amt: allocation, cat: 'Wants Transfer', date: dateStr, monthKey: activeMonth });
             } else if (source === '1') { state.globalBalance -= allocation; pot.current += allocation; } 
             else { alert("Operation aborted. Invalid option selected."); return; }
             save();
@@ -1175,7 +1174,7 @@
                     capsContainer.innerHTML += `
                         <div class="progress-wrapper">
                             <div class="progress-meta">
-                                <div><strong style="font-weight: 600; font-size:0.88rem;">${cat.name.toLowerCase()}</strong><span class="tx-cat-tag ${cat.nonNegotiable ? 'nn' : ''}" style="margin-top:0; margin-left:6px; font-size:0.58rem; padding:2px 8px; border-radius:10px;">${cat.nonNegotiable ? 'Essential' : 'Choice'}</span></div>
+                                <div><strong style="font-weight: 600; font-size:0.88rem;">${cat.name.toLowerCase()}</strong><span class="tx-cat-tag ${cat.nonNegotiable ? 'nn' : ''}" style="margin-top:0; margin-left:6px; font-size:0.58rem; padding:2px 8px; border-radius:10px;">${cat.nonNegotiable ? 'Need' : 'Want'}</span></div>
                                 <span style="color: var(--text-muted); font-size:0.82rem; font-weight: 600;">$${spent.toFixed(0)} / $${limit}</span>
                             </div>
                             <div class="progress-bg"><div class="progress-bar" style="width: ${pct}%; background: ${color};"></div></div>
@@ -1187,7 +1186,7 @@
                     editCatsContainer.innerHTML += `
                         <li class="tx-item" style="padding: 14px; background: var(--card-bg); border-radius: 16px; margin-bottom: 10px; border: 1px solid var(--border); flex-direction: column; align-items: flex-start;">
                             <div style="display:flex; justify-content:space-between; width:100%; align-items: center;">
-                                <div><strong style="font-size: 0.95rem;">${cat.name}</strong><br><span class="tx-cat-tag ${cat.nonNegotiable ? 'nn' : ''}" style="margin-top: 4px;">${cat.nonNegotiable ? 'Essential' : 'Choice'}</span></div>
+                                <div><strong style="font-size: 0.95rem;">${cat.name}</strong><br><span class="tx-cat-tag ${cat.nonNegotiable ? 'nn' : ''}" style="margin-top: 4px;">${cat.nonNegotiable ? 'Need' : 'Want'}</span></div>
                                 <span style="font-weight:700; font-size: 1rem;">$${cat.limit}/mo</span>
                             </div>
                             <div class="inline-actions" style="margin-top: 12px;">
@@ -1247,7 +1246,7 @@
                         const inlineActionMarkup = `<div class="inline-actions"><button class="btn-inline edit" onclick="editTransaction(${item.id})">Adjust</button><button class="btn-inline del" onclick="deleteTransaction(${item.id})">Delete</button></div>`;
                         const isNN = state.categoryTargets.find(c => c.name === item.cat)?.nonNegotiable;
                         if(item.type === 'expense') {
-                            ledgerUl.innerHTML += `<li class="tx-item" style="align-items: center;"><div><div><strong>${item.desc.toLowerCase()}</strong></div><span class="tx-cat-tag ${isNN ? 'nn' : (item.cat === 'Choice Transfer' ? 'nn' : '')}">${item.cat}</span>${inlineActionMarkup}</div><span style="color:var(--text-main); font-weight:600; font-size: 1rem;">-$${item.amt.toFixed(2)}</span></li>`;
+                            ledgerUl.innerHTML += `<li class="tx-item" style="align-items: center;"><div><div><strong>${item.desc.toLowerCase()}</strong></div><span class="tx-cat-tag ${isNN ? 'nn' : (item.cat === 'Wants Transfer' ? 'nn' : '')}">${item.cat}</span>${inlineActionMarkup}</div><span style="color:var(--text-main); font-weight:600; font-size: 1rem;">-$${item.amt.toFixed(2)}</span></li>`;
                         } else {
                             ledgerUl.innerHTML += `<li class="tx-item" style="align-items: center;"><div><div><strong>${item.desc.toLowerCase()}</strong></div><span class="tx-cat-tag" style="background:var(--block-blue); color:#1C1E24;">Net Pay</span>${inlineActionMarkup}</div><span style="color:var(--success); font-weight:600; font-size: 1rem;">+$${item.net.toFixed(2)}</span></li>`;
                         }
