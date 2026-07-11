@@ -50,9 +50,9 @@
         .view-toggle { display: flex; background: var(--border); padding: 4px; border-radius: 20px; margin-bottom: 16px; transition: background-color 0.8s ease; }
         .toggle-btn { flex: 1; text-align: center; padding: 12px; border-radius: 16px; font-size: 0.88rem; font-weight: 600; border: none; background: transparent; cursor: pointer; color: var(--text-muted); transition: all 0.3s ease; }
         .toggle-btn.active { background: var(--card-bg); color: var(--text-main); box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
-        .hero-inline-row { display: flex; gap: 14px; align-items: stretch; margin-bottom: 20px; width: 100%; }
-        .month-select-wrapper { display: flex; align-items: center; justify-content: center; }
-        select.nav-select { height: 100%; padding: 0 16px; border-radius: 24px; border: 1px solid var(--border); background: var(--card-bg); font-weight: 600; font-size: 0.88rem; color: var(--text-main); outline: none; box-shadow: 0 4px 12px rgba(0,0,0,0.04); -webkit-appearance: none; min-width: 120px; text-align: center; transition: all 0.8s ease; }
+        .hero-inline-row { display: flex; gap: 14px; align-items: stretch; margin-bottom: 20px; width: 100%; justify-content: center; }
+        .month-select-wrapper { display: flex; align-items: center; justify-content: center; width: 100%; }
+        select.nav-select { height: 100%; width: 100%; padding: 14px 16px; border-radius: 24px; border: 1px solid var(--border); background: var(--card-bg); font-weight: 600; font-size: 0.88rem; color: var(--text-main); outline: none; box-shadow: 0 4px 12px rgba(0,0,0,0.04); -webkit-appearance: none; text-align: center; transition: all 0.8s ease; }
 
         .card { background: var(--card-bg); border-radius: 28px; padding: 24px; margin-bottom: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.03); border: 1px solid var(--border); overflow: hidden; transition: background-color 0.8s ease, border-color 0.8s ease; }
         
@@ -61,8 +61,7 @@
         .mini-stat { background: var(--card-bg); border-radius: 24px; padding: 18px; border: 1px solid var(--border); transition: transform 0.2s, background-color 0.8s ease; }
         .stat-lbl { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); font-weight: 700; transition: color 0.8s ease; }
         .stat-val { font-size: 1.4rem; font-weight: 700; margin-top: 6px; color: var(--text-main); letter-spacing: -0.5px; transition: color 0.8s ease; }
-        .choice-hero-box { flex: 1; background: var(--hero-gradient); border: 1px solid var(--border); border-radius: 24px; padding: 18px; transition: background 0.8s ease; }
-        .choice-hero-box .stat-val { font-family: "Georgia", Georgia, serif; font-style: italic; font-size: 2.1rem; font-weight: 400; color: var(--text-main); margin-top: 4px; }
+        .choice-hero-box { background: var(--hero-gradient); border: 2px solid var(--shine); border-radius: 28px; padding: 28px; transition: background 0.8s ease; text-align: center; position: relative; margin-bottom: 20px; box-shadow: 0 12px 32px rgba(245,199,77,0.15); }
 
         /* Gamification: Stamp Card */
         .stamp-box { width: 42px; height: 48px; border-radius: 12px; background: var(--bg-color); border: 1px dashed var(--linen); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 1.2rem; position: relative; transition: all 0.3s ease; }
@@ -76,13 +75,13 @@
         .top-showcase-container::-webkit-scrollbar { display: none; }
         .top-showcase-card { min-width: 260px; flex-shrink: 0; background: var(--card-bg); border-radius: 24px; padding: 16px; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.04); scroll-snap-align: center; transition: background-color 0.8s ease, border-color 0.8s ease; }
 
-        /* Inputs & Forms */
-        .form-group { margin-bottom: 16px; }
+        /* Inputs & Forms (Fixed iOS Overlay Bug) */
+        .form-group { margin-bottom: 16px; width: 100%; }
         label { display: block; font-size: 0.75rem; color: var(--text-muted); font-weight: 700; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; transition: color 0.8s ease; }
-        input, select.form-input { width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 16px; font-size: 0.95rem; background: var(--bg-color); color: var(--text-main); outline: none; transition: all 0.3s ease; }
-        input[type="date"] { font-family: -apple-system, sans-serif; }
+        input, select.form-input { width: 100%; max-width: 100%; box-sizing: border-box; padding: 14px; border: 1px solid var(--border); border-radius: 16px; font-size: 0.95rem; background: var(--bg-color); color: var(--text-main); outline: none; transition: all 0.3s ease; margin: 0; }
+        input[type="date"] { -webkit-appearance: none; appearance: none; font-family: -apple-system, sans-serif; display: block; }
         input:focus, select.form-input:focus { border-color: var(--venice); background: var(--card-bg); box-shadow: 0 0 0 3px rgba(136,148,183,0.1); }
-        button { width: 100%; padding: 16px; background: var(--venice); color: white; border: none; border-radius: 18px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+        button { width: 100%; padding: 16px; background: var(--venice); color: white; border: none; border-radius: 18px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; box-sizing: border-box; }
         button:active { transform: scale(0.99); opacity: 0.9; }
         button.secondary { background: var(--border); color: var(--text-main); margin-top: 0; padding: 8px 14px; width: auto; font-size: 0.78rem; border-radius: 12px; border: 1px solid var(--border); }
         button.action-link { background: transparent; color: var(--venice); width: auto; padding: 0; margin: 0; font-size: 0.85rem; font-weight: 700; }
@@ -109,9 +108,9 @@
         .tx-cat-tag.nn { background: var(--block-blue); color: #1C1E24; border: 1px solid rgba(136,148,183,0.3); }
         .pot-eta { font-size: 0.78rem; color: var(--text-muted); margin-top: 6px; font-style: italic; }
 
-        /* Modals */
+        /* Modals (Fixed overflow logic) */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: none; justify-content: center; align-items: center; z-index: 2000; padding: 16px; transition: opacity 0.3s ease; }
-        .modal-card { background: var(--card-bg); border-radius: 28px; padding: 24px; width: 100%; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); border: 1px solid var(--border); }
+        .modal-card { background: var(--card-bg); border-radius: 28px; padding: 24px; width: 100%; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); border: 1px solid var(--border); box-sizing: border-box; overflow-x: hidden; }
         .modal-card h3 { font-family: "Georgia", Georgia, serif; font-style: italic; font-size: 1.4rem; color: var(--danger); margin-bottom: 12px; }
         .modal-card p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px; }
 
@@ -150,44 +149,31 @@
             <button id="toggle-year" class="toggle-btn" onclick="switchView('year')">Cycle View (12M)</button>
         </div>
         <div class="hero-inline-row" id="month-filter-wrap">
-            <div class="choice-hero-box">
-                <div class="stat-lbl"><span class="view-label-ctx">Month</span> Choice Allowance</div>
-                <div class="stat-val" id="dash-choice-cash">$0.00</div>
-            </div>
             <div class="month-select-wrapper">
                 <select id="global-month-filter" class="nav-select" onchange="render()"></select>
             </div>
         </div>
 
-        <!-- ==================== TAB 1: HOME ==================== -->
+        <!-- ==================== TAB 1: HOME (Goal-First Redesign) ==================== -->
         <div id="tab-home" class="tab-content active">
             
-            <!-- Cycle Refresh Tracker -->
-            <div class="card" style="padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; border-color: var(--venice); background: var(--waiting-gradient);">
-                <div>
-                    <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Next Pay Cycle Refresh</div>
-                    <div style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-top: 4px; display: flex; align-items: center; gap: 8px;">
-                        <span id="refresh-countdown">-- days</span>
+            <!-- Safe-To-Spend Hero Card -->
+            <div class="choice-hero-box">
+                <div style="font-size: 0.75rem; font-weight: 800; color: var(--warning); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 4px;">Available Choice Cash</div>
+                <div id="dash-choice-cash" style="font-size: 3.2rem; font-family: 'Georgia', serif; font-style: italic; font-weight: 400; color: var(--text-main); margin-bottom: 12px;">$0.00</div>
+                
+                <div id="hero-gamified-msg" style="font-size: 0.9rem; font-weight: 600; color: var(--success); margin-bottom: 24px; padding: 0 10px;">✨ You're pacing beautifully! Keep it cozy.</div>
+
+                <div style="background: var(--bg-color); border-radius: 18px; padding: 16px; border: 1px solid var(--border); cursor: pointer;" onclick="openRefreshSettings()">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">
+                        <span>Pay Cycle Refresh</span>
+                        <span id="hero-days-left" style="color: var(--text-main);">-- Days Left</span>
                     </div>
+                    <div class="progress-bg" style="height: 8px; border: none; background: rgba(0,0,0,0.05);"><div id="hero-cycle-bar" class="progress-bar" style="background: var(--venice); width: 0%;"></div></div>
                 </div>
-                <button class="secondary" style="margin: 0; background: var(--card-bg);" onclick="openRefreshSettings()">Edit Timeline</button>
             </div>
-
-            <div class="card" style="padding: 18px 22px; background: var(--daily-gradient);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                    <h2 style="margin: 0; font-size: 1.1rem;">cozy daily check-in</h2>
-                    <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">This Week</span>
-                </div>
-                <div id="stamp-grid" style="display: flex; justify-content: space-between; align-items: center; gap: 8px;"></div>
-            </div>
-
-            <div id="top-progression-showcase" class="top-showcase-container" style="display: none;"></div>
 
             <div class="metrics-grid">
-                <div class="mini-stat" style="background-color: var(--block-blue); border-color: rgba(136,148,183,0.2);">
-                    <div class="stat-lbl" style="color: #4A5568;">Fluid Balance</div>
-                    <div class="stat-val" id="dash-balance" style="color: #1C1E24;">$0.00</div>
-                </div>
                 <div class="mini-stat" style="background-color: var(--block-cream); border-color: rgba(221,197,169,0.4);">
                     <div class="stat-lbl" style="color: #4A5568;">Essential Vault</div>
                     <div class="stat-val" id="dash-nn-vault" style="color: #1C1E24; font-weight: 600;">$0.00</div>
@@ -196,11 +182,24 @@
                     <div class="stat-lbl" style="color: #4A5568;">Tax Escrow</div>
                     <div class="stat-val" id="dash-tax" style="color: #1C1E24; font-weight: 600;">$0.00</div>
                 </div>
+                <div class="mini-stat" style="background-color: var(--block-blue); border-color: rgba(136,148,183,0.2);">
+                    <div class="stat-lbl" style="color: #4A5568;">Fluid Balance</div>
+                    <div class="stat-val" id="dash-balance" style="color: #1C1E24;">$0.00</div>
+                </div>
                 <div class="mini-stat" style="background-color: var(--block-pink); border-color: rgba(214,140,140,0.2);">
                     <div class="stat-lbl" style="color: #4A5568;"><span class="view-label-ctx">Month</span> Outflow</div>
                     <div class="stat-val" id="dash-outflow" style="color: var(--danger); font-weight: 700;">$0.00</div>
                 </div>
-                <div class="mini-stat" style="display:none;"><div id="dash-inflow"></div></div>
+            </div>
+
+            <div id="top-progression-showcase" class="top-showcase-container" style="display: none;"></div>
+
+            <div class="card" style="padding: 18px 22px; background: var(--daily-gradient);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h2 style="margin: 0; font-size: 1.1rem;">cozy daily check-in</h2>
+                    <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">This Week</span>
+                </div>
+                <div id="stamp-grid" style="display: flex; justify-content: space-between; align-items: center; gap: 8px;"></div>
             </div>
 
             <div class="card">
@@ -248,6 +247,28 @@
 
         <!-- ==================== TAB 4: GARDEN ==================== -->
         <div id="tab-garden" class="tab-content">
+            
+            <!-- NEW: Editable Categories Manager -->
+            <div class="card" id="category-manager-card">
+                <h2>spending blueprint 📝</h2>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4;">Design your financial architecture. Mark essential items to protect their funds from your Choice Cash allowance.</p>
+                
+                <ul id="editable-categories-list" class="tx-list" style="margin-bottom: 20px;"></ul>
+                
+                <div style="background: var(--bg-color); padding: 16px; border-radius: 16px; border: 1px dashed var(--border);">
+                    <h4 style="margin-bottom: 12px; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Add New Target</h4>
+                    <div class="form-group"><input type="text" id="new-cat-name" placeholder="Category Name (e.g., Dining Out)"></div>
+                    <div class="form-group"><input type="number" id="new-cat-limit" placeholder="Monthly Limit ($)"></div>
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <select id="new-cat-type" class="form-input">
+                            <option value="choice">Choice (Flexible / Fun)</option>
+                            <option value="essential">Essential (Non-Negotiable)</option>
+                        </select>
+                    </div>
+                    <button class="secondary" style="background: var(--venice); color: white; width: 100%; padding: 14px; font-size: 0.9rem;" onclick="addNewCategory()">+ Create Target</button>
+                </div>
+            </div>
+
             <div class="card">
                 <h2>long-term savings pots</h2>
                 <div class="form-group">
@@ -316,13 +337,14 @@
         </div>
     </div>
 
-    <!-- Cycle Refresh Settings Modal -->
+    <!-- Cycle Refresh Settings Modal (FIXED OVERFLOW) -->
     <div class="modal-overlay" id="refresh-settings-modal">
         <div class="modal-card">
             <h3 style="color: var(--venice);">Pay Cycle Timeline 🗓️</h3>
             <p>Set your paycheck timeline to trigger the end-of-cycle review.</p>
             <div class="form-group">
                 <label>Next Paycheck Date</label>
+                <!-- Input bounding box fixed with CSS additions -->
                 <input type="date" id="refresh-date-input" class="form-input">
             </div>
             <div class="form-group">
@@ -488,19 +510,16 @@
             if (state.lastRolloverAmount > 0) {
                 const dest = document.getElementById('rollover-dest-input').value;
                 if (dest !== 'carry') {
-                    // It's a pot ID
                     const pot = state.pots.find(p => p.id == dest);
                     if (pot) {
                         pot.current += state.lastRolloverAmount;
                         state.globalBalance -= state.lastRolloverAmount;
-                        
                         const activeMonth = document.getElementById('global-month-filter').value;
                         const dateStr = new Date().toLocaleDateString();
                         state.ledger.unshift({ id: Date.now(), type: 'expense', desc: `End of Cycle Transfer to ${pot.name}`, amt: state.lastRolloverAmount, cat: 'Choice Transfer', date: dateStr, monthKey: activeMonth });
                     }
                 }
             }
-            // Clear pending status
             state.rolloverPending = false;
             document.getElementById('rollover-action-modal').style.display = 'none';
             save();
@@ -511,29 +530,36 @@
             
             const today = new Date();
             today.setHours(0,0,0,0);
-            
-            // Fix parsing cross-timezone by splitting the date string
             const parts = state.refreshSettings.nextRefreshDate.split('-');
             const refreshDate = new Date(parts[0], parts[1] - 1, parts[2]); 
             refreshDate.setHours(0,0,0,0);
             
             const diffTime = refreshDate - today;
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            const freq = parseInt(state.refreshSettings.frequency) || 14;
             
-            const countdownEl = document.getElementById('refresh-countdown');
-            if (countdownEl) {
+            // Calculate progress bar percentage
+            let pct = ((freq - diffDays) / freq) * 100;
+            if (pct < 0) pct = 0;
+            if (pct > 100) pct = 100;
+
+            const countdownEl = document.getElementById('hero-days-left');
+            const cycleBar = document.getElementById('hero-cycle-bar');
+            
+            if (countdownEl && cycleBar) {
                 if (diffDays === 0) countdownEl.innerText = 'Today!';
                 else if (diffDays === 1) countdownEl.innerText = 'Tomorrow';
                 else if (diffDays > 1) countdownEl.innerText = `${diffDays} days`;
                 else countdownEl.innerText = 'Processing...';
+                
+                cycleBar.style.width = `${pct}%`;
             }
 
-            // Trigger rollover logic if date has passed and we aren't already waiting for user input
+            // Trigger rollover logic
             if (diffDays <= 0 && !state.rolloverPending) {
                 state.rolloverPending = true;
                 state.lastRolloverAmount = choiceCashRemaining;
                 
-                // Advance the next refresh date automatically
                 const nextDate = new Date(refreshDate);
                 nextDate.setDate(nextDate.getDate() + parseInt(state.refreshSettings.frequency));
                 const yyyy = nextDate.getFullYear();
@@ -541,10 +567,9 @@
                 const dd = String(nextDate.getDate()).padStart(2, '0');
                 state.refreshSettings.nextRefreshDate = `${yyyy}-${mm}-${dd}`;
                 
-                save(); // Call save to re-render, which will then trigger the modal block below
+                save(); 
             }
 
-            // Display Modal if Pending
             if (state.rolloverPending) {
                 const modal = document.getElementById('rollover-action-modal');
                 const positiveText = document.getElementById('rollover-text-positive');
@@ -571,9 +596,57 @@
                     document.getElementById('rollover-amt-display-neg').innerText = `$${Math.abs(state.lastRolloverAmount).toFixed(2)}`;
                     btn.innerText = "Acknowledge & Start New Cycle";
                 }
-
                 modal.style.display = 'flex';
             }
+        }
+
+        /* --- Editable Categories Logic --- */
+        function addNewCategory() {
+            const name = document.getElementById('new-cat-name').value.trim();
+            const limit = parseFloat(document.getElementById('new-cat-limit').value);
+            const type = document.getElementById('new-cat-type').value;
+            if (!name || isNaN(limit) || limit < 0) return;
+            
+            if (state.categoryTargets.find(c => c.name.toLowerCase() === name.toLowerCase())) {
+                alert("A target with this name already exists!"); return;
+            }
+            
+            state.categoryTargets.push({ name, limit, nonNegotiable: type === 'essential' });
+            save();
+            document.getElementById('new-cat-name').value = '';
+            document.getElementById('new-cat-limit').value = '';
+        }
+
+        function deleteCategory(name) {
+            if(confirm(`Wipe "${name}" from your blueprint? Past transactions using this tag will stay in your ledger but won't trace back to a cap.`)) {
+                state.categoryTargets = state.categoryTargets.filter(c => c.name !== name);
+                save();
+            }
+        }
+
+        function editCategoryNameAndLimit(oldName) {
+            const cat = state.categoryTargets.find(c => c.name === oldName);
+            if(!cat) return;
+            
+            const newName = prompt(`Modify target name (currently ${cat.name}):`, cat.name);
+            if(newName === null || newName.trim() === '') return;
+            
+            const nextLimit = parseFloat(prompt(`Modify plan cap target for ${newName.trim()}:`, cat.limit));
+            if(!isNaN(nextLimit) && nextLimit >= 0) { 
+                if(newName.trim() !== oldName) {
+                    state.ledger.forEach(tx => { if(tx.cat === oldName) tx.cat = newName.trim(); });
+                    state.recurringTemplates.forEach(rt => { if(rt.cat === oldName) rt.cat = newName.trim(); });
+                    state.wishlist.forEach(wl => { if(wl.cat === oldName) wl.cat = newName.trim(); });
+                }
+                cat.name = newName.trim();
+                cat.limit = nextLimit; 
+                save(); 
+            }
+        }
+
+        function toggleCategoryPrioritization(name) {
+            const cat = state.categoryTargets.find(c => c.name === name);
+            if(cat) { cat.nonNegotiable = !cat.nonNegotiable; save(); }
         }
 
         /* --- Ambient Environments --- */
@@ -676,8 +749,10 @@
         }
 
         function populateCategorySelectFields() {
-            const select = document.getElementById('rec-cat');
-            if (select) select.innerHTML = state.categoryTargets.map(c => `<option value="${c.name}">${c.name}</option>`).join('') + `<option value="Income-Pay">Income-Pay</option>`;
+            const selects = [document.getElementById('rec-cat'), document.getElementById('field-cat')];
+            selects.forEach(select => {
+                if (select) select.innerHTML = state.categoryTargets.map(c => `<option value="${c.name}">${c.name}</option>`).join('') + (select.id === 'rec-cat' ? `<option value="Income-Pay">Income-Pay</option>` : ``);
+            });
         }
 
         function switchView(mode) {
@@ -754,38 +829,8 @@
                 let sortedPrices = fallbackPrices.map(p => parseFloat(p)).filter(p => p < 999);
                 if (sortedPrices.length > 0) { detectedAmount = Math.max(...sortedPrices); }
             }
-
-            const corpus = text.toLowerCase();
-            if (corpus.match(/(market|grocery|heb|kroger|central market|walmart|target|whole foods|trader|safeway|costco|aldi|food)/)) {
-                detectedCategory = "Groceries"; detectedDescription = "grocery pickup store scan";
-            } else if (corpus.match(/(uber|lyft|gas|shell|exxon|chevron|fuel|texaco|speedway|qt|clean|parking|toll|transit)/)) {
-                detectedCategory = "Transport"; detectedDescription = "commute transport line check";
-            } else if (corpus.match(/(cafe|restaurant|starbucks|dunkin|spotify|netflix|hulu|cinema|movie|bar|pub|bites|dine|concert|ticket)/)) {
-                detectedCategory = "Entertainment"; detectedDescription = "lifestyle experience out";
-            } else if (corpus.match(/(electric|water|gas|internet|spectrum|att|verizon|tmobile|utility|power|waste|trash)/)) {
-                detectedCategory = "Utilities"; detectedDescription = "fixed service invoice billing";
-            } else if (corpus.match(/(rent|mortgage|hoa|maintenance|lease)/)) {
-                detectedCategory = "Housing"; detectedDescription = "housing structural line cost";
-            } else {
-                detectedDescription = "scanned vendor log";
-            }
-
-            if (document.getElementById('field-desc')) document.getElementById('field-desc').value = detectedDescription;
+            if (document.getElementById('field-desc')) document.getElementById('field-desc').value = "scanned vendor log";
             if (document.getElementById('field-amount')) document.getElementById('field-amount').value = detectedAmount > 0 ? detectedAmount.toFixed(2) : "";
-            if (document.getElementById('field-cat')) document.getElementById('field-cat').value = detectedCategory;
-        }
-
-        function toggleCategoryPrioritization(name) {
-            const cat = state.categoryTargets.find(c => c.name === name);
-            if(cat) { cat.nonNegotiable = !cat.nonNegotiable; save(); }
-        }
-
-        function editCategoryLimit(name) {
-            const cat = state.categoryTargets.find(c => c.name === name);
-            if(cat) {
-                const nextLimit = parseFloat(prompt(`Modify plan cap target for ${cat.name}:`, cat.limit));
-                if(!isNaN(nextLimit) && nextLimit >= 0) { cat.limit = nextLimit; save(); }
-            }
         }
 
         function trackTxMilestones() {
@@ -1101,17 +1146,32 @@
             
             if (choiceCashEl) {
                 choiceCashEl.innerText = `${trueChoiceCashRemaining >= 0 ? '' : '-'}$${Math.abs(trueChoiceCashRemaining).toFixed(2)}`;
-                choiceCashEl.style.color = trueChoiceCashRemaining >= 0 ? 'var(--success)' : 'var(--danger)';
+            }
+            
+            // Gamification Text Update
+            const msgEl = document.getElementById('hero-gamified-msg');
+            if(msgEl) {
+                let msg = ""; let msgColor = "var(--success)";
+                if (trueChoiceCashRemaining > 200) { msg = "✨ You're pacing beautifully! Keep it cozy."; }
+                else if (trueChoiceCashRemaining > 50) { msg = "🌿 Pacing is steady. Mindful choices ahead."; msgColor = "var(--warning)"; }
+                else if (trueChoiceCashRemaining > 0) { msg = "⚠️ Pacing is tight! Guard your remaining allowance."; msgColor = "var(--warning)"; }
+                else { msg = "🚨 You are in the red for this cycle."; msgColor = "var(--danger)"; }
+                msgEl.innerText = msg; msgEl.style.color = msgColor;
             }
 
             const capsContainer = document.getElementById('category-caps-container'); 
-            if (capsContainer) {
-                capsContainer.innerHTML = '';
-                state.categoryTargets.forEach(cat => {
-                    const spent = categorySpendingMap[cat.name]; const limit = isYearMode ? cat.limit * 12 : cat.limit;
-                    const pct = Math.min((spent / limit) * 100, 100);
-                    let color = 'var(--success)'; if(pct >= 90) color = 'var(--danger)'; else if(pct >= 75) color = 'var(--warning)';
+            const editCatsContainer = document.getElementById('editable-categories-list');
+            
+            if (capsContainer) capsContainer.innerHTML = '';
+            if (editCatsContainer) editCatsContainer.innerHTML = '';
 
+            state.categoryTargets.forEach(cat => {
+                const spent = categorySpendingMap[cat.name] || 0; const limit = isYearMode ? cat.limit * 12 : cat.limit;
+                const pct = Math.min((spent / limit) * 100, 100);
+                let color = 'var(--success)'; if(pct >= 90) color = 'var(--danger)'; else if(pct >= 75) color = 'var(--warning)';
+
+                // Render in Home Tab
+                if (capsContainer) {
                     capsContainer.innerHTML += `
                         <div class="progress-wrapper">
                             <div class="progress-meta">
@@ -1119,10 +1179,25 @@
                                 <span style="color: var(--text-muted); font-size:0.82rem; font-weight: 600;">$${spent.toFixed(0)} / $${limit}</span>
                             </div>
                             <div class="progress-bg"><div class="progress-bar" style="width: ${pct}%; background: ${color};"></div></div>
-                            <div class="inline-actions" style="margin-top: 6px; margin-bottom: 12px;"><button class="btn-inline edit" onclick="editCategoryLimit('${cat.name}')">Adjust Cap</button><button class="btn-inline" style="color: var(--text-muted);" onclick="toggleCategoryPrioritization('${cat.name}')">Swap Priority</button></div>
                         </div>`;
-                });
-            }
+                }
+
+                // Render in Garden Tab (Editable mode)
+                if (editCatsContainer) {
+                    editCatsContainer.innerHTML += `
+                        <li class="tx-item" style="padding: 14px; background: var(--card-bg); border-radius: 16px; margin-bottom: 10px; border: 1px solid var(--border); flex-direction: column; align-items: flex-start;">
+                            <div style="display:flex; justify-content:space-between; width:100%; align-items: center;">
+                                <div><strong style="font-size: 0.95rem;">${cat.name}</strong><br><span class="tx-cat-tag ${cat.nonNegotiable ? 'nn' : ''}" style="margin-top: 4px;">${cat.nonNegotiable ? 'Essential' : 'Choice'}</span></div>
+                                <span style="font-weight:700; font-size: 1rem;">$${cat.limit}/mo</span>
+                            </div>
+                            <div class="inline-actions" style="margin-top: 12px;">
+                                <button class="btn-inline edit" onclick="editCategoryNameAndLimit('${cat.name}')">Edit Cap / Rename</button>
+                                <button class="btn-inline edit" onclick="toggleCategoryPrioritization('${cat.name}')">Swap Priority</button>
+                                <button class="btn-inline del" onclick="deleteCategory('${cat.name}')">Delete</button>
+                            </div>
+                        </li>`;
+                }
+            });
 
             if(!isYearMode) {
                 const recUl = document.getElementById('recurring-list'); 
@@ -1180,7 +1255,7 @@
                 }
             }
             
-            // Execute the refresh check at the very end of the render cycle
+            populateCategorySelectFields();
             checkRefreshCycle(trueChoiceCashRemaining);
         }
 
