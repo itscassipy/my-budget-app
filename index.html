@@ -295,6 +295,14 @@
                 <div id="sticker-grid-container" class="sticker-grid"></div>
             </div>
 
+            <div class="card" id="backup-manager">
+                <h2>data vault 💾</h2>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4;">Your data lives securely on this device. Export a backup regularly so you never lose your progress if you clear your browser or get a new phone.</p>
+                <button style="background: var(--text-main); margin-bottom: 10px;" onclick="exportData()">⬇️ Download Backup File</button>
+                <button class="secondary" style="width: 100%; padding: 14px; background: transparent;" onclick="document.getElementById('import-file').click()">⬆️ Restore from Backup</button>
+                <input type="file" id="import-file" accept=".json" style="display: none;" onchange="importData(event)">
+            </div>
+
             <div class="card" id="recurring-card-manager">
                 <h2>recurring templates <button class="action-link" onclick="applyRecurringToCurrentMonth()">Apply to Month</button></h2>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:14px; margin-top: 12px;">
@@ -378,6 +386,17 @@
     </div>
 
     <script>
+        /* --- Service Worker Registration --- */
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(reg => {
+                    console.log('ServiceWorker registration successful');
+                }).catch(err => {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+
         // Ensure you get today's date formatted properly for default setup
         const d = new Date();
         d.setDate(d.getDate() + 14); // default 14 days out
@@ -413,6 +432,42 @@
         function save() {
             localStorage.setItem('cassidyProBudgetState', JSON.stringify(state));
             render();
+        }
+
+        /* --- Fail-Proof Data Backup --- */
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "cassidy_budget_backup_" + new Date().toISOString().split('T')[0] + ".json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+            showToast("Backup downloaded successfully! 💾");
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedState = JSON.parse(e.target.result);
+                    if (importedState && importedState.ledger) {
+                        if(confirm("Are you sure? This will overwrite your current budget data with the backup.")) {
+                            state = importedState;
+                            save();
+                            showToast("Data restored successfully! ✨");
+                            setTimeout(() => location.reload(), 1500); 
+                        }
+                    } else {
+                        alert("This doesn't look like a valid budget backup file.");
+                    }
+                } catch (err) {
+                    alert("Error reading the backup file. It might be corrupted.");
+                }
+            };
+            reader.readAsText(file);
         }
 
         /* --- Tab Navigation --- */
