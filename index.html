@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Cassidy's Budget System</title>
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,7 +16,8 @@
         :root {
             --venice: #8894B7; --shine: #F5C74D; --success: #527558; --warning: #D18D34; --danger: #BA6868; 
             --block-pink: #F5D3D3; --block-blue: #D3DCF5; --block-yellow: #FBE6AD; --block-green: #D3F5D9; --block-cream: #F6EFE5;
-            --bg-color: #FAF6EE; --card-bg: #FFFFFF; --text-main: #1C1E24; --text-muted: #727B8E; --border: #EFE9DE; --linen: #DDC5A9;
+            --bg-color: #FAF6EE; --card-bg: #FFFFFF; --text-main: #1C1E24; --text-muted: #5C6478; --border: #EFE9DE; --linen: #DDC5A9;
+            --focus-ring: #4A5AA8; --overlay: rgba(0,0,0,0.7);
             --dock-glass: rgba(250, 246, 238, 0.75); 
             --hero-gradient: linear-gradient(135deg, #FFFDF9 0%, #F6EFE5 100%);
             --daily-gradient: linear-gradient(135deg, #FFFFFF 0%, #FFFDF9 100%);
@@ -96,8 +97,8 @@
         .tx-cat-tag { font-size: 0.65rem; background: var(--border); padding: 4px 12px; border-radius: 20px; color: var(--text-main); display: inline-block; margin-top: 6px; font-weight: 700; text-transform: uppercase; }
         .tx-cat-tag.nn { background: var(--block-blue); color: #1C1E24; }
         
-        .inline-actions { display: flex; gap: 12px; margin-top: 8px; align-items: center; }
-        .btn-inline { background: transparent; color: var(--text-muted); font-size: 0.72rem; width: auto; padding: 0; font-weight: 700; border: none; cursor: pointer; text-transform: uppercase; }
+        .inline-actions { display: flex; gap: 4px; margin-top: 8px; align-items: center; flex-wrap: wrap; }
+        .btn-inline { background: transparent; color: var(--text-muted); font-size: 0.72rem; width: auto; min-height: 44px; padding: 8px 12px; margin: -8px 0; font-weight: 700; border: none; cursor: pointer; text-transform: uppercase; display: inline-flex; align-items: center; }
         .btn-inline.del { color: var(--danger); }
         .btn-inline.edit { color: var(--venice); }
 
@@ -144,87 +145,247 @@
         .vendor-chip:active { background: var(--block-yellow); }
         .undo-pill { position: fixed; bottom: 110px; left: 24px; display: flex; align-items: center; gap: 6px; background: var(--card-bg); color: var(--text-main); border: 1px solid var(--border); border-radius: 22px; padding: 10px 16px; font-size: 0.78rem; font-weight: 700; box-shadow: 0 8px 20px rgba(0,0,0,0.08); z-index: 1500; cursor: pointer; }
         .undo-pill:active { transform: scale(0.94); }
+
+        /* ---------- Accessibility & theming ---------- */
+        :root { color-scheme: light dark; }
+        button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focus-visible {
+            outline: 3px solid var(--focus-ring); outline-offset: 2px; border-radius: 8px;
+        }
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+        /* Infinite motion is a vestibular trigger — honour the OS preference. */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+            .stamp-box.today-active { box-shadow: 0 0 0 3px var(--shine); }
+            .pulse-warning { box-shadow: 0 0 0 2px var(--danger); }
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --venice: #9AA6C9; --shine: #E8BE55; --success: #7FA886; --warning: #E0A354; --danger: #E08C8C;
+                --block-pink: #4A3436; --block-blue: #313A52; --block-yellow: #4C4326; --block-green: #2E4434; --block-cream: #38332B;
+                --bg-color: #14161B; --card-bg: #1D2027; --text-main: #ECEAE4; --text-muted: #A3ABBD; --border: #2C3038; --linen: #6B5A46;
+                --dock-glass: rgba(20, 22, 27, 0.8); --focus-ring: #A9B6E8; --overlay: rgba(0,0,0,0.8);
+                --hero-gradient: linear-gradient(135deg, #23262E 0%, #1B1E24 100%);
+                --daily-gradient: linear-gradient(135deg, #1D2027 0%, #23262E 100%);
+                --waiting-gradient: linear-gradient(to bottom, #1D2027, #14161B);
+            }
+            .mini-stat .stat-lbl { color: var(--text-muted) !important; }
+            .mini-stat .stat-val { color: var(--text-main) !important; }
+            .tx-cat-tag { color: var(--text-main) !important; }
+        }
+
+        /* ---------- Empty states ---------- */
+        .empty-state { text-align: center; padding: 28px 18px; color: var(--text-muted); }
+        .empty-state .es-icon { font-size: 2rem; display: block; margin-bottom: 10px; }
+        .empty-state .es-title { font-family: Georgia, serif; font-style: italic; font-size: 1.05rem; color: var(--text-main); margin-bottom: 6px; }
+        .empty-state .es-body { font-size: 0.8rem; line-height: 1.5; max-width: 280px; margin: 0 auto 14px; }
+
+        /* ---------- In-app dialog (replaces alert/confirm) ---------- */
+        #app-dialog .modal-card { max-width: 340px; }
+        .dialog-actions { display: flex; gap: 10px; margin-top: 18px; }
+        .dialog-actions button { flex: 1; }
+
+        /* ---------- Search & filter ---------- */
+        .filter-row { display: flex; gap: 8px; margin-bottom: 14px; }
+        .filter-row input, .filter-row select { text-align: left; text-align-last: left; font-size: 0.85rem; padding: 12px; }
+        .chip-row { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 12px; scrollbar-width: none; }
+        .chip-row::-webkit-scrollbar { display: none; }
+        .filter-chip { width: auto; flex-shrink: 0; padding: 8px 14px; font-size: 0.72rem; font-weight: 700; background: var(--card-bg); color: var(--text-muted); border: 1px solid var(--border); border-radius: 16px; min-height: 36px; }
+        .filter-chip.active { background: var(--text-main); color: var(--bg-color); border-color: var(--text-main); }
+
+        /* ---------- Pots ---------- */
+        .pot-card { background: var(--bg-color); border: 1px solid var(--border); border-radius: 20px; padding: 16px; margin-bottom: 12px; }
+        .pot-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+
+        .settings-btn { width: auto; padding: 8px; background: transparent; color: var(--text-muted); font-size: 1.2rem; min-height: 44px; min-width: 44px; }
     </style>
 </head>
 <body>
     <div class="container">
-        
+
         <header>
-            <h1>lucky girl cass <span id="token-display" class="token-badge" style="display: none;">⭐ 0</span></h1>
-            <div style="text-align: right;">
-                <div style="font-size: 0.6rem; text-transform: uppercase; font-weight: 800; color: var(--text-muted); letter-spacing: 0.5px; margin-bottom: 4px;">Total Bank Cash</div>
-                <div id="global-bank-balance" style="font-weight: 700; color: var(--success); font-size: 0.95rem; background: var(--card-bg); padding: 6px 14px; border-radius: 14px; border: 1px solid var(--border);">$0</div>
+            <h1>lucky girl cass</h1>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <div style="text-align: right;">
+                    <div style="font-size: 0.6rem; text-transform: uppercase; font-weight: 800; color: var(--text-muted); letter-spacing: 0.5px; margin-bottom: 4px;">Total Bank Cash</div>
+                    <div id="global-bank-balance" style="font-weight: 700; color: var(--success); font-size: 0.95rem; background: var(--card-bg); padding: 6px 14px; border-radius: 14px; border: 1px solid var(--border);">$0</div>
+                </div>
+                <button class="settings-btn" aria-label="Settings" onclick="switchTab('settings')">⚙️</button>
             </div>
         </header>
 
-        <!-- Centered View Toggle -->
-        <div class="view-toggle">
-            <button id="toggle-week" class="toggle-btn" onclick="switchView('week')">Week</button>
-            <button id="toggle-month" class="toggle-btn active" onclick="switchView('month')">Month</button>
-            <button id="toggle-year" class="toggle-btn" onclick="switchView('year')">Cycle (12M)</button>
-        </div>
-        <div class="hero-inline-row" id="month-filter-wrap">
-            <div class="month-select-wrapper">
-                <select id="global-month-filter" class="nav-select" onchange="render()"></select>
+        <div id="period-controls">
+            <div class="view-toggle">
+                <button id="toggle-week" class="toggle-btn" onclick="switchView('week')">Week</button>
+                <button id="toggle-month" class="toggle-btn active" onclick="switchView('month')">Month</button>
+                <button id="toggle-year" class="toggle-btn" onclick="switchView('year')">Cycle (12M)</button>
             </div>
-        </div>
-        <div class="hero-inline-row" id="week-nav-wrap" style="display: none;">
-            <div class="week-nav">
-                <button class="week-arrow" onclick="shiftWeek(-1)" aria-label="Previous week">‹</button>
-                <div class="week-label" onclick="shiftWeek(0)">
-                    <div class="week-label-main" id="week-range-label">--</div>
-                    <div class="week-label-sub" id="week-relative-label">This Week</div>
+            <div class="hero-inline-row" id="month-filter-wrap">
+                <div class="month-select-wrapper">
+                    <label class="sr-only" for="global-month-filter">Month</label>
+                    <select id="global-month-filter" class="nav-select" onchange="render()"></select>
                 </div>
-                <button class="week-arrow" onclick="shiftWeek(1)" aria-label="Next week">›</button>
+            </div>
+            <div class="hero-inline-row" id="week-nav-wrap" style="display: none;">
+                <div class="week-nav">
+                    <button class="week-arrow" onclick="shiftWeek(-1)" aria-label="Previous week">‹</button>
+                    <div class="week-label" tabindex="0" role="button" onclick="shiftWeek(0)" onkeydown="if(event.key==='Enter')shiftWeek(0)">
+                        <div class="week-label-main" id="week-range-label">--</div>
+                        <div class="week-label-sub" id="week-relative-label">This Week</div>
+                    </div>
+                    <button class="week-arrow" onclick="shiftWeek(1)" aria-label="Next week">›</button>
+                </div>
+            </div>
+            <div class="hero-inline-row" id="cycle-range-wrap" style="display: none;">
+                <div class="month-select-wrapper">
+                    <div class="nav-select" style="display:block; color: var(--text-muted); font-weight: 700;">
+                        Rolling 12 months · <span id="cycle-range-label">--</span>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="hero-inline-row" id="cycle-range-wrap" style="display: none;">
-            <div class="month-select-wrapper">
-                <div class="nav-select" style="display:block; color: var(--text-muted); font-weight: 700;">
-                    Rolling 12 months · <span id="cycle-range-label">--</span>
-                </div>
-            </div>
-        </div>
+        <!-- ==================== TODAY ==================== -->
+        <div id="tab-today" class="tab-content active">
 
-        <!-- ==================== TAB 1: HOME ==================== -->
-        <div id="tab-home" class="tab-content active">
-            
+            <div id="first-run-card" class="card" style="display:none;"></div>
+
             <div id="rest-state-banner">🍵 Daily check-in complete. The system is resting.</div>
 
             <div class="choice-hero-box">
                 <div id="hero-allowance-label" style="font-size: 0.75rem; font-weight: 800; color: var(--warning); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 4px;">Guilt-Free "Wants" Allowance</div>
                 <div id="dash-choice-cash" style="font-size: 3.2rem; font-family: 'Georgia', serif; font-style: italic; font-weight: 400; color: var(--text-main); margin-bottom: 12px;">$0.00</div>
-                
+
                 <div id="hero-gamified-msg" style="font-size: 0.9rem; font-weight: 600; color: var(--success); margin-bottom: 8px; padding: 0 10px;">✨ You're pacing beautifully! Keep it cozy.</div>
                 <div id="hero-daily-rate" style="font-size: 1rem; font-weight: 700; color: var(--text-main); margin-bottom: 20px;"></div>
 
-                <div style="background: var(--bg-color); border-radius: 18px; padding: 16px; border: 1px solid var(--border); cursor: pointer;" onclick="openRefreshSettings()">
+                <div style="background: var(--bg-color); border-radius: 18px; padding: 16px; border: 1px solid var(--border); cursor: pointer;" tabindex="0" role="button" onclick="openRefreshSettings()" onkeydown="if(event.key==='Enter')openRefreshSettings()">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
                         <span>Pay Cycle Refresh</span>
                         <span id="hero-days-left" style="color: var(--text-main);">-- Days Left</span>
                     </div>
-                    <div class="progress-bg" style="height: 8px; border: none; background: rgba(0,0,0,0.05);"><div id="hero-cycle-bar" class="progress-bar" style="background: var(--venice); width: 0%;"></div></div>
+                    <div class="progress-bg" style="height: 8px; border: none;"><div id="hero-cycle-bar" class="progress-bar" style="background: var(--venice); width: 0%;"></div></div>
                 </div>
             </div>
 
-            <!-- Month-Scoped Metrics Grid (Tax Escrow Removed) -->
+            <div class="card" id="daily-checkin-card" style="padding: 18px 22px; background: var(--daily-gradient);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h2 style="margin: 0; font-size: 1.1rem;">cozy daily check-in</h2>
+                    <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 800; text-transform: uppercase;">This Week</span>
+                </div>
+                <div id="stamp-grid" style="display: flex; justify-content: space-between; align-items: center; gap: 8px;"></div>
+            </div>
+        </div>
+
+        <!-- ==================== LOG ==================== -->
+        <div id="tab-log" class="tab-content">
+            <div class="card">
+                <h2>log an entry</h2>
+                <div class="form-group">
+                    <label for="tx-type">Entry type</label>
+                    <select id="tx-type" class="form-input" onchange="toggleFormContext()">
+                        <option value="expense">Expense (logs immediately)</option>
+                        <option value="wishlist">Impulse want (48-hour cooldown)</option>
+                        <option value="income">Paycheck / inflow</option>
+                    </select>
+                </div>
+                <div id="dynamic-form-fields"></div>
+                <button onclick="submitTransaction()">Record Entry</button>
+            </div>
+
+            <div class="card" id="waiting-room-card" style="display: none; background: var(--waiting-gradient); border-color: var(--venice);">
+                <h2>the impulse waiting room ⏳</h2>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4;">Impulse wants are cooling down. Max queue size is 5 items.</p>
+                <ul id="wishlist-container" class="tx-list"></ul>
+            </div>
+        </div>
+
+        <!-- ==================== LEDGER ==================== -->
+        <div id="tab-ledger" class="tab-content">
+            <div class="card">
+                <h2>ledger</h2>
+                <div class="filter-row">
+                    <label class="sr-only" for="ledger-search">Search transactions</label>
+                    <input type="search" id="ledger-search" placeholder="Search description…" oninput="onLedgerFilterChange()">
+                </div>
+                <div class="chip-row" id="ledger-filter-chips"></div>
+                <div id="ledger-count" style="font-size:0.7rem; font-weight:800; text-transform:uppercase; color:var(--text-muted); margin-bottom:8px;"></div>
+                <ul id="ledger-container" class="tx-list"></ul>
+                <button class="secondary" id="ledger-more" style="width:100%; margin-top:14px; display:none;" onclick="showMoreLedger()">Show more</button>
+            </div>
+        </div>
+
+        <!-- ==================== PLAN ==================== -->
+        <div id="tab-plan" class="tab-content">
+            <div class="card">
+                <h2><span class="view-label-ctx">Month</span> spending targets
+                    <button class="secondary" onclick="openMoveMoney()">🔀 Move money</button>
+                </h2>
+                <div id="category-caps-container"></div>
+            </div>
+
+            <div class="card" id="category-manager-card">
+                <h2>spending blueprint 📝</h2>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4;">Needs and Set-Asides are locked away from your Wants allowance. Set-Asides bank what you don't spend.</p>
+                <ul id="editable-categories-list" class="tx-list" style="margin-bottom: 20px;"></ul>
+
+                <div style="background: var(--bg-color); padding: 16px; border-radius: 16px; border: 1px dashed var(--border);">
+                    <h4 style="margin-bottom: 12px; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Add new target</h4>
+                    <div class="form-group"><label class="sr-only" for="new-cat-name">Category name</label><input type="text" id="new-cat-name" placeholder="Category name (e.g., Dining Out)"></div>
+                    <div class="form-group"><label class="sr-only" for="new-cat-limit">Monthly limit</label><input type="number" inputmode="decimal" step="0.01" id="new-cat-limit" placeholder="Monthly limit ($)"></div>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label class="sr-only" for="new-cat-type">Category kind</label>
+                        <select id="new-cat-type" class="form-input" onchange="syncNewCatRollover()">
+                            <option value="choice">Want (flexible / fun)</option>
+                            <option value="essential">Need (monthly &amp; predictable)</option>
+                            <option value="reserve">Set-Aside (non-monthly / irregular)</option>
+                        </select>
+                    </div>
+                    <label style="display:flex; align-items:center; justify-content:center; gap:8px; text-transform:none; letter-spacing:0; font-size:0.75rem; margin-bottom:16px; cursor:pointer;">
+                        <input type="checkbox" id="new-cat-rollover" style="width:auto; margin:0;">
+                        <span>Roll unspent money over to next month</span>
+                    </label>
+                    <button class="secondary" style="background: var(--venice); color: white; width: 100%; padding: 14px; font-size: 0.9rem;" onclick="addNewCategory()">+ Create target</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>savings pots</h2>
+                <div id="pots-container" style="margin-bottom: 18px;"></div>
+                <div style="background: var(--bg-color); padding: 16px; border-radius: 16px; border: 1px dashed var(--border);">
+                    <h4 style="margin-bottom: 12px; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">New pot</h4>
+                    <div class="form-group"><label for="pot-name">Name</label><input type="text" id="pot-name" placeholder="e.g., Cold Savings Runway"></div>
+                    <div class="form-group">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div><label for="pot-target">Target ($)</label><input type="number" inputmode="decimal" step="0.01" id="pot-target" placeholder="15000"></div>
+                            <div><label for="pot-starting">Already saved ($)</label><input type="number" inputmode="decimal" step="0.01" id="pot-starting" placeholder="5000" value="0"></div>
+                        </div>
+                    </div>
+                    <div class="form-group"><label for="pot-monthly">Planned monthly ($)</label><input type="number" inputmode="decimal" step="0.01" id="pot-monthly" placeholder="500"></div>
+                    <button style="background: var(--text-main);" onclick="createNewPot()">Initialize pot</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== REVIEW ==================== -->
+        <div id="tab-review" class="tab-content">
             <div class="metrics-grid">
-                <div class="mini-stat" style="background-color: var(--block-cream); border-color: rgba(221,197,169,0.4);">
-                    <div class="stat-lbl" style="color: #4A5568;">Protected "Needs"</div>
-                    <div class="stat-val" id="dash-nn-vault" style="color: #1C1E24; font-weight: 600;">$0.00</div>
+                <div class="mini-stat" style="background-color: var(--block-cream);">
+                    <div class="stat-lbl">Protected "Needs"</div>
+                    <div class="stat-val" id="dash-nn-vault">$0.00</div>
                 </div>
-                <div class="mini-stat" style="background-color: var(--block-green); border-color: rgba(82,117,88,0.2);">
-                    <div class="stat-lbl" style="color: #4A5568;"><span class="view-label-ctx">Month</span> Inflow</div>
-                    <div class="stat-val" id="dash-inflow" style="color: var(--success); font-weight: 600;">$0.00</div>
+                <div class="mini-stat" style="background-color: var(--block-green);">
+                    <div class="stat-lbl"><span class="view-label-ctx">Month</span> Inflow</div>
+                    <div class="stat-val" id="dash-inflow" style="color: var(--success);">$0.00</div>
                 </div>
-                <div class="mini-stat" style="background-color: var(--block-pink); border-color: rgba(214,140,140,0.2);">
-                    <div class="stat-lbl" style="color: #4A5568;"><span class="view-label-ctx">Month</span> Outflow</div>
-                    <div class="stat-val" id="dash-outflow" style="color: var(--danger); font-weight: 700;">$0.00</div>
+                <div class="mini-stat" style="background-color: var(--block-pink);">
+                    <div class="stat-lbl"><span class="view-label-ctx">Month</span> Outflow</div>
+                    <div class="stat-val" id="dash-outflow" style="color: var(--danger);">$0.00</div>
                 </div>
-                <div class="mini-stat" style="background-color: var(--block-blue); border-color: rgba(136,148,183,0.2);">
-                    <div class="stat-lbl" style="color: #4A5568;"><span class="view-label-ctx">Month</span> Net Cash</div>
-                    <div class="stat-val" id="dash-month-net" style="color: #1C1E24;">$0.00</div>
+                <div class="mini-stat" style="background-color: var(--block-blue);">
+                    <div class="stat-lbl"><span class="view-label-ctx">Month</span> Net Cash</div>
+                    <div class="stat-val" id="dash-month-net">$0.00</div>
                 </div>
             </div>
 
@@ -235,13 +396,12 @@
                         <div class="stat-val" id="dash-age-of-money" style="font-size: 1.6rem;">—</div>
                     </div>
                     <div style="text-align:right; max-width: 55%;">
-                        <div id="age-of-money-note" style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.4;">How long a dollar sits with you before you spend it. 30+ days means you're a month ahead.</div>
+                        <div id="age-of-money-note" style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.4;">How long a dollar sits with you before you spend it.</div>
                     </div>
                 </div>
                 <div class="progress-bg" style="margin-top: 12px;"><div id="age-of-money-bar" class="progress-bar" style="width: 0%; background: var(--venice);"></div></div>
             </div>
 
-            <!-- Week-only: 7-day spending shape -->
             <div class="card" id="week-breakdown-card" style="display: none; padding: 20px 22px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                     <h2 style="margin: 0; font-size: 1.1rem;">the week's shape</h2>
@@ -249,45 +409,27 @@
                 </div>
                 <div id="day-bars" class="day-bars"></div>
                 <div class="week-summary-row">
-                    <div class="week-summary-cell">
-                        <div class="stat-lbl">Daily Avg</div>
-                        <div class="stat-val" id="week-daily-avg">$0</div>
-                    </div>
-                    <div class="week-summary-cell">
-                        <div class="stat-lbl">No-Spend Days</div>
-                        <div class="stat-val" id="week-nospend-days">0</div>
-                    </div>
-                    <div class="week-summary-cell">
-                        <div class="stat-lbl">Entries</div>
-                        <div class="stat-val" id="week-entry-count">0</div>
-                    </div>
+                    <div class="week-summary-cell"><div class="stat-lbl">Daily Avg</div><div class="stat-val" id="week-daily-avg">$0</div></div>
+                    <div class="week-summary-cell"><div class="stat-lbl">No-Spend Days</div><div class="stat-val" id="week-nospend-days">0</div></div>
+                    <div class="week-summary-cell"><div class="stat-lbl">Entries</div><div class="stat-val" id="week-entry-count">0</div></div>
                 </div>
             </div>
 
-            <div id="top-progression-showcase" class="top-showcase-container" style="display: none;"></div>
-
-            <div class="card" id="daily-checkin-card" style="padding: 18px 22px; background: var(--daily-gradient);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                    <h2 style="margin: 0; font-size: 1.1rem;">cozy daily check-in</h2>
-                    <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 800; text-transform: uppercase;">This Week</span>
+            <div class="card" id="week-hint-card" style="display:none;">
+                <div class="empty-state">
+                    <span class="es-icon">📆</span>
+                    <div class="es-title">the week's shape</div>
+                    <div class="es-body">Switch to Week above to see your 7-day spending shape and close out the week.</div>
                 </div>
-                <div id="stamp-grid" style="display: flex; justify-content: space-between; align-items: center; gap: 8px;"></div>
-            </div>
-
-            <div class="card">
-                <h2><span class="view-label-ctx">Month</span> spending targets
-                    <button class="secondary" style="font-size:0.72rem;" onclick="openMoveMoney()">🔀 Move money</button>
-                </h2>
-                <div id="category-caps-container"></div>
             </div>
 
             <div class="card" id="weekly-close-card" style="display: none; background: var(--waiting-gradient); border-color: var(--venice);">
                 <h2>close the week 🍵</h2>
-                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4;">Two questions, once a week. This is the part that actually changes behaviour — the stamps only track that you showed up.</p>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4;">Two questions, once a week. This is the part that changes behaviour — the stamps only track that you showed up.</p>
                 <div id="weekly-close-summary" style="font-size: 0.82rem; margin-bottom: 14px;"></div>
-                <div class="form-group"><label>What was worth it?</label><input type="text" id="review-worth" placeholder="e.g., the concert, no regrets"></div>
-                <div class="form-group"><label>What will you change next week?</label><input type="text" id="review-change" placeholder="e.g., cook Thursday instead of takeout"></div>
-                <button onclick="saveWeeklyReview()">Save & Close the Week</button>
+                <div class="form-group"><label for="review-worth">What was worth it?</label><input type="text" id="review-worth" placeholder="e.g., the concert, no regrets"></div>
+                <div class="form-group"><label for="review-change">What will you change next week?</label><input type="text" id="review-change" placeholder="e.g., cook Thursday instead of takeout"></div>
+                <button onclick="saveWeeklyReview()">Save &amp; close the week</button>
             </div>
 
             <div class="card" id="past-reviews-card" style="display: none;">
@@ -296,106 +438,44 @@
             </div>
         </div>
 
-        <!-- ==================== TAB 2: LOG ==================== -->
-        <div id="tab-log" class="tab-content">
-            <div class="card">
-                <h2>Log Entry Transaction</h2>
-                <div class="form-group">
-                    <label>Transaction Blueprint Type</label>
-                    <select id="tx-type" class="form-input" onchange="toggleFormContext()">
-                        <option value="expense">Expense / Need (Instant Log)</option>
-                        <option value="wishlist">Impulse / Want (48-Hour Cooldown)</option>
-                        <option value="income">Paycheck / Inflow</option>
-                    </select>
-                </div>
-                <div id="dynamic-form-fields"></div>
-                <button onclick="submitTransaction()">Record Entry</button>
-            </div>
-            
-            <div class="card" id="waiting-room-card" style="display: none; background: var(--waiting-gradient); border-color: var(--venice);">
-                <h2>the impulse waiting room ⏳</h2>
-                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4;">Impulse wants are cooling down. Max queue size is 5 items. Priorities must be managed.</p>
-                <ul id="wishlist-container" class="tx-list"></ul>
-            </div>
-        </div>
-
-        <!-- ==================== TAB 3: LEDGER ==================== -->
-        <div id="tab-ledger" class="tab-content">
-            <div class="card">
-                <h2>dynamic operational ledger</h2>
-                <ul id="ledger-container" class="tx-list"></ul>
-            </div>
-        </div>
-
-        <!-- ==================== TAB 4: GARDEN ==================== -->
-        <div id="tab-garden" class="tab-content">
-            
-            <div class="card" id="category-manager-card">
-                <h2>spending blueprint 📝</h2>
-                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4;">Design your financial architecture. Mark <strong>Needs</strong> to lock their funds away from your <strong>Wants</strong> allowance.</p>
-                <ul id="editable-categories-list" class="tx-list" style="margin-bottom: 20px;"></ul>
-                
-                <div style="background: var(--bg-color); padding: 16px; border-radius: 16px; border: 1px dashed var(--border);">
-                    <h4 style="margin-bottom: 12px; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Add New Target</h4>
-                    <div class="form-group"><input type="text" id="new-cat-name" placeholder="Category Name (e.g., Dining Out)"></div>
-                    <div class="form-group"><input type="number" id="new-cat-limit" placeholder="Monthly Limit ($)"></div>
-                    <div class="form-group" style="margin-bottom: 12px;">
-                        <select id="new-cat-type" class="form-input" onchange="syncNewCatRollover()">
-                            <option value="choice">Want (flexible / fun)</option>
-                            <option value="essential">Need (monthly & predictable)</option>
-                            <option value="reserve">Set-Aside (non-monthly / irregular)</option>
-                        </select>
-                    </div>
-                    <label style="display:flex; align-items:center; justify-content:center; gap:8px; text-transform:none; letter-spacing:0; font-size:0.75rem; margin-bottom:16px; cursor:pointer;">
-                        <input type="checkbox" id="new-cat-rollover" style="width:auto; margin:0;">
-                        <span>Roll unspent money over to next month</span>
-                    </label>
-                    <button class="secondary" style="background: var(--venice); color: white; width: 100%; padding: 14px; font-size: 0.9rem;" onclick="addNewCategory()">+ Create Target</button>
-                </div>
-            </div>
-
-            <div class="card">
-                <h2>long-term savings pots</h2>
-                <div class="form-group"><label>Designation Name</label><input type="text" id="pot-name" placeholder="e.g., Cold Savings Runway"></div>
-                <div class="form-group">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 4px;">
-                        <div><label>Target Goal ($)</label><input type="number" id="pot-target" placeholder="15000"></div>
-                        <div><label>Already Saved ($)</label><input type="number" id="pot-starting" placeholder="5000" value="0"></div>
-                    </div>
-                </div>
-                <div class="form-group"><label>Planned Monthly Contribution ($)</label><input type="number" id="pot-monthly" placeholder="500"></div>
-                <button style="background: var(--text-main);" onclick="createNewPot()">Initialize Pot</button>
-                <div id="pots-container" style="margin-top: 18px;"></div>
-            </div>
-
-            <div class="card" id="sticker-drawer">
-                <h2>sticker compendium 📖</h2>
-                <div id="sticker-grid-container" class="sticker-grid"></div>
-            </div>
-
+        <!-- ==================== SETTINGS ==================== -->
+        <div id="tab-settings" class="tab-content">
             <div class="card" id="reconcile-card">
                 <h2>reconcile 🏦</h2>
                 <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4;">A hand-kept ledger drifts. Check it against your real bank balance every week or two so the numbers stay worth trusting.</p>
                 <div id="reconcile-last" style="font-size: 0.75rem; color: var(--text-muted); text-align:center; margin-bottom: 12px;"></div>
-                <button style="background: var(--success);" onclick="openReconcile()">⚖️ Reconcile Balance</button>
+                <button style="background: var(--success);" onclick="openReconcile()">⚖️ Reconcile balance</button>
+            </div>
+
+            <div class="card">
+                <h2>opening balance</h2>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4;">Your cash balance is calculated from your ledger. This is the figure it starts from — set it once when you begin.</p>
+                <div class="form-group"><label for="opening-balance-input">Opening balance ($)</label><input type="number" inputmode="decimal" step="0.01" id="opening-balance-input"></div>
+                <button class="secondary" style="width:100%; padding:14px;" onclick="saveOpeningBalance()">Save opening balance</button>
+            </div>
+
+            <div class="card">
+                <h2>pay cycle 🗓️</h2>
+                <div id="paycycle-summary" style="font-size:0.8rem; color:var(--text-muted); text-align:center; margin-bottom:12px;"></div>
+                <button class="secondary" style="width:100%; padding:14px;" onclick="openRefreshSettings()">Edit pay cycle</button>
             </div>
 
             <div class="card" id="csv-card">
                 <h2>import from bank csv 📥</h2>
                 <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4;">Export a CSV from your bank and drop it here. Rows already in your ledger are skipped automatically.</p>
-                <button class="secondary" style="width:100%; padding:14px; background: var(--venice); color: white;" onclick="document.getElementById('csv-file').click()">Choose CSV File</button>
+                <button class="secondary" style="width:100%; padding:14px; background: var(--venice); color: white;" onclick="document.getElementById('csv-file').click()">Choose CSV file</button>
                 <input type="file" id="csv-file" accept=".csv,text/csv" style="display:none" onchange="handleCsvFile(event)">
             </div>
 
             <div class="card" id="backup-manager">
                 <h2>data vault 💾</h2>
                 <div id="storage-status" style="font-size: 0.75rem; font-weight: 700; text-align: center; padding: 10px; background: var(--bg-color); border-radius: 14px; margin-bottom: 14px;">Checking storage…</div>
-                <button style="background: var(--text-main); margin-bottom: 10px;" onclick="exportData()">⬇️ Download Backup File</button>
-                <button class="secondary" style="width: 100%; padding: 14px; background: transparent;" onclick="document.getElementById('import-file').click()">⬆️ Restore from Backup</button>
+                <button style="background: var(--text-main); margin-bottom: 10px;" onclick="exportData()">⬇️ Download backup file</button>
+                <button class="secondary" style="width: 100%; padding: 14px; background: transparent;" onclick="document.getElementById('import-file').click()">⬆️ Restore from backup</button>
                 <input type="file" id="import-file" accept=".json" style="display: none;" onchange="importData(event)">
 
-                <h4 style="margin: 22px 0 4px; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Automatic Snapshots</h4>
-                <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 8px; line-height: 1.4;">Saved on your device once a day, keeping the last 8 days. Insurance against a bad restore or an accidental bulk delete.</p>
+                <h4 style="margin: 22px 0 4px; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Automatic snapshots</h4>
+                <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 8px; line-height: 1.4;">Saved once a day, keeping the last 8 days.</p>
                 <ul id="snapshot-list" class="tx-list"></ul>
             </div>
         </div>
@@ -403,13 +483,14 @@
     </div>
 
     <div class="undo-pill" id="undo-pill" style="display: none;" onclick="undoLastChange()">↩️ Undo</div>
-    <div class="fab" onclick="openQuickAddModal()">+</div>
+    <button class="fab" aria-label="Quick add a transaction" onclick="openQuickAddModal()">+</button>
 
     <nav class="bottom-dock">
-        <button class="dock-item active" onclick="switchTab('home', this)"><span>🏠</span> Home</button>
-        <button class="dock-item" onclick="switchTab('log', this)"><span>📝</span> Log</button>
-        <button class="dock-item" onclick="switchTab('ledger', this)"><span>📊</span> Ledger</button>
-        <button class="dock-item" onclick="switchTab('garden', this)"><span>🪴</span> Garden</button>
+        <button class="dock-item active" data-tab="today" onclick="switchTab('today')"><span>🏠</span> Today</button>
+        <button class="dock-item" data-tab="log" onclick="switchTab('log')"><span>📝</span> Log</button>
+        <button class="dock-item" data-tab="ledger" onclick="switchTab('ledger')"><span>📊</span> Ledger</button>
+        <button class="dock-item" data-tab="plan" onclick="switchTab('plan')"><span>🪴</span> Plan</button>
+        <button class="dock-item" data-tab="review" onclick="switchTab('review')"><span>🍵</span> Review</button>
     </nav>
 
     <!-- Quick Add Modal -->
@@ -425,7 +506,7 @@
             </div>
             <div class="form-group">
                 <label>Amount ($)</label>
-                <input type="number" id="qa-amount" class="form-input" placeholder="0.00">
+                <input type="number" inputmode="decimal" step="0.01" id="qa-amount" class="form-input" placeholder="0.00">
             </div>
             <div class="form-group">
                 <label>Category</label>
@@ -458,6 +539,62 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="app-dialog">
+        <div class="modal-card">
+            <h3 id="app-dialog-title" style="font-size:1.2rem;">Are you sure?</h3>
+            <p id="app-dialog-body" style="font-size:0.85rem; line-height:1.5; color:var(--text-muted);"></p>
+            <div class="dialog-actions">
+                <button id="app-dialog-cancel" class="secondary" style="padding:14px;">Cancel</button>
+                <button id="app-dialog-ok">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="edit-tx-modal">
+        <div class="modal-card">
+            <h3 style="color: var(--venice);">Edit Entry ✏️</h3>
+            <div class="form-group"><label for="edit-tx-desc">Description</label><input type="text" id="edit-tx-desc"></div>
+            <div class="form-group"><label for="edit-tx-amount">Amount ($)</label><input type="number" inputmode="decimal" step="0.01" id="edit-tx-amount"></div>
+            <div class="form-group"><label for="edit-tx-date">Date</label><input type="date" id="edit-tx-date"></div>
+            <div class="form-group" id="edit-tx-cat-wrap"><label for="edit-tx-cat">Category</label><select id="edit-tx-cat" class="form-input"></select></div>
+            <button onclick="saveTransactionEdit()">Save changes</button>
+            <button class="secondary" style="width:100%; margin-top:10px;" onclick="document.getElementById('edit-tx-modal').style.display='none'">Cancel</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="edit-cat-modal">
+        <div class="modal-card">
+            <h3 style="color: var(--venice);">Edit Category ✏️</h3>
+            <div class="form-group"><label for="edit-cat-name">Name</label><input type="text" id="edit-cat-name"></div>
+            <div class="form-group"><label for="edit-cat-limit">Monthly limit ($)</label><input type="number" inputmode="decimal" step="0.01" id="edit-cat-limit"></div>
+            <div class="form-group"><label for="edit-cat-kind">Kind</label>
+                <select id="edit-cat-kind" class="form-input">
+                    <option value="want">Want (flexible / fun)</option>
+                    <option value="need">Need (monthly &amp; predictable)</option>
+                    <option value="reserve">Set-Aside (non-monthly / irregular)</option>
+                </select>
+            </div>
+            <label style="display:flex; align-items:center; justify-content:center; gap:8px; text-transform:none; letter-spacing:0; font-size:0.75rem; margin-bottom:16px; cursor:pointer;">
+                <input type="checkbox" id="edit-cat-rollover" style="width:auto; margin:0;">
+                <span>Roll unspent money over to next month</span>
+            </label>
+            <p style="font-size:0.72rem; color:var(--text-muted); margin-bottom:14px; line-height:1.4;">Renaming updates every past entry in this category, so nothing is orphaned.</p>
+            <button onclick="saveCategoryEdit()">Save changes</button>
+            <button class="secondary" style="width:100%; margin-top:10px;" onclick="document.getElementById('edit-cat-modal').style.display='none'">Cancel</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="edit-pot-modal">
+        <div class="modal-card">
+            <h3 style="color: var(--venice);">Edit Pot ✏️</h3>
+            <div class="form-group"><label for="edit-pot-name">Name</label><input type="text" id="edit-pot-name"></div>
+            <div class="form-group"><label for="edit-pot-target">Target ($)</label><input type="number" inputmode="decimal" step="0.01" id="edit-pot-target"></div>
+            <div class="form-group"><label for="edit-pot-current">Currently saved ($)</label><input type="number" inputmode="decimal" step="0.01" id="edit-pot-current"></div>
+            <button onclick="savePotEdit()">Save changes</button>
+            <button class="secondary" style="width:100%; margin-top:10px;" onclick="document.getElementById('edit-pot-modal').style.display='none'">Cancel</button>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="reconcile-modal">
         <div class="modal-card">
             <h3 style="color: var(--success);">Reconcile ⚖️</h3>
@@ -466,7 +603,7 @@
                 <span style="color: var(--text-muted); font-weight: 700;">This app says</span>
                 <strong id="reconcile-app-balance">$0.00</strong>
             </div>
-            <div class="form-group"><label>Actual bank balance ($)</label><input type="number" id="reconcile-actual" placeholder="0.00" oninput="previewReconcile()"></div>
+            <div class="form-group"><label>Actual bank balance ($)</label><input type="number" inputmode="decimal" step="0.01" id="reconcile-actual" placeholder="0.00" oninput="previewReconcile()"></div>
             <div id="reconcile-diff" style="text-align:center; padding: 4px 0 16px;"></div>
             <button id="reconcile-apply" onclick="applyReconcile()" disabled>Write Adjustment</button>
             <button class="secondary" style="width: 100%; margin-top: 10px;" onclick="closeReconcile()">Cancel</button>
@@ -479,7 +616,7 @@
             <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px;">Went over in one category? Cover it from another. This is a decision, not a failure — no guilt.</p>
             <div class="form-group"><label>Take from</label><select id="move-from" class="form-input"></select></div>
             <div class="form-group"><label>Give to</label><select id="move-to" class="form-input"></select></div>
-            <div class="form-group"><label>Amount ($)</label><input type="number" id="move-amount" placeholder="0.00"></div>
+            <div class="form-group"><label>Amount ($)</label><input type="number" inputmode="decimal" step="0.01" id="move-amount" placeholder="0.00"></div>
             <button onclick="applyMoveMoney()">Move It</button>
             <button class="secondary" style="width: 100%; margin-top: 10px;" onclick="closeMoveMoney()">Cancel</button>
         </div>
@@ -560,8 +697,6 @@
         let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
             openingBalance: 0, currentViewMode: 'month',
             pots: [], ledger: [], wishlist: [], stamps: {}, vendors: {},
-            stickers: { blossom: false, sprout: false, matcha: false, lantern: false, star: false },
-            txCount: 0, bonusTokens: 0, 
             refreshSettings: { frequency: "7", nextRefreshDate: getUpcomingFridayStr() },
             rolloverPending: false, lastRolloverAmount: 0,
             categoryRolloverThrough: null,
@@ -579,6 +714,8 @@
 
         let pendingOverbudgetTx = null;
         let weekOffset = 0; // 0 = current week, -1 = last week, +1 = next week
+        let editingTxId = null, editingCatName = null, editingPotId = null;
+        let lastUsedEntryDate = null;
 
         /* ===================== TIME HELPERS =====================
            Ledger rows historically had no real timestamp: `date` is a
@@ -720,7 +857,7 @@
             } catch (err) {
                 // Quota is usually snapshots, not live state. Drop them and retry once.
                 try { localStorage.removeItem(SNAPSHOT_KEY); localStorage.setItem(STORAGE_KEY, lastPersisted); showToast("Storage was full — old snapshots cleared."); }
-                catch (fatal) { alert("Couldn't save: browser storage is full. Export a backup now."); }
+                catch (fatal) { appAlert("Couldn't save: browser storage is full. Export a backup now."); }
             }
         }
 
@@ -760,12 +897,13 @@
             }
         }
 
-        function restoreSnapshot(day) {
+        async function restoreSnapshot(day) {
             const snap = readSnapshots().find(s => s.day === day);
             if (!snap) return;
-            if (!confirm(`Roll back to the snapshot from ${day}? Everything logged since then will be replaced. This is undoable once.`)) return;
+            const proceed = await appConfirm(`Roll back to the snapshot from ${day}? Everything logged since then will be replaced. This is undoable once.`, { confirmText: 'Roll back', danger: true });
+            if (!proceed) return;
             const current = lastPersisted;
-            try { state = JSON.parse(snap.data); } catch (e) { alert("That snapshot is unreadable."); return; }
+            try { state = JSON.parse(snap.data); } catch (e) { appAlert("That snapshot is unreadable."); return; }
             undoStack.push({ label: `rollback to ${day}`, at: Date.now(), data: current });
             persist(); render(); showToast(`Rolled back to ${day}`);
         }
@@ -879,10 +1017,11 @@
             save(cat.rollover ? 'enabling rollover' : 'clearing the rollover balance');
         }
 
-        function resetCarried(name) {
+        async function resetCarried(name) {
             const cat = state.categoryTargets.find(c => c.name === name);
             if (!cat || !cat.carried) return;
-            if (!confirm(`Zero out the $${cat.carried.toFixed(2)} banked in "${name}"? Use this after you've actually spent it on the real-world bill.`)) return;
+            const ok = await appConfirm(`Zero out the $${cat.carried.toFixed(2)} banked in "${name}"? Use this after you've actually spent it on the real-world bill.`, { confirmText: 'Zero it out' });
+            if (!ok) return;
             cat.carried = 0;
             save('the balance reset');
         }
@@ -1036,7 +1175,7 @@
             const toName = document.getElementById('move-to').value;
             const amt = parseFloat(document.getElementById('move-amount').value);
             if (!amt || amt <= 0) return;
-            if (fromName === toName) { alert("Pick two different categories."); return; }
+            if (fromName === toName) { appAlert("Pick two different categories."); return; }
             const from = state.categoryTargets.find(c => c.name === fromName);
             const to = state.categoryTargets.find(c => c.name === toName);
             if (!from || !to) return;
@@ -1113,7 +1252,7 @@
             const reader = new FileReader();
             reader.onload = e => {
                 try { buildCsvPreview(String(e.target.result)); }
-                catch (err) { alert("Couldn't read that CSV: " + err.message); }
+                catch (err) { appAlert("Couldn't read that CSV: " + err.message); }
                 finally { event.target.value = ''; }
             };
             reader.readAsText(file);
@@ -1121,7 +1260,7 @@
 
         function buildCsvPreview(text) {
             const rows = parseCsv(text);
-            if (rows.length < 2) { alert("That file doesn't have any data rows."); return; }
+            if (rows.length < 2) { appAlert("That file doesn't have any data rows."); return; }
             const headers = rows[0].map(h => h.trim().toLowerCase());
             const dateIdx = findColumn(headers, ['date', 'posted', 'transaction date']);
             const descIdx = findColumn(headers, ['description', 'payee', 'name', 'memo', 'merchant', 'details']);
@@ -1130,7 +1269,7 @@
             const creditIdx = findColumn(headers, ['credit', 'deposit']);
 
             if (dateIdx === -1 || descIdx === -1 || (amtIdx === -1 && debitIdx === -1)) {
-                alert(`Couldn't identify the columns.\n\nFound: ${headers.join(', ')}\n\nNeeds a date column, a description column, and either an amount column or debit/credit columns.`);
+                appAlert(`Couldn't identify the columns.\n\nFound: ${headers.join(', ')}\n\nNeeds a date column, a description column, and either an amount column or debit/credit columns.`);
                 return;
             }
 
@@ -1165,7 +1304,7 @@
             });
 
             if (!csvPending.length) {
-                alert(`Nothing new to import.\n\n${skipped} row${skipped === 1 ? '' : 's'} already in your ledger, ${unparsed} unreadable.`);
+                appAlert(`Nothing new to import.\n\n${skipped} row${skipped === 1 ? '' : 's'} already in your ledger, ${unparsed} unreadable.`);
                 return;
             }
 
@@ -1245,7 +1384,7 @@
             const key = weekKeyOf(bounds);
             const worth = document.getElementById('review-worth').value.trim();
             const change = document.getElementById('review-change').value.trim();
-            if (!worth && !change) { alert("Write at least one line — that's the whole point."); return; }
+            if (!worth && !change) { appAlert("Write at least one line — that's the whole point."); return; }
             if (!state.reviews) state.reviews = {};
             state.reviews[key] = { worth, change, at: Date.now() };
             save('the weekly review');
@@ -1341,6 +1480,257 @@
             el.innerHTML = `<span style="color: ${stale ? 'var(--warning)' : 'var(--text-muted)'};">Last reconciled ${days === 0 ? 'today' : `${days} day${days === 1 ? '' : 's'} ago`}${stale ? ' — worth doing again' : ''}.</span>`;
         }
 
+        /* ===================== IN-APP DIALOG =====================
+           Native alert()/confirm() render as system chrome in a standalone PWA
+           and break the whole aesthetic. These return promises so call sites
+           read the same way.                                                  */
+        function appAlert(message, title) {
+            return appDialog({ title: title || 'Heads up', message, confirmText: 'OK', cancelText: null });
+        }
+        function appConfirm(message, opts) {
+            return appDialog(Object.assign({ title: 'Are you sure?', message, confirmText: 'Confirm', cancelText: 'Cancel' }, opts || {}));
+        }
+        function appDialog({ title, message, confirmText, cancelText, danger }) {
+            return new Promise(resolve => {
+                const overlay = document.getElementById('app-dialog');
+                document.getElementById('app-dialog-title').innerText = title;
+                document.getElementById('app-dialog-body').innerText = message;
+                const ok = document.getElementById('app-dialog-ok');
+                const cancel = document.getElementById('app-dialog-cancel');
+                ok.innerText = confirmText || 'OK';
+                ok.style.background = danger ? 'var(--danger)' : 'var(--venice)';
+                cancel.style.display = cancelText ? 'block' : 'none';
+                cancel.innerText = cancelText || 'Cancel';
+                const done = val => {
+                    overlay.style.display = 'none';
+                    ok.onclick = null; cancel.onclick = null;
+                    resolve(val);
+                };
+                ok.onclick = () => done(true);
+                cancel.onclick = () => done(false);
+                overlay.style.display = 'flex';
+                ok.focus();
+            });
+        }
+
+        /* ===================== TABS ===================== */
+        const TABS = ['today', 'log', 'ledger', 'plan', 'review', 'settings'];
+        function switchTab(tabId) {
+            if (!TABS.includes(tabId)) tabId = 'today';
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active');
+            document.querySelectorAll('.dock-item').forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
+            // The period selector only means something on screens scoped to a period.
+            document.getElementById('period-controls').style.display =
+                ['today', 'ledger', 'plan', 'review'].includes(tabId) ? 'block' : 'none';
+            state.activeTab = tabId;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            render();
+        }
+
+        /* ===================== SAVINGS POTS =====================
+           `pots-container` existed in the markup from the start but nothing ever
+           wrote to it, so every pot created was invisible outside dropdowns. */
+        function renderPots() {
+            const box = document.getElementById('pots-container');
+            if (!box) return;
+            if (!state.pots.length) {
+                box.innerHTML = `<div class="empty-state" style="padding:16px 8px;">
+                    <span class="es-icon">🫙</span>
+                    <div class="es-title">no pots yet</div>
+                    <div class="es-body">Pots hold money for a specific goal. End-of-cycle leftovers can sweep into them automatically.</div>
+                </div>`;
+                return;
+            }
+            box.innerHTML = state.pots.map(pot => {
+                const pct = pot.target > 0 ? Math.min(100, (pot.current / pot.target) * 100) : 0;
+                const full = pct >= 100;
+                return `<div class="pot-card">
+                    <div class="pot-head">
+                        <strong style="font-size:0.95rem;">${esc(pot.name)}</strong>
+                        <span style="font-size:0.82rem; font-weight:700; color:${full ? 'var(--success)' : 'var(--text-main)'};">$${pot.current.toFixed(0)} <span style="color:var(--text-muted); font-weight:600;">/ $${pot.target.toFixed(0)}</span></span>
+                    </div>
+                    <div class="progress-bg"><div class="progress-bar" style="width:${pct}%; background:${full ? 'var(--success)' : 'var(--venice)'};"></div></div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+                        <span style="font-size:0.68rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">${full ? '🎉 goal reached' : `${pct.toFixed(0)}% · $${(pot.target - pot.current).toFixed(0)} to go`}</span>
+                        <div class="inline-actions" style="margin:0;">
+                            <button class="btn-inline edit" data-id="${pot.id}" onclick="openPotEdit(this.dataset.id)">Edit</button>
+                            <button class="btn-inline del" data-id="${pot.id}" onclick="deletePot(this.dataset.id)">Delete</button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function openPotEdit(id) {
+            const pot = state.pots.find(p => p.id == id); if (!pot) return;
+            editingPotId = pot.id;
+            document.getElementById('edit-pot-name').value = pot.name;
+            document.getElementById('edit-pot-target').value = pot.target;
+            document.getElementById('edit-pot-current').value = pot.current;
+            document.getElementById('edit-pot-modal').style.display = 'flex';
+        }
+        function savePotEdit() {
+            const pot = state.pots.find(p => p.id == editingPotId); if (!pot) return;
+            const name = document.getElementById('edit-pot-name').value.trim();
+            const target = parseFloat(document.getElementById('edit-pot-target').value);
+            const current = parseFloat(document.getElementById('edit-pot-current').value);
+            if (!name || isNaN(target)) return;
+            pot.name = name; pot.target = target;
+            if (!isNaN(current)) pot.current = current;
+            document.getElementById('edit-pot-modal').style.display = 'none';
+            save('the pot edit');
+        }
+        async function deletePot(id) {
+            const pot = state.pots.find(p => p.id == id); if (!pot) return;
+            const ok = await appConfirm(`Delete "${pot.name}"? The $${pot.current.toFixed(2)} in it isn't returned to your cash balance — it was never taken out of it.`, { confirmText: 'Delete pot', danger: true });
+            if (!ok) return;
+            state.pots = state.pots.filter(p => p.id != id);
+            save('the pot deletion');
+        }
+
+        /* ===================== EDITING =====================
+           Previously the only correction path was delete-and-retype. */
+        function openTransactionEdit(id) {
+            const item = state.ledger.find(i => i.id == id); if (!item) return;
+            editingTxId = item.id;
+            const isIncome = item.type === 'income';
+            document.getElementById('edit-tx-desc').value = item.desc || '';
+            document.getElementById('edit-tx-amount').value = isIncome ? (item.net || 0) : (item.amt || 0);
+            document.getElementById('edit-tx-date').value = toDateInputValue(new Date(getTxTime(item)));
+            const catWrap = document.getElementById('edit-tx-cat-wrap');
+            catWrap.style.display = isIncome ? 'none' : 'block';
+            const sel = document.getElementById('edit-tx-cat');
+            sel.innerHTML = state.categoryTargets.map(c => `<option value="${esc(c.name)}">${esc(c.name)}</option>`).join('');
+            if (!isIncome) {
+                if (!state.categoryTargets.some(c => c.name === item.cat)) {
+                    sel.innerHTML += `<option value="${esc(item.cat)}">${esc(item.cat)} (archived)</option>`;
+                }
+                sel.value = item.cat;
+            }
+            document.getElementById('edit-tx-modal').style.display = 'flex';
+        }
+        function saveTransactionEdit() {
+            const item = state.ledger.find(i => i.id == editingTxId); if (!item) return;
+            const desc = document.getElementById('edit-tx-desc').value.trim();
+            const amt = parseFloat(document.getElementById('edit-tx-amount').value);
+            const dateVal = document.getElementById('edit-tx-date').value;
+            if (!desc || isNaN(amt) || amt <= 0) return;
+            const stamp = stampFor(dateVal);
+            item.desc = desc;
+            if (item.type === 'income') item.net = amt; else item.amt = amt;
+            if (item.type !== 'income') {
+                const cat = document.getElementById('edit-tx-cat').value;
+                item.cat = cat;
+                item.isNeed = catIsNeed(cat);
+            }
+            // Preserve time-of-day ordering when only the description changed.
+            item.ts = stamp.ts; item.date = stamp.date; item.monthKey = stamp.monthKey;
+            document.getElementById('edit-tx-modal').style.display = 'none';
+            save('the edit');
+        }
+
+        function openCategoryEdit(name) {
+            const cat = state.categoryTargets.find(c => c.name === name); if (!cat) return;
+            editingCatName = cat.name;
+            document.getElementById('edit-cat-name').value = cat.name;
+            document.getElementById('edit-cat-limit').value = cat.limit;
+            document.getElementById('edit-cat-kind').value = cat.kind;
+            document.getElementById('edit-cat-rollover').checked = !!cat.rollover;
+            document.getElementById('edit-cat-modal').style.display = 'flex';
+        }
+        async function saveCategoryEdit() {
+            const cat = state.categoryTargets.find(c => c.name === editingCatName); if (!cat) return;
+            const newName = document.getElementById('edit-cat-name').value.trim();
+            const limit = parseFloat(document.getElementById('edit-cat-limit').value);
+            const kind = document.getElementById('edit-cat-kind').value;
+            if (!newName || isNaN(limit)) return;
+            if (newName !== cat.name && state.categoryTargets.some(c => c.name.toLowerCase() === newName.toLowerCase())) {
+                await appAlert(`You already have a category called "${newName}".`); return;
+            }
+            if (newName !== cat.name) {
+                // Rename has to follow the history, or every past entry orphans itself.
+                state.ledger.forEach(i => { if (i.cat === cat.name) i.cat = newName; });
+                Object.keys(state.vendors).forEach(v => { if (state.vendors[v] === cat.name) state.vendors[v] = newName; });
+                cat.name = newName;
+            }
+            cat.limit = limit;
+            cat.kind = kind;
+            cat.nonNegotiable = kind !== 'want';
+            cat.rollover = document.getElementById('edit-cat-rollover').checked;
+            if (!cat.rollover) cat.carried = 0;
+            state.ledger.forEach(i => { if (i.cat === cat.name && i.type !== 'income') i.isNeed = cat.nonNegotiable; });
+            document.getElementById('edit-cat-modal').style.display = 'none';
+            save('the category edit');
+        }
+
+        /* ===================== LEDGER SEARCH & PAGING ===================== */
+        let ledgerQuery = '', ledgerFilter = 'all', ledgerLimit = 25;
+        function onLedgerFilterChange() {
+            ledgerQuery = document.getElementById('ledger-search').value.trim().toLowerCase();
+            ledgerLimit = 25;
+            render();
+        }
+        function setLedgerFilter(f) { ledgerFilter = f; ledgerLimit = 25; render(); }
+        function showMoreLedger() { ledgerLimit += 50; render(); }
+
+        function renderLedgerFilterChips() {
+            const box = document.getElementById('ledger-filter-chips');
+            if (!box) return;
+            const opts = [['all', 'All'], ['expense', 'Spending'], ['income', 'Income'], ['need', 'Needs'], ['want', 'Wants']];
+            box.innerHTML = opts.map(([k, label]) =>
+                `<button class="filter-chip ${ledgerFilter === k ? 'active' : ''}" onclick="setLedgerFilter('${k}')">${label}</button>`).join('');
+        }
+
+        function applyLedgerFilters(rows) {
+            return rows.filter(item => {
+                if (ledgerQuery) {
+                    const hay = `${item.desc || ''} ${item.cat || ''}`.toLowerCase();
+                    if (!hay.includes(ledgerQuery)) return false;
+                }
+                if (ledgerFilter === 'expense') return item.type !== 'income';
+                if (ledgerFilter === 'income') return item.type === 'income';
+                if (ledgerFilter === 'need') return item.type !== 'income' && txIsNeed(item);
+                if (ledgerFilter === 'want') return item.type !== 'income' && !txIsNeed(item);
+                return true;
+            });
+        }
+
+        /* ===================== FIRST-RUN GUIDANCE ===================== */
+        function renderFirstRun() {
+            const card = document.getElementById('first-run-card');
+            if (!card) return;
+            const hasLedger = state.ledger.length > 0;
+            const hasOpening = typeof state.openingBalance === 'number' && state.openingBalance !== 0;
+            if (hasLedger || hasOpening) { card.style.display = 'none'; return; }
+            card.style.display = 'block';
+            card.innerHTML = `<div class="empty-state">
+                <span class="es-icon">🌱</span>
+                <div class="es-title">let's get you started</div>
+                <div class="es-body">Three steps: set your opening balance, log a paycheck, then log what you spend. Everything else fills itself in.</div>
+                <button class="secondary" style="width:auto; padding:12px 20px;" onclick="switchTab('settings')">Set opening balance</button>
+            </div>`;
+        }
+
+        function saveOpeningBalance() {
+            const val = parseFloat(document.getElementById('opening-balance-input').value);
+            if (isNaN(val)) return;
+            state.openingBalance = round2(val);
+            save('the opening balance');
+            showToast('Opening balance set 🌱');
+        }
+
+        function renderSettingsSummaries() {
+            const ob = document.getElementById('opening-balance-input');
+            if (ob && document.activeElement !== ob) ob.value = (state.openingBalance || 0).toFixed(2);
+            const pc = document.getElementById('paycycle-summary');
+            if (pc) {
+                const freqLabel = { '7': 'Weekly', '14': 'Bi-weekly', '15': 'Semi-monthly', '30': 'Monthly' }[String(state.refreshSettings.frequency)] || 'Custom';
+                const left = daysUntilRefresh();
+                pc.innerText = `${freqLabel} · next refresh ${state.refreshSettings.nextRefreshDate}${left !== null && left >= 0 ? ` (${left} day${left === 1 ? '' : 's'})` : ''}`;
+            }
+        }
+
         function exportData() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
             const downloadAnchorNode = document.createElement('a');
@@ -1351,10 +1741,10 @@
         function importData(event) {
             const file = event.target.files[0]; if (!file) return;
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = async function(e) {
                 try {
                     const incoming = JSON.parse(e.target.result);
-                    if (!incoming || !Array.isArray(incoming.ledger)) { alert("This doesn't look like a valid budget backup file."); return; }
+                    if (!incoming || !Array.isArray(incoming.ledger)) { appAlert("This doesn't look like a valid budget backup file."); return; }
 
                     // Show what's actually in the file before overwriting anything.
                     const txCount = incoming.ledger.length;
@@ -1368,7 +1758,8 @@
                         `  • Cash balance: $${describeIncomingBalance(incoming)}\n\n` +
                         `You currently have ${state.ledger.length} transactions and $${cashBalance().toFixed(2)}.\n\n` +
                         `Replace your current data? A snapshot of what you have now is kept, and you can undo this.`;
-                    if (!confirm(summary)) return;
+                    const proceed = await appConfirm(summary, { title: 'Restore backup?', confirmText: 'Replace my data', danger: true });
+                    if (!proceed) return;
 
                     const current = lastPersisted;
                     state = incoming;
@@ -1378,17 +1769,10 @@
                     showToast("Data restored — undo is available ✨");
                     populateMonthTimelineOptions(); populateCategorySelectFields();
                     switchView(state.currentViewMode || 'month');
-                } catch (err) { alert("Error reading the backup file. It might be corrupted."); }
+                } catch (err) { appAlert("Error reading the backup file. It might be corrupted."); }
                 finally { event.target.value = ''; }
             };
             reader.readAsText(file);
-        }
-
-        function switchTab(tabId, btn) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.dock-item').forEach(b => b.classList.remove('active'));
-            document.getElementById('tab-' + tabId).classList.add('active'); btn.classList.add('active');
-            window.scrollTo({top: 0, behavior: 'smooth'}); render();
         }
 
         function openQuickAddModal() {
@@ -1477,7 +1861,9 @@
         function toggleFormContext() {
             const type = document.getElementById('tx-type').value;
             const container = document.getElementById('dynamic-form-fields');
-            const dateField = `<div class="form-group"><label>Date</label><input type="date" id="field-date" value="${toDateInputValue(new Date())}"></div>`;
+            // Sticky: keeps the chosen date across submissions so a batch of back-dated
+            // entries doesn't reset to today after every save.
+            const dateField = `<div class="form-group"><label for="field-date">Date</label><input type="date" id="field-date" value="${lastUsedEntryDate || toDateInputValue(new Date())}"></div>`;
             if(type === 'expense' || type === 'wishlist') {
                 container.innerHTML = `
                     <div class="form-group">
@@ -1485,7 +1871,7 @@
                         <input type="text" id="field-desc" placeholder="e.g., Central Market" onkeyup="checkVendorMemory(this.value, 'field-cat')">
                         <div id="main-vendor-hint" style="font-size: 0.65rem; color: var(--success); margin-top: 4px; display: none;">✨ Auto-categorized from memory</div>
                     </div>
-                    <div class="form-group"><label>Amount ($)</label><input type="number" id="field-amount" placeholder="0.00"></div>
+                    <div class="form-group"><label>Amount ($)</label><input type="number" inputmode="decimal" step="0.01" id="field-amount" placeholder="0.00"></div>
                     ${type === 'expense' ? dateField : ''}
                     <div class="form-group"><label>Target Allocation Category</label>
                         <select id="field-cat" class="form-input">
@@ -1494,7 +1880,7 @@
                     </div>`;
             } else {
                 container.innerHTML = `
-                    <div class="form-group"><label>Net Pay Amount ($)</label><input type="number" id="field-net-pay" placeholder="e.g., 1250"></div>
+                    <div class="form-group"><label>Net Pay Amount ($)</label><input type="number" inputmode="decimal" step="0.01" id="field-net-pay" placeholder="e.g., 1250"></div>
                     ${dateField}
                     <p style="font-size: 0.75rem; color: var(--text-muted); font-style: italic; margin-bottom: 16px;">Since your employer handles taxes, just enter the exact amount that hits your bank account.</p>`;
             }
@@ -1514,6 +1900,7 @@
         function submitTransaction() {
             const type = document.getElementById('tx-type').value;
             const dateEl = document.getElementById('field-date');
+            if (dateEl && dateEl.value) lastUsedEntryDate = dateEl.value;
             const stamp = stampFor(dateEl ? dateEl.value : null);
 
             if(type === 'expense' || type === 'wishlist') {
@@ -1523,7 +1910,7 @@
                 if(!desc || !amt || amt <= 0) return;
 
                 if (type === 'wishlist') {
-                    if(state.wishlist.length >= 5) { alert("Your impulse queue is maxed out at 5. You must delete an existing want to add a new one."); return; }
+                    if(state.wishlist.length >= 5) { appAlert("Your impulse queue is maxed out at 5. Delete one to make room."); return; }
                     state.wishlist.push({ id: Date.now(), desc, amt, cat, timestamp: Date.now() });
                 } else {
                     if (amt > cashBalance()) { triggerRecalibrationModal(desc, amt, cat, stamp); return; }
@@ -1566,9 +1953,9 @@
         function recalibrateWithPot() {
             const potId = document.getElementById('recal-pot-select').value;
             const pot = state.pots.find(p => p.id == potId);
-            if (!pot) { alert("Pick a savings pot first."); return; }
+            if (!pot) { appAlert("Pick a savings pot first."); return; }
             const t = pendingOverbudgetTx;
-            if (pot.current < t.amt) { alert("Not enough in this pot."); return; }
+            if (pot.current < t.amt) { appAlert("Not enough in this pot."); return; }
             pot.current -= t.amt;
             // paidFromPot: this money never left cash, so deleting the row
             // must refund the pot rather than crediting cash.
@@ -1680,7 +2067,7 @@
             const type = document.getElementById('new-cat-type').value;
             if (!name || isNaN(limit)) return;
             if (state.categoryTargets.some(c => c.name.toLowerCase() === name.toLowerCase())) {
-                alert(`You already have a category called "${name}".`); return;
+                appAlert(`You already have a category called "${name}".`); return;
             }
             const kind = type === 'essential' ? 'need' : (type === 'reserve' ? 'reserve' : 'want');
             state.categoryTargets.push({
@@ -1693,9 +2080,12 @@
             document.getElementById('new-cat-limit').value = '';
             save('adding a category');
         }
-        function deleteCategory(name) {
+        async function deleteCategory(name) {
             const affected = state.ledger.filter(i => i.type !== 'income' && i.cat === name).length;
-            if (affected > 0 && !confirm(`"${name}" has ${affected} logged ${affected === 1 ? 'entry' : 'entries'}. Those stay in your ledger and keep counting toward your totals — they'll show under "archived categories". Remove the target?`)) return;
+            if (affected > 0) {
+                const ok = await appConfirm(`"${name}" has ${affected} logged ${affected === 1 ? 'entry' : 'entries'}. Those stay in your ledger and keep counting toward your totals — they'll show under "archived categories".`, { confirmText: 'Remove target', danger: true });
+                if (!ok) return;
+            }
             state.categoryTargets = state.categoryTargets.filter(c => c.name !== name);
             save('the category deletion');
         }
@@ -1739,7 +2129,6 @@
             document.getElementById('month-filter-wrap').style.display = mode === 'month' ? 'flex' : 'none';
             document.getElementById('week-nav-wrap').style.display = mode === 'week' ? 'flex' : 'none';
             document.getElementById('cycle-range-wrap').style.display = mode === 'year' ? 'flex' : 'none';
-            document.getElementById('week-breakdown-card').style.display = mode === 'week' ? 'block' : 'none';
             const ctxLabel = mode === 'week' ? 'Week' : (mode === 'month' ? 'Month' : 'Cycle');
             document.querySelectorAll('.view-label-ctx').forEach(el => { el.innerText = ctxLabel; });
             document.getElementById('hero-allowance-label').innerText =
@@ -1953,7 +2342,8 @@
                                 </div>
                             </div>
                             <div class="inline-actions" style="margin-top: 12px;">
-                                <button class="btn-inline edit" data-cat="${esc(cat.name)}" onclick="toggleCategoryRollover(this.dataset.cat)">Rollover: ${cat.rollover ? 'on' : 'off'}</button>
+                                <button class="btn-inline edit" data-cat="${esc(cat.name)}" onclick="openCategoryEdit(this.dataset.cat)">Edit</button>
+                                <button class="btn-inline" data-cat="${esc(cat.name)}" onclick="toggleCategoryRollover(this.dataset.cat)">Rollover: ${cat.rollover ? 'on' : 'off'}</button>
                                 ${cat.rollover && cat.carried ? `<button class="btn-inline" data-cat="${esc(cat.name)}" onclick="resetCarried(this.dataset.cat)">Spend it</button>` : ''}
                                 <button class="btn-inline del" data-cat="${esc(cat.name)}" onclick="deleteCategory(this.dataset.cat)">Delete</button>
                             </div>
@@ -1974,25 +2364,43 @@
                     </div>`;
             }
 
-            const ledgerUl = document.getElementById('ledger-container'); 
+            renderLedgerFilterChips();
+            const ledgerUl = document.getElementById('ledger-container');
             if (ledgerUl) {
+                const filtered = applyLedgerFilters(targetedLedger);
+                const countEl = document.getElementById('ledger-count');
+                const moreBtn = document.getElementById('ledger-more');
                 ledgerUl.innerHTML = '';
-                if(targetedLedger.length === 0) {
-                    const emptyMsg = isWeekMode ? 'Nothing logged this week.' : 'No active logs found.';
-                    ledgerUl.innerHTML = `<li class="tx-item" style="color:var(--text-muted); justify-content:center; padding: 24px 0;">${emptyMsg}</li>`;
+
+                if (!filtered.length) {
+                    const searching = ledgerQuery || ledgerFilter !== 'all';
+                    ledgerUl.innerHTML = `<li><div class="empty-state">
+                        <span class="es-icon">${searching ? '🔍' : '🧾'}</span>
+                        <div class="es-title">${searching ? 'nothing matches' : 'nothing logged yet'}</div>
+                        <div class="es-body">${searching ? 'Try a different search, or clear the filters above.' : 'Tap the + button to log your first entry for this period.'}</div>
+                    </div></li>`;
+                    if (countEl) countEl.innerText = '';
+                    if (moreBtn) moreBtn.style.display = 'none';
                 } else {
-                    // A week is small enough to show whole; longer windows stay capped.
-                    const rows = isWeekMode ? targetedLedger : targetedLedger.slice(0, 15);
-                    rows.forEach(item => {
-                        const isNN = state.categoryTargets.find(c => c.name === item.cat)?.nonNegotiable;
-                        const action = `<div class="inline-actions"><button class="btn-inline del" onclick="deleteTransaction(${item.id})">Delete</button></div>`;
+                    const shown = filtered.slice(0, ledgerLimit);
+                    if (countEl) countEl.innerText = `Showing ${shown.length} of ${filtered.length}`;
+                    if (moreBtn) moreBtn.style.display = filtered.length > shown.length ? 'block' : 'none';
+
+                    shown.forEach(item => {
+                        const isNN = item.type !== 'income' && txIsNeed(item);
                         const t = getTxTime(item);
                         const dayTag = t ? `<span style="font-size:0.62rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">${new Date(t).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span><br>` : '';
-                        if(item.type === 'expense') {
-                            ledgerUl.innerHTML += `<li class="tx-item" style="align-items: center;"><div>${dayTag}<div><strong>${esc(item.desc.toLowerCase())}</strong></div><span class="tx-cat-tag ${isNN ? 'nn' : ''}">${esc(item.cat)}</span>${action}</div><span style="color:var(--text-main); font-weight:600; font-size: 1rem;">-$${item.amt.toFixed(2)}</span></li>`;
+                        const actions = `<div class="inline-actions">
+                                <button class="btn-inline edit" data-id="${item.id}" onclick="openTransactionEdit(this.dataset.id)">Edit</button>
+                                <button class="btn-inline del" data-id="${item.id}" onclick="deleteTransaction(Number(this.dataset.id))">Delete</button>
+                            </div>`;
+                        if (item.type === 'income') {
+                            ledgerUl.innerHTML += `<li class="tx-item" style="align-items:center;"><div>${dayTag}<div><strong>${esc(String(item.desc).toLowerCase())}</strong></div><span class="tx-cat-tag" style="background:var(--block-blue);">Net Pay</span>${actions}</div><span style="color:var(--success); font-weight:600; font-size:1rem;">+$${(item.net || 0).toFixed(2)}</span></li>`;
                         } else {
-                            const netAmt = item.net || 0; // Fallback
-                            ledgerUl.innerHTML += `<li class="tx-item" style="align-items: center;"><div>${dayTag}<div><strong>${esc(item.desc.toLowerCase())}</strong></div><span class="tx-cat-tag" style="background:var(--block-blue); color:#1C1E24;">Net Pay</span>${action}</div><span style="color:var(--success); font-weight:600; font-size: 1rem;">+$${netAmt.toFixed(2)}</span></li>`;
+                            const tag = item.excluded
+                                ? `<span class="tx-cat-tag" style="background:var(--block-cream);">Adjustment</span>`
+                                : `<span class="tx-cat-tag ${isNN ? 'nn' : ''}">${esc(item.cat)}</span>`;
+                            ledgerUl.innerHTML += `<li class="tx-item" style="align-items:center;"><div>${dayTag}<div><strong>${esc(String(item.desc).toLowerCase())}</strong></div>${tag}${actions}</div><span style="color:var(--text-main); font-weight:600; font-size:1rem;">-$${item.amt.toFixed(2)}</span></li>`;
                         }
                     });
                 }
@@ -2024,12 +2432,18 @@
             const checkinCard = document.getElementById('daily-checkin-card');
             if (checkinCard) checkinCard.style.display = (isWeekMode && weekOffset !== 0) ? 'none' : 'block';
 
+            document.getElementById('week-breakdown-card').style.display = isWeekMode ? 'block' : 'none';
             if (isWeekMode) renderWeekBreakdown(weekBounds, targetedLedger);
+            const weekHint = document.getElementById('week-hint-card');
+            if (weekHint) weekHint.style.display = isWeekMode ? 'none' : 'block';
             renderWeeklyReview(isWeekMode ? weekBounds : null, targetedLedger);
             renderAgeOfMoney();
             renderDailyRate(trueChoiceCash, isWeekMode, weekBounds);
             renderReconcileStatus();
 
+            renderPots();
+            renderFirstRun();
+            renderSettingsSummaries();
             renderStorageControls();
             renderWishlist(trueChoiceCash);
 
@@ -2115,6 +2529,7 @@
             requestDurableStorage();
             // switchView also wires up the toggle chrome, so it replaces the bare render().
             switchView(state.currentViewMode || 'month');
+            switchTab(state.activeTab || 'today');
         };
 
         // A PWA left open overnight would otherwise never notice the month turned over.
