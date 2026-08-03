@@ -124,7 +124,10 @@
         
         <header>
             <h1>lucky girl cass <span id="token-display" class="token-badge" style="display: none;">⭐ 0</span></h1>
-            <div id="fluid-balance" style="font-weight: 700; color: var(--success); font-size: 0.95rem; background: var(--card-bg); padding: 6px 14px; border-radius: 14px; border: 1px solid var(--border);">$0</div>
+            <div style="text-align: right;">
+                <div style="font-size: 0.6rem; text-transform: uppercase; font-weight: 800; color: var(--text-muted); letter-spacing: 0.5px; margin-bottom: 4px;">Total Bank Cash</div>
+                <div id="global-bank-balance" style="font-weight: 700; color: var(--success); font-size: 0.95rem; background: var(--card-bg); padding: 6px 14px; border-radius: 14px; border: 1px solid var(--border);">$0</div>
+            </div>
         </header>
 
         <!-- Centered View Toggle -->
@@ -158,22 +161,23 @@
                 </div>
             </div>
 
+            <!-- Month-Scoped Metrics Grid (Tax Escrow Removed) -->
             <div class="metrics-grid">
                 <div class="mini-stat" style="background-color: var(--block-cream); border-color: rgba(221,197,169,0.4);">
                     <div class="stat-lbl" style="color: #4A5568;">Protected "Needs"</div>
                     <div class="stat-val" id="dash-nn-vault" style="color: #1C1E24; font-weight: 600;">$0.00</div>
                 </div>
-                <div class="mini-stat" style="background-color: var(--block-yellow); border-color: rgba(245,199,77,0.3);">
-                    <div class="stat-lbl" style="color: #4A5568;">Tax Escrow</div>
-                    <div class="stat-val" id="dash-tax" style="color: #1C1E24; font-weight: 600;">$0.00</div>
-                </div>
-                <div class="mini-stat" style="background-color: var(--block-blue); border-color: rgba(136,148,183,0.2);">
-                    <div class="stat-lbl" style="color: #4A5568;">Fluid Balance</div>
-                    <div class="stat-val" id="dash-balance" style="color: #1C1E24;">$0.00</div>
+                <div class="mini-stat" style="background-color: var(--block-green); border-color: rgba(82,117,88,0.2);">
+                    <div class="stat-lbl" style="color: #4A5568;"><span class="view-label-ctx">Month</span> Inflow</div>
+                    <div class="stat-val" id="dash-inflow" style="color: var(--success); font-weight: 600;">$0.00</div>
                 </div>
                 <div class="mini-stat" style="background-color: var(--block-pink); border-color: rgba(214,140,140,0.2);">
                     <div class="stat-lbl" style="color: #4A5568;"><span class="view-label-ctx">Month</span> Outflow</div>
                     <div class="stat-val" id="dash-outflow" style="color: var(--danger); font-weight: 700;">$0.00</div>
+                </div>
+                <div class="mini-stat" style="background-color: var(--block-blue); border-color: rgba(136,148,183,0.2);">
+                    <div class="stat-lbl" style="color: #4A5568;"><span class="view-label-ctx">Month</span> Net Cash</div>
+                    <div class="stat-val" id="dash-month-net" style="color: #1C1E24;">$0.00</div>
                 </div>
             </div>
 
@@ -310,7 +314,7 @@
     <div class="modal-overlay" id="recalibration-modal">
         <div class="modal-card">
             <h3>optimization needed 🧩</h3>
-            <p>This entry exceeds your available fluid balance by <strong id="recal-shortfall" style="color: var(--danger);">$0.00</strong>. How would you like to balance this puzzle?</p>
+            <p>This entry exceeds your available bank cash by <strong id="recal-shortfall" style="color: var(--danger);">$0.00</strong>. How would you like to balance this puzzle?</p>
             <div class="form-group" style="margin-bottom: 24px;">
                 <label>Option 1: Draw from a Savings Pot</label>
                 <div style="display: flex; gap: 8px;">
@@ -325,7 +329,6 @@
         </div>
     </div>
 
-    <!-- Enhanced Custom Pay Cycle Settings Modal -->
     <div class="modal-overlay" id="refresh-settings-modal">
         <div class="modal-card">
             <h3 style="color: var(--venice);">Pay Cycle Timeline 🗓️</h3>
@@ -372,7 +375,6 @@
     </div>
 
     <script>
-        // Calculate default next Friday date
         function getUpcomingFridayStr() {
             const now = new Date();
             const dayOfWeek = now.getDay();
@@ -383,7 +385,7 @@
         }
 
         let state = JSON.parse(localStorage.getItem('cassidyProBudgetState')) || {
-            globalBalance: 0, taxEscrowBalance: 0, currentViewMode: 'month',
+            globalBalance: 0, currentViewMode: 'month',
             pots: [], ledger: [], wishlist: [], stamps: {}, vendors: {},
             stickers: { blossom: false, sprout: false, matcha: false, lantern: false, star: false },
             txCount: 0, bonusTokens: 0, 
@@ -527,8 +529,8 @@
                     </div>`;
             } else {
                 container.innerHTML = `
-                    <div class="form-group"><label>Gross Income Amount ($)</label><input type="number" id="field-gross" placeholder="e.g., 1250"></div>
-                    <div class="form-group"><label>Estimated Tax Withholding (%)</label><input type="number" id="field-tax-rate" value="20"></div>`;
+                    <div class="form-group"><label>Net Pay Amount ($)</label><input type="number" id="field-net-pay" placeholder="e.g., 1250"></div>
+                    <p style="font-size: 0.75rem; color: var(--text-muted); font-style: italic; margin-bottom: 16px;">Since your employer handles taxes, just enter the exact amount that hits your bank account.</p>`;
             }
         }
 
@@ -554,13 +556,11 @@
                 }
                 save(); toggleFormContext();
             } else {
-                const grossInput = parseFloat(document.getElementById('field-gross').value);
-                const rate = parseFloat(document.getElementById('field-tax-rate').value) / 100;
-                if(!grossInput || grossInput <= 0) return;
+                const netInput = parseFloat(document.getElementById('field-net-pay').value);
+                if(!netInput || netInput <= 0) return;
 
-                const tax = grossInput * rate; const net = grossInput - tax;
-                state.globalBalance += net; state.taxEscrowBalance += tax;
-                state.ledger.unshift({ id: Date.now(), type: 'income', desc: 'Paycheck Inflow (Friday)', gross: grossInput, tax, net, date: dateStr, monthKey: activeMonth });
+                state.globalBalance += netInput;
+                state.ledger.unshift({ id: Date.now(), type: 'income', desc: 'Paycheck Inflow', net: netInput, date: dateStr, monthKey: activeMonth });
                 save(); toggleFormContext();
             }
         }
@@ -609,7 +609,7 @@
                     const hours = Math.floor(remainingMs / (1000 * 60 * 60)); const mins = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
                     timeText = `🔒 Locks lift in ${hours}h ${mins}m`;
                 } else if (isVelocityLocked) {
-                    timeText = `🚨 LOCKED: Insufficient Wants Pacing. Wait until Friday refresh.`;
+                    timeText = `🚨 LOCKED: Insufficient Wants Pacing. Wait until cycle refresh.`;
                 } else {
                     timeText = `✅ Unlocked & ready`;
                 }
@@ -644,9 +644,15 @@
         function deleteTransaction(id) {
             const index = state.ledger.findIndex(item => item.id === id); if(index === -1) return;
             const item = state.ledger[index];
-            if(item.type === 'expense') state.globalBalance += item.amt; else { state.globalBalance -= item.net; state.taxEscrowBalance -= item.tax; }
+            if(item.type === 'expense') {
+                state.globalBalance += item.amt; 
+            } else { 
+                const netAmt = item.net || 0; // Fallback for old data structure
+                state.globalBalance -= netAmt; 
+            }
             state.ledger.splice(index, 1); save();
         }
+
         function createNewPot() {
             const name = document.getElementById('pot-name').value.trim(); const target = parseFloat(document.getElementById('pot-target').value); const starting = parseFloat(document.getElementById('pot-starting').value) || 0; const monthly = parseFloat(document.getElementById('pot-monthly').value) || 0;
             if(!name || !target) return;
@@ -722,7 +728,6 @@
             }
         }
 
-        /* Pay Cycle Customization Helpers */
         function openRefreshSettings() {
             document.getElementById('refresh-date-input').value = state.refreshSettings.nextRefreshDate;
             document.getElementById('refresh-freq-input').value = state.refreshSettings.frequency || "7";
@@ -761,9 +766,8 @@
             const activeMonth = document.getElementById('global-month-filter').value;
             const isYearMode = state.currentViewMode === 'year';
             
-            document.getElementById('dash-balance').innerText = `$${state.globalBalance.toFixed(2)}`;
-            document.getElementById('fluid-balance').innerText = `$${state.globalBalance.toFixed(0)}`;
-            document.getElementById('dash-tax').innerText = `$${state.taxEscrowBalance.toFixed(2)}`;
+            // Global Bank Balance explicitly separated
+            document.getElementById('global-bank-balance').innerText = `$${state.globalBalance.toFixed(0)}`;
 
             const targetedLedger = isYearMode ? state.ledger.filter(i => i.monthKey >= '2026-08' && i.monthKey <= '2027-07') : state.ledger.filter(i => i.monthKey === activeMonth);
 
@@ -773,7 +777,10 @@
             state.categoryTargets.forEach(cat => { if(cat.nonNegotiable) nnVaultTotal += (isYearMode ? cat.limit * 12 : cat.limit); });
 
             targetedLedger.forEach(item => {
-                if(item.type === 'income') { totalInflow += item.net; } 
+                if(item.type === 'income') { 
+                    const netAmt = item.net || 0; // Fallback
+                    totalInflow += netAmt; 
+                } 
                 else { 
                     totalOutflow += item.amt; 
                     if(categorySpent[item.cat] !== undefined) categorySpent[item.cat] += item.amt;
@@ -783,9 +790,16 @@
             });
 
             let trueChoiceCash = totalInflow - nnVaultTotal - choiceLogged;
+            let monthNetCash = totalInflow - totalOutflow;
             
             document.getElementById('dash-nn-vault').innerText = `$${nnVaultTotal.toFixed(0)}`;
+            document.getElementById('dash-inflow').innerText = `$${totalInflow.toFixed(2)}`;
             document.getElementById('dash-outflow').innerText = `$${totalOutflow.toFixed(2)}`;
+            
+            const netCashEl = document.getElementById('dash-month-net');
+            netCashEl.innerText = `${monthNetCash >= 0 ? '' : '-'}$${Math.abs(monthNetCash).toFixed(2)}`;
+            netCashEl.style.color = monthNetCash < 0 ? "var(--danger)" : "#1C1E24";
+
             document.getElementById('dash-choice-cash').innerText = `${trueChoiceCash >= 0 ? '' : '-'}$${Math.abs(trueChoiceCash).toFixed(2)}`;
 
             const msgEl = document.getElementById('hero-gamified-msg');
@@ -840,7 +854,8 @@
                         if(item.type === 'expense') {
                             ledgerUl.innerHTML += `<li class="tx-item" style="align-items: center;"><div><div><strong>${item.desc.toLowerCase()}</strong></div><span class="tx-cat-tag ${isNN ? 'nn' : ''}">${item.cat}</span>${action}</div><span style="color:var(--text-main); font-weight:600; font-size: 1rem;">-$${item.amt.toFixed(2)}</span></li>`;
                         } else {
-                            ledgerUl.innerHTML += `<li class="tx-item" style="align-items: center;"><div><div><strong>${item.desc.toLowerCase()}</strong></div><span class="tx-cat-tag" style="background:var(--block-blue); color:#1C1E24;">Net Pay</span>${action}</div><span style="color:var(--success); font-weight:600; font-size: 1rem;">+$${item.net.toFixed(2)}</span></li>`;
+                            const netAmt = item.net || 0; // Fallback
+                            ledgerUl.innerHTML += `<li class="tx-item" style="align-items: center;"><div><div><strong>${item.desc.toLowerCase()}</strong></div><span class="tx-cat-tag" style="background:var(--block-blue); color:#1C1E24;">Net Pay</span>${action}</div><span style="color:var(--success); font-weight:600; font-size: 1rem;">+$${netAmt.toFixed(2)}</span></li>`;
                         }
                     });
                 }
