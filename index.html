@@ -139,6 +139,9 @@
         .week-summary-cell { flex: 1; text-align: center; }
         .week-summary-cell .stat-lbl { font-size: 0.6rem; }
         .week-summary-cell .stat-val { font-size: 1rem; margin-top: 4px; }
+
+        .undo-pill { position: fixed; bottom: 110px; left: 24px; display: flex; align-items: center; gap: 6px; background: var(--card-bg); color: var(--text-main); border: 1px solid var(--border); border-radius: 22px; padding: 10px 16px; font-size: 0.78rem; font-weight: 700; box-shadow: 0 8px 20px rgba(0,0,0,0.08); z-index: 1500; cursor: pointer; }
+        .undo-pill:active { transform: scale(0.94); }
     </style>
 </head>
 <body>
@@ -304,12 +307,17 @@
                     <h4 style="margin-bottom: 12px; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Add New Target</h4>
                     <div class="form-group"><input type="text" id="new-cat-name" placeholder="Category Name (e.g., Dining Out)"></div>
                     <div class="form-group"><input type="number" id="new-cat-limit" placeholder="Monthly Limit ($)"></div>
-                    <div class="form-group" style="margin-bottom: 16px;">
-                        <select id="new-cat-type" class="form-input">
-                            <option value="choice">Want (Flexible / Fun)</option>
-                            <option value="essential">Need (Survival & Commitments)</option>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <select id="new-cat-type" class="form-input" onchange="syncNewCatRollover()">
+                            <option value="choice">Want (flexible / fun)</option>
+                            <option value="essential">Need (monthly & predictable)</option>
+                            <option value="reserve">Set-Aside (non-monthly / irregular)</option>
                         </select>
                     </div>
+                    <label style="display:flex; align-items:center; justify-content:center; gap:8px; text-transform:none; letter-spacing:0; font-size:0.75rem; margin-bottom:16px; cursor:pointer;">
+                        <input type="checkbox" id="new-cat-rollover" style="width:auto; margin:0;">
+                        <span>Roll unspent money over to next month</span>
+                    </label>
                     <button class="secondary" style="background: var(--venice); color: white; width: 100%; padding: 14px; font-size: 0.9rem;" onclick="addNewCategory()">+ Create Target</button>
                 </div>
             </div>
@@ -335,14 +343,20 @@
 
             <div class="card" id="backup-manager">
                 <h2>data vault 💾</h2>
+                <div id="storage-status" style="font-size: 0.75rem; font-weight: 700; text-align: center; padding: 10px; background: var(--bg-color); border-radius: 14px; margin-bottom: 14px;">Checking storage…</div>
                 <button style="background: var(--text-main); margin-bottom: 10px;" onclick="exportData()">⬇️ Download Backup File</button>
                 <button class="secondary" style="width: 100%; padding: 14px; background: transparent;" onclick="document.getElementById('import-file').click()">⬆️ Restore from Backup</button>
                 <input type="file" id="import-file" accept=".json" style="display: none;" onchange="importData(event)">
+
+                <h4 style="margin: 22px 0 4px; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Automatic Snapshots</h4>
+                <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 8px; line-height: 1.4;">Saved on your device once a day, keeping the last 8 days. Insurance against a bad restore or an accidental bulk delete.</p>
+                <ul id="snapshot-list" class="tx-list"></ul>
             </div>
         </div>
 
     </div>
 
+    <div class="undo-pill" id="undo-pill" style="display: none;" onclick="undoLastChange()">↩️ Undo</div>
     <div class="fab" onclick="openQuickAddModal()">+</div>
 
     <nav class="bottom-dock">
@@ -452,17 +466,26 @@
             return nextFriday.toISOString().split('T')[0];
         }
 
-        let state = JSON.parse(localStorage.getItem('cassidyProBudgetState')) || {
+        const STORAGE_KEY = 'cassidyProBudgetState';
+        const SNAPSHOT_KEY = 'cassidyProBudgetSnapshots';
+
+        let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
             globalBalance: 0, currentViewMode: 'month',
             pots: [], ledger: [], wishlist: [], stamps: {}, vendors: {},
             stickers: { blossom: false, sprout: false, matcha: false, lantern: false, star: false },
             txCount: 0, bonusTokens: 0, 
             refreshSettings: { frequency: "7", nextRefreshDate: getUpcomingFridayStr() },
             rolloverPending: false, lastRolloverAmount: 0,
+            categoryRolloverThrough: null,
             categoryTargets: [
-                { name: "Housing", limit: 1600, nonNegotiable: true }, { name: "Groceries", limit: 450, nonNegotiable: true },
-                { name: "Utilities", limit: 250, nonNegotiable: true }, { name: "Transport", limit: 350, nonNegotiable: false },
-                { name: "Entertainment", limit: 300, nonNegotiable: false }, { name: "Miscellaneous", limit: 200, nonNegotiable: false }
+                // kind: 'need' (monthly survival) | 'reserve' (non-monthly, accrues) | 'want' (discretionary)
+                { name: "Housing", limit: 1600, kind: 'need', rollover: false, carried: 0 },
+                { name: "Groceries", limit: 450, kind: 'need', rollover: false, carried: 0 },
+                { name: "Utilities", limit: 250, kind: 'need', rollover: false, carried: 0 },
+                { name: "Car & Home Upkeep", limit: 120, kind: 'reserve', rollover: true, carried: 0 },
+                { name: "Transport", limit: 350, kind: 'want', rollover: false, carried: 0 },
+                { name: "Entertainment", limit: 300, kind: 'want', rollover: false, carried: 0 },
+                { name: "Miscellaneous", limit: 200, kind: 'want', rollover: false, carried: 0 }
             ]
         };
 
@@ -506,7 +529,7 @@
                 // been intentional. Only rows created from here on derive it from the date.
                 if (!item.monthKey && item.ts) { item.monthKey = monthKeyOf(new Date(item.ts)); changed = true; }
             });
-            if (changed) localStorage.setItem('cassidyProBudgetState', JSON.stringify(state));
+            if (changed) persist();
         }
 
         // Week runs Sunday -> Saturday, matching the daily check-in grid.
@@ -588,7 +611,190 @@
                               .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         }
 
-        function save() { localStorage.setItem('cassidyProBudgetState', JSON.stringify(state)); render(); }
+        /* ===================== PERSISTENCE, UNDO & DURABILITY =====================
+           Everything lives in one localStorage key, which is a single point of
+           failure: a cleared cache or an evicted origin loses the whole history.
+           Three defences here — request persistent storage from the browser,
+           keep rotating dated snapshots alongside the live state, and keep an
+           in-session undo stack so a mistake is one tap away from reversal.   */
+        const UNDO_LIMIT = 25;
+        const SNAPSHOT_LIMIT = 8;
+        let undoStack = [];
+        // The serialized state as of the last successful write. Because save() runs
+        // *after* a mutation, this string is the pre-mutation state — exactly what
+        // undo needs, with no need to wrap every call site.
+        let lastPersisted = JSON.stringify(state);
+
+        function persist() {
+            lastPersisted = JSON.stringify(state);
+            try {
+                localStorage.setItem(STORAGE_KEY, lastPersisted);
+            } catch (err) {
+                // Quota is usually snapshots, not live state. Drop them and retry once.
+                try { localStorage.removeItem(SNAPSHOT_KEY); localStorage.setItem(STORAGE_KEY, lastPersisted); showToast("Storage was full — old snapshots cleared."); }
+                catch (fatal) { alert("Couldn't save: browser storage is full. Export a backup now."); }
+            }
+        }
+
+        function save(label) {
+            undoStack.push({ label: label || 'last change', at: Date.now(), data: lastPersisted });
+            if (undoStack.length > UNDO_LIMIT) undoStack.shift();
+            persist();
+            maybeWriteSnapshot();
+            render();
+        }
+
+        function undoLastChange() {
+            const prev = undoStack.pop();
+            if (!prev) return;
+            try { state = JSON.parse(prev.data); } catch (e) { showToast("That undo point was unreadable."); return; }
+            persist();
+            render();
+            showToast(`↩️ Undid ${prev.label}`);
+        }
+
+        function readSnapshots() {
+            try { const raw = JSON.parse(localStorage.getItem(SNAPSHOT_KEY)); return Array.isArray(raw) ? raw : []; }
+            catch (e) { return []; }
+        }
+
+        // One snapshot per day, kept for SNAPSHOT_LIMIT days. Cheap insurance
+        // against a bad import or an accidental bulk delete going unnoticed.
+        function maybeWriteSnapshot() {
+            const today = toDateInputValue(new Date());
+            let snaps = readSnapshots();
+            if (snaps.length && snaps[snaps.length - 1].day === today) return;
+            snaps.push({ day: today, at: Date.now(), data: lastPersisted });
+            while (snaps.length > SNAPSHOT_LIMIT) snaps.shift();
+            try { localStorage.setItem(SNAPSHOT_KEY, JSON.stringify(snaps)); }
+            catch (err) {
+                while (snaps.length > 2) { snaps.shift(); try { localStorage.setItem(SNAPSHOT_KEY, JSON.stringify(snaps)); return; } catch (e) {} }
+            }
+        }
+
+        function restoreSnapshot(day) {
+            const snap = readSnapshots().find(s => s.day === day);
+            if (!snap) return;
+            if (!confirm(`Roll back to the snapshot from ${day}? Everything logged since then will be replaced. This is undoable once.`)) return;
+            const current = lastPersisted;
+            try { state = JSON.parse(snap.data); } catch (e) { alert("That snapshot is unreadable."); return; }
+            undoStack.push({ label: `rollback to ${day}`, at: Date.now(), data: current });
+            persist(); render(); showToast(`Rolled back to ${day}`);
+        }
+
+        // Asks the browser not to evict this origin under storage pressure.
+        async function requestDurableStorage() {
+            const el = document.getElementById('storage-status');
+            if (!navigator.storage || !navigator.storage.persist) {
+                if (el) el.innerHTML = `<span style="color: var(--warning);">⚠️ This browser can't guarantee storage. Export backups regularly.</span>`;
+                return;
+            }
+            let persisted = await navigator.storage.persisted();
+            if (!persisted) persisted = await navigator.storage.persist();
+            let usage = '';
+            if (navigator.storage.estimate) {
+                const est = await navigator.storage.estimate();
+                if (est && est.usage) usage = ` · ${(est.usage / 1024).toFixed(0)} KB used`;
+            }
+            if (el) {
+                el.innerHTML = persisted
+                    ? `<span style="color: var(--success);">🔒 Storage marked persistent${usage}</span>`
+                    : `<span style="color: var(--warning);">⚠️ Storage is evictable${usage} — export backups regularly.</span>`;
+            }
+        }
+
+        function renderStorageControls() {
+            const undoBtn = document.getElementById('undo-pill');
+            if (undoBtn) {
+                undoBtn.style.display = undoStack.length ? 'flex' : 'none';
+                undoBtn.title = undoStack.length ? `Undo ${undoStack[undoStack.length - 1].label}` : '';
+            }
+            const list = document.getElementById('snapshot-list');
+            if (!list) return;
+            const snaps = readSnapshots().slice().reverse();
+            if (!snaps.length) { list.innerHTML = `<div style="font-size:0.75rem; color: var(--text-muted); text-align:center; padding: 8px 0;">No snapshots yet — one is saved automatically each day you use the app.</div>`; return; }
+            list.innerHTML = snaps.map(s => `
+                <li class="tx-item" style="padding: 10px 0;">
+                    <div><strong style="font-size:0.85rem;">${s.day}</strong><br><span style="font-size:0.68rem; color: var(--text-muted);">${(s.data.length / 1024).toFixed(1)} KB</span></div>
+                    <button class="btn-inline edit" onclick="restoreSnapshot('${s.day}')">Restore</button>
+                </li>`).join('');
+        }
+
+        /* ===================== CATEGORY MODEL & ROLLOVER =====================
+           Categories now have three kinds instead of a Need/Want boolean:
+             need    — monthly, predictable, reserved off the top (rent, groceries)
+             reserve — non-monthly and irregular (car service, annual fees, gifts).
+                       Protected like a Need, but accrues month over month.
+             want    — discretionary, spends the Wants allowance
+           `nonNegotiable` is kept in sync so nothing downstream has to change:
+           anything that isn't a 'want' is protected.                          */
+        function migrateCategoryModel() {
+            let changed = false;
+            (state.categoryTargets || []).forEach(cat => {
+                if (!cat.kind) { cat.kind = cat.nonNegotiable ? 'need' : 'want'; changed = true; }
+                if (typeof cat.rollover !== 'boolean') { cat.rollover = cat.kind === 'reserve'; changed = true; }
+                if (typeof cat.carried !== 'number' || isNaN(cat.carried)) { cat.carried = 0; changed = true; }
+                const protectedNow = cat.kind !== 'want';
+                if (cat.nonNegotiable !== protectedNow) { cat.nonNegotiable = protectedNow; changed = true; }
+            });
+            // Start accruing from this month forward. Backfilling from history would
+            // conjure large carried balances out of months that were never budgeted
+            // with rollover in mind.
+            if (!state.categoryRolloverThrough) { state.categoryRolloverThrough = monthKeyOf(new Date()); changed = true; }
+            if (changed) persist();
+        }
+
+        function nextMonthKey(key) {
+            const [y, m] = key.split('-').map(Number);
+            const d = new Date(y, m, 1); // m is already 1-based, so this is the next month
+            return monthKeyOf(d);
+        }
+
+        // Walks every completed month since the last close and banks the unspent
+        // (or overspent) portion of each rollover category. Idempotent: the
+        // `categoryRolloverThrough` watermark only ever moves forward.
+        function closeOutCategoryMonths() {
+            const current = monthKeyOf(new Date());
+            let cursor = state.categoryRolloverThrough || current;
+            if (cursor >= current) return false;
+
+            const rollovers = state.categoryTargets.filter(c => c.rollover);
+            let guard = 0;
+            while (cursor < current && guard++ < 240) {
+                if (rollovers.length) {
+                    const spentInMonth = {};
+                    state.ledger.forEach(item => {
+                        if (item.type === 'income' || item.monthKey !== cursor) return;
+                        spentInMonth[item.cat] = (spentInMonth[item.cat] || 0) + item.amt;
+                    });
+                    rollovers.forEach(cat => {
+                        const spent = spentInMonth[cat.name] || 0;
+                        // Surplus banks; a deficit carries as a debt, same as Monarch.
+                        cat.carried = Math.round(((cat.carried || 0) + (cat.limit - spent)) * 100) / 100;
+                    });
+                }
+                cursor = nextMonthKey(cursor);
+            }
+            state.categoryRolloverThrough = current;
+            persist();
+            return true;
+        }
+
+        function toggleCategoryRollover(name) {
+            const cat = state.categoryTargets.find(c => c.name === name);
+            if (!cat) return;
+            cat.rollover = !cat.rollover;
+            if (!cat.rollover) cat.carried = 0; // turning it off clears the bank
+            save(cat.rollover ? 'enabling rollover' : 'clearing the rollover balance');
+        }
+
+        function resetCarried(name) {
+            const cat = state.categoryTargets.find(c => c.name === name);
+            if (!cat || !cat.carried) return;
+            if (!confirm(`Zero out the $${cat.carried.toFixed(2)} banked in "${name}"? Use this after you've actually spent it on the real-world bill.`)) return;
+            cat.carried = 0;
+            save('the balance reset');
+        }
 
         function exportData() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
@@ -602,14 +808,33 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
-                    const importedState = JSON.parse(e.target.result);
-                    if (importedState && importedState.ledger) {
-                        if(confirm("Are you sure? This will overwrite your current budget data with the backup.")) {
-                            state = importedState; save(); showToast("Data restored successfully! ✨");
-                            setTimeout(() => location.reload(), 1500); 
-                        }
-                    } else { alert("This doesn't look like a valid budget backup file."); }
+                    const incoming = JSON.parse(e.target.result);
+                    if (!incoming || !Array.isArray(incoming.ledger)) { alert("This doesn't look like a valid budget backup file."); return; }
+
+                    // Show what's actually in the file before overwriting anything.
+                    const txCount = incoming.ledger.length;
+                    const catCount = (incoming.categoryTargets || []).length;
+                    const potCount = (incoming.pots || []).length;
+                    const newest = incoming.ledger.reduce((max, r) => Math.max(max, r.ts || r.id || 0), 0);
+                    const newestStr = newest ? new Date(newest).toLocaleDateString() : 'unknown';
+                    const summary = `This backup contains:\n\n` +
+                        `  • ${txCount} transactions (most recent: ${newestStr})\n` +
+                        `  • ${catCount} categories, ${potCount} savings pots\n` +
+                        `  • Cash balance: $${Number(incoming.globalBalance || 0).toFixed(2)}\n\n` +
+                        `You currently have ${state.ledger.length} transactions and $${state.globalBalance.toFixed(2)}.\n\n` +
+                        `Replace your current data? A snapshot of what you have now is kept, and you can undo this.`;
+                    if (!confirm(summary)) return;
+
+                    const current = lastPersisted;
+                    state = incoming;
+                    undoStack.push({ label: 'the restore', at: Date.now(), data: current });
+                    persist();
+                    migrateLedgerTimestamps(); migrateCategoryModel();
+                    showToast("Data restored — undo is available ✨");
+                    populateMonthTimelineOptions(); populateCategorySelectFields();
+                    switchView(state.currentViewMode || 'month');
                 } catch (err) { alert("Error reading the backup file. It might be corrupted."); }
+                finally { event.target.value = ''; }
             };
             reader.readAsText(file);
         }
@@ -645,7 +870,7 @@
             followEntryInto(stamp.monthKey);
 
             document.getElementById('quick-add-modal').style.display = 'none';
-            save(); showToast("Captured instantly ⚡");
+            save('the quick entry'); showToast("Captured instantly ⚡");
         }
 
         function checkVendorMemory(inputVal, selectId) {
@@ -703,7 +928,7 @@
             }
             state.rolloverPending = false;
             document.getElementById('rollover-action-modal').style.display = 'none';
-            save();
+            save('the cycle rollover');
         }
 
         function toggleFormContext() {
@@ -764,7 +989,7 @@
                     state.vendors[desc.toLowerCase()] = cat;
                     followEntryInto(stamp.monthKey);
                 }
-                save(); toggleFormContext();
+                save('the entry'); toggleFormContext();
             } else {
                 const netInput = parseFloat(document.getElementById('field-net-pay').value);
                 if(!netInput || netInput <= 0) return;
@@ -772,7 +997,7 @@
                 state.globalBalance += netInput;
                 state.ledger.unshift({ id: Date.now(), type: 'income', desc: 'Paycheck Inflow', net: netInput, ...stamp });
                 followEntryInto(stamp.monthKey);
-                save(); toggleFormContext();
+                save('the entry'); toggleFormContext();
             }
         }
 
@@ -796,7 +1021,7 @@
             state.globalBalance -= t.amt;
             state.ledger.unshift({ id: Date.now(), type: 'expense', desc: t.desc, amt: t.amt, cat: t.cat, isNeed: catIsNeed(t.cat), ...t.stamp });
             followEntryInto(t.stamp.monthKey);
-            save(); closeRecalibration(); toggleFormContext();
+            save('the entry'); closeRecalibration(); toggleFormContext();
         }
         function recalibrateWithPot() {
             const potId = document.getElementById('recal-pot-select').value;
@@ -809,7 +1034,7 @@
             // must refund the pot rather than crediting cash.
             state.ledger.unshift({ id: Date.now(), type: 'expense', desc: `${t.desc} (from ${pot.name})`, amt: t.amt, cat: t.cat, isNeed: catIsNeed(t.cat), paidFromPot: pot.id, ...t.stamp });
             followEntryInto(t.stamp.monthKey);
-            save(); closeRecalibration(); toggleFormContext();
+            save('the entry'); closeRecalibration(); toggleFormContext();
         }
 
         function renderWishlist(choiceCash) {
@@ -862,7 +1087,7 @@
                 state.ledger.unshift({ id: Date.now(), type: 'expense', desc: item.desc, amt: item.amt, cat: item.cat, isNeed: catIsNeed(item.cat), ...stamp });
                 followEntryInto(stamp.monthKey);
             } 
-            state.wishlist.splice(index, 1); save();
+            state.wishlist.splice(index, 1); save('the wishlist action');
         }
 
         function deleteTransaction(id) {
@@ -899,25 +1124,45 @@
                 state.globalBalance += item.amt;
             }
 
-            state.ledger.splice(index, 1); save();
+            state.ledger.splice(index, 1); save('the deletion');
         }
 
         function createNewPot() {
             const name = document.getElementById('pot-name').value.trim(); const target = parseFloat(document.getElementById('pot-target').value); const starting = parseFloat(document.getElementById('pot-starting').value) || 0; const monthly = parseFloat(document.getElementById('pot-monthly').value) || 0;
             if(!name || !target) return;
             state.pots.push({ id: Date.now(), name, target, monthly, current: starting });
-            document.getElementById('pot-name').value = ''; document.getElementById('pot-target').value = ''; save();
+            document.getElementById('pot-name').value = ''; document.getElementById('pot-target').value = ''; save('the new pot');
         }
+        function syncNewCatRollover() {
+            // Set-Aside categories are pointless without rollover, so default it on.
+            const isReserve = document.getElementById('new-cat-type').value === 'reserve';
+            document.getElementById('new-cat-rollover').checked = isReserve;
+        }
+
         function addNewCategory() {
-            const name = document.getElementById('new-cat-name').value.trim(); const limit = parseFloat(document.getElementById('new-cat-limit').value); const type = document.getElementById('new-cat-type').value;
+            const name = document.getElementById('new-cat-name').value.trim();
+            const limit = parseFloat(document.getElementById('new-cat-limit').value);
+            const type = document.getElementById('new-cat-type').value;
             if (!name || isNaN(limit)) return;
-            state.categoryTargets.push({ name, limit, nonNegotiable: type === 'essential' }); save();
+            if (state.categoryTargets.some(c => c.name.toLowerCase() === name.toLowerCase())) {
+                alert(`You already have a category called "${name}".`); return;
+            }
+            const kind = type === 'essential' ? 'need' : (type === 'reserve' ? 'reserve' : 'want');
+            state.categoryTargets.push({
+                name, limit, kind,
+                nonNegotiable: kind !== 'want',
+                rollover: document.getElementById('new-cat-rollover').checked,
+                carried: 0
+            });
+            document.getElementById('new-cat-name').value = '';
+            document.getElementById('new-cat-limit').value = '';
+            save('adding a category');
         }
         function deleteCategory(name) {
             const affected = state.ledger.filter(i => i.type !== 'income' && i.cat === name).length;
             if (affected > 0 && !confirm(`"${name}" has ${affected} logged ${affected === 1 ? 'entry' : 'entries'}. Those stay in your ledger and keep counting toward your totals — they'll show under "archived categories". Remove the target?`)) return;
             state.categoryTargets = state.categoryTargets.filter(c => c.name !== name);
-            save();
+            save('the category deletion');
         }
         
         function populateMonthTimelineOptions() {
@@ -1132,17 +1377,27 @@
             if (editCatsContainer) editCatsContainer.innerHTML = '';
 
             state.categoryTargets.forEach(cat => {
-                const spent = categorySpent[cat.name] || 0; const limit = cat.limit * scale;
+                const spent = categorySpent[cat.name] || 0;
+                const carried = cat.rollover ? (cat.carried || 0) : 0;
+                // Carried money is an absolute bank, not a monthly rate — prorating it
+                // into a week would let a fat balance mask a bad week's pacing.
+                // Week view shows the base pace and reports the bank separately.
+                const limit = cat.limit * scale + (isWeekMode ? 0 : carried);
                 const pct = limit > 0 ? Math.min((spent / limit) * 100, 100) : (spent > 0 ? 100 : 0);
                 let color = 'var(--success)'; if(pct >= 90) color = 'var(--danger)'; else if(pct >= 75) color = 'var(--warning)';
                 
                 let pulseClass = (pct >= 95 && cat.nonNegotiable) ? 'pulse-warning' : '';
+                const kindLabel = cat.kind === 'need' ? 'Need' : (cat.kind === 'reserve' ? 'Set-Aside' : 'Want');
+                const kindClass = cat.kind === 'want' ? '' : 'nn';
+                const bankNote = carried
+                    ? `<span style="font-size:0.62rem; font-weight:800; color:${carried < 0 ? 'var(--danger)' : 'var(--success)'}; margin-left:6px;">${carried < 0 ? '−' : '+'}$${Math.abs(carried).toFixed(0)} ${carried < 0 ? 'behind' : 'banked'}${isWeekMode ? ' (not in this week\'s pace)' : ''}</span>`
+                    : '';
 
                 if (capsContainer) {
                     capsContainer.innerHTML += `
                         <div class="progress-wrapper">
                             <div class="progress-meta">
-                                <div><strong style="font-weight: 600; font-size:0.88rem;">${esc(cat.name.toLowerCase())}</strong><span class="tx-cat-tag ${cat.nonNegotiable ? 'nn' : ''}" style="margin-top:0; margin-left:6px; font-size:0.58rem; padding:2px 8px; border-radius:10px;">${cat.nonNegotiable ? 'Need' : 'Want'}</span></div>
+                                <div><strong style="font-weight: 600; font-size:0.88rem;">${esc(cat.name.toLowerCase())}</strong><span class="tx-cat-tag ${kindClass}" style="margin-top:0; margin-left:6px; font-size:0.58rem; padding:2px 8px; border-radius:10px;">${kindLabel}</span>${bankNote}</div>
                                 <span style="color: var(--text-muted); font-size:0.82rem; font-weight: 600;">$${spent.toFixed(0)} / $${limit.toFixed(0)}</span>
                             </div>
                             <div class="progress-bg ${pulseClass}"><div class="progress-bar" style="width: ${pct}%; background: ${color};"></div></div>
@@ -1153,10 +1408,17 @@
                     editCatsContainer.innerHTML += `
                         <li class="tx-item" style="padding: 14px; background: var(--card-bg); border-radius: 16px; margin-bottom: 10px; border: 1px solid var(--border); flex-direction: column; align-items: flex-start;">
                             <div style="display:flex; justify-content:space-between; width:100%; align-items: center;">
-                                <div><strong style="font-size: 0.95rem;">${esc(cat.name)}</strong><br><span class="tx-cat-tag ${cat.nonNegotiable ? 'nn' : ''}" style="margin-top: 4px;">${cat.nonNegotiable ? 'Need' : 'Want'}</span></div>
-                                <span style="font-weight:700; font-size: 1rem;">$${cat.limit}/mo</span>
+                                <div><strong style="font-size: 0.95rem;">${esc(cat.name)}</strong><br><span class="tx-cat-tag ${kindClass}" style="margin-top: 4px;">${kindLabel}</span></div>
+                                <div style="text-align:right;">
+                                    <span style="font-weight:700; font-size: 1rem;">$${cat.limit}/mo</span>
+                                    ${cat.rollover ? `<br><span style="font-size:0.68rem; font-weight:800; color:${(cat.carried||0) < 0 ? 'var(--danger)' : 'var(--success)'};">banked $${(cat.carried || 0).toFixed(2)}</span>` : ''}
+                                </div>
                             </div>
-                            <div class="inline-actions" style="margin-top: 12px;"><button class="btn-inline del" data-cat="${esc(cat.name)}" onclick="deleteCategory(this.dataset.cat)">Delete</button></div>
+                            <div class="inline-actions" style="margin-top: 12px;">
+                                <button class="btn-inline edit" data-cat="${esc(cat.name)}" onclick="toggleCategoryRollover(this.dataset.cat)">Rollover: ${cat.rollover ? 'on' : 'off'}</button>
+                                ${cat.rollover && cat.carried ? `<button class="btn-inline" data-cat="${esc(cat.name)}" onclick="resetCarried(this.dataset.cat)">Spend it</button>` : ''}
+                                <button class="btn-inline del" data-cat="${esc(cat.name)}" onclick="deleteCategory(this.dataset.cat)">Delete</button>
+                            </div>
                         </li>`;
                 }
             });
@@ -1208,7 +1470,7 @@
                     let boxClass = 'stamp-box'; let content = ''; let click = '';
                     
                     if (state.stamps[dStr]) { boxClass += ' claimed'; content = '🌸'; } 
-                    else if (dStr === todayStr) { boxClass += ' today-active'; content = '✨'; click = `onclick="state.stamps['${dStr}']=true; save();"`; } 
+                    else if (dStr === todayStr) { boxClass += ' today-active'; content = '✨'; click = `onclick="state.stamps['${dStr}']=true; save('the check-in');"`; } 
                     else if (d > today) { content = '<span style="opacity:0.2;">•</span>'; } 
                     grid.innerHTML += `<div class="${boxClass}" ${click}><div class="stamp-lbl">${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][i]}</div><div>${content}</div></div>`;
                 }
@@ -1226,6 +1488,7 @@
 
             if (isWeekMode) renderWeekBreakdown(weekBounds, targetedLedger);
 
+            renderStorageControls();
             renderWishlist(trueChoiceCash);
 
             // checkRefreshCycle writes lastRolloverAmount, which later gets swept into
@@ -1300,12 +1563,26 @@
 
         window.onload = () => {
             migrateLedgerTimestamps();
+            migrateCategoryModel();
+            closeOutCategoryMonths();
             populateMonthTimelineOptions();
             toggleFormContext();
             populateCategorySelectFields();
+            syncNewCatRollover();
+            requestDurableStorage();
             // switchView also wires up the toggle chrome, so it replaces the bare render().
             switchView(state.currentViewMode || 'month');
         };
+
+        // A PWA left open overnight would otherwise never notice the month turned over.
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState !== 'visible') return;
+            if (closeOutCategoryMonths()) {
+                populateMonthTimelineOptions();
+                showToast("New month — rollover balances updated 🗓️");
+            }
+            render();
+        });
     </script>
 </body>
 </html>
