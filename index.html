@@ -39,11 +39,14 @@
         .confetti-particle { position: fixed; pointer-events: none; z-index: 9999; font-size: 1.8rem; animation: floatUp 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
         @keyframes floatUp { 0% { transform: translateY(0) scale(0.5); opacity: 1; } 100% { transform: translateY(-120px) scale(1.2) rotate(25deg); opacity: 0; } }
 
-        .view-toggle { display: flex; background: var(--border); padding: 4px; border-radius: 20px; margin-bottom: 16px; }
-        .toggle-btn { flex: 1; text-align: center; padding: 12px; border-radius: 16px; font-size: 0.88rem; font-weight: 600; border: none; background: transparent; cursor: pointer; color: var(--text-muted); }
+        /* Centered View Toggle & Dropdowns */
+        .view-toggle { display: flex; justify-content: center; align-items: center; background: var(--border); padding: 4px; border-radius: 20px; margin-bottom: 16px; }
+        .toggle-btn { flex: 1; display: flex; align-items: center; justify-content: center; text-align: center; padding: 12px; border-radius: 16px; font-size: 0.88rem; font-weight: 600; border: none; background: transparent; cursor: pointer; color: var(--text-muted); transition: all 0.3s ease; }
         .toggle-btn.active { background: var(--card-bg); color: var(--text-main); box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
+        
         .hero-inline-row { display: flex; gap: 14px; margin-bottom: 20px; justify-content: center; }
-        select.nav-select { width: 100%; padding: 14px 16px; border-radius: 24px; border: 1px solid var(--border); background: var(--card-bg); font-weight: 600; font-size: 0.88rem; color: var(--text-main); outline: none; -webkit-appearance: none; text-align: center; }
+        .month-select-wrapper { display: flex; align-items: center; justify-content: center; width: 100%; }
+        select.nav-select { width: 100%; padding: 14px 16px; border-radius: 24px; border: 1px solid var(--border); background: var(--card-bg); font-weight: 600; font-size: 0.88rem; color: var(--text-main); outline: none; -webkit-appearance: none; text-align: center; text-align-last: center; display: flex; align-items: center; justify-content: center; }
 
         .card { background: var(--card-bg); border-radius: 28px; padding: 24px; margin-bottom: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.03); border: 1px solid var(--border); }
         .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px; }
@@ -67,8 +70,8 @@
 
         .form-group { margin-bottom: 16px; width: 100%; position: relative; }
         label { display: block; font-size: 0.75rem; color: var(--text-muted); font-weight: 700; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
-        input, select.form-input { width: 100%; max-width: 100%; box-sizing: border-box; padding: 14px; border: 1px solid var(--border); border-radius: 16px; font-size: 0.95rem; background: var(--bg-color); color: var(--text-main); outline: none; margin: 0; }
-        input[type="date"] { -webkit-appearance: none; appearance: none; display: block; }
+        input, select.form-input { width: 100%; max-width: 100%; box-sizing: border-box; padding: 14px; border: 1px solid var(--border); border-radius: 16px; font-size: 0.95rem; background: var(--bg-color); color: var(--text-main); outline: none; margin: 0; text-align-last: center; }
+        input[type="date"] { -webkit-appearance: none; appearance: none; display: block; text-align: center; }
         input:focus, select.form-input:focus { border-color: var(--venice); background: var(--card-bg); }
         button { width: 100%; padding: 16px; background: var(--venice); color: white; border: none; border-radius: 18px; font-size: 0.95rem; font-weight: 600; cursor: pointer; }
         button:active { transform: scale(0.99); opacity: 0.9; }
@@ -124,6 +127,7 @@
             <div id="fluid-balance" style="font-weight: 700; color: var(--success); font-size: 0.95rem; background: var(--card-bg); padding: 6px 14px; border-radius: 14px; border: 1px solid var(--border);">$0</div>
         </header>
 
+        <!-- Centered View Toggle -->
         <div class="view-toggle">
             <button id="toggle-month" class="toggle-btn active" onclick="switchView('month')">Month View</button>
             <button id="toggle-year" class="toggle-btn" onclick="switchView('year')">Cycle View (12M)</button>
@@ -280,6 +284,7 @@
         <button class="dock-item" onclick="switchTab('garden', this)"><span>🪴</span> Garden</button>
     </nav>
 
+    <!-- Quick Add Modal -->
     <div class="modal-overlay" id="quick-add-modal">
         <div class="modal-card">
             <h3 style="color: var(--venice);">Fast Capture ⚡</h3>
@@ -320,19 +325,31 @@
         </div>
     </div>
 
+    <!-- Enhanced Custom Pay Cycle Settings Modal -->
     <div class="modal-overlay" id="refresh-settings-modal">
         <div class="modal-card">
             <h3 style="color: var(--venice);">Pay Cycle Timeline 🗓️</h3>
-            <div class="form-group"><label>Next Paycheck Date</label><input type="date" id="refresh-date-input" class="form-input"></div>
+            <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 16px;">Customize your payday frequency and anchor date anytime your schedule changes.</p>
+            
             <div class="form-group">
                 <label>Pay Frequency</label>
-                <select id="refresh-freq-input" class="form-input">
+                <select id="refresh-freq-input" class="form-input" onchange="handleFrequencyChange(this.value)">
+                    <option value="7">Weekly (Every Friday / 7 Days)</option>
                     <option value="14">Bi-weekly (Every 14 Days)</option>
+                    <option value="15">Semi-Monthly (15th & Last Day)</option>
                     <option value="30">Monthly (Every 30 Days)</option>
-                    <option value="7">Weekly (Every 7 Days)</option>
                 </select>
             </div>
-            <button onclick="saveRefreshSettings()">Save Timeline</button>
+
+            <div class="form-group">
+                <label>Next Paycheck Date (Anchor Payday)</label>
+                <input type="date" id="refresh-date-input" class="form-input">
+                <button type="button" class="secondary" style="width: 100%; margin-top: 8px; font-size: 0.75rem;" onclick="setNextFridayDate()">🗓️ Auto-Set to Next Friday</button>
+            </div>
+
+            <p style="font-size: 0.7rem; color: var(--text-muted); font-style: italic; margin-bottom: 16px; text-align: center;">Note: Prior week work lag doesn't affect payday cash flow—the system refreshes your "Wants" allowance the moment payday hits!</p>
+
+            <button onclick="saveRefreshSettings()">Save Timeline Configuration</button>
             <button class="secondary" style="width: 100%; margin-top: 10px;" onclick="closeRefreshSettings()">Cancel</button>
         </div>
     </div>
@@ -355,14 +372,22 @@
     </div>
 
     <script>
-        const d = new Date(); d.setDate(d.getDate() + 14); 
-        const defaultDateStr = d.toISOString().split('T')[0];
+        // Calculate default next Friday date
+        function getUpcomingFridayStr() {
+            const now = new Date();
+            const dayOfWeek = now.getDay();
+            const daysUntilFriday = (5 - dayOfWeek + 7) % 7 || 7;
+            const nextFriday = new Date(now);
+            nextFriday.setDate(now.getDate() + daysUntilFriday);
+            return nextFriday.toISOString().split('T')[0];
+        }
 
         let state = JSON.parse(localStorage.getItem('cassidyProBudgetState')) || {
             globalBalance: 0, taxEscrowBalance: 0, currentViewMode: 'month',
             pots: [], ledger: [], wishlist: [], stamps: {}, vendors: {},
             stickers: { blossom: false, sprout: false, matcha: false, lantern: false, star: false },
-            txCount: 0, bonusTokens: 0, refreshSettings: { frequency: "14", nextRefreshDate: defaultDateStr },
+            txCount: 0, bonusTokens: 0, 
+            refreshSettings: { frequency: "7", nextRefreshDate: getUpcomingFridayStr() },
             rolloverPending: false, lastRolloverAmount: 0,
             categoryTargets: [
                 { name: "Housing", limit: 1600, nonNegotiable: true }, { name: "Groceries", limit: 450, nonNegotiable: true },
@@ -502,7 +527,7 @@
                     </div>`;
             } else {
                 container.innerHTML = `
-                    <div class="form-group"><label>Gross Income Amount ($)</label><input type="number" id="field-gross" placeholder="e.g., 6250"></div>
+                    <div class="form-group"><label>Gross Income Amount ($)</label><input type="number" id="field-gross" placeholder="e.g., 1250"></div>
                     <div class="form-group"><label>Estimated Tax Withholding (%)</label><input type="number" id="field-tax-rate" value="20"></div>`;
             }
         }
@@ -535,7 +560,7 @@
 
                 const tax = grossInput * rate; const net = grossInput - tax;
                 state.globalBalance += net; state.taxEscrowBalance += tax;
-                state.ledger.unshift({ id: Date.now(), type: 'income', desc: 'Paycheck Inflow', gross: grossInput, tax, net, date: dateStr, monthKey: activeMonth });
+                state.ledger.unshift({ id: Date.now(), type: 'income', desc: 'Paycheck Inflow (Friday)', gross: grossInput, tax, net, date: dateStr, monthKey: activeMonth });
                 save(); toggleFormContext();
             }
         }
@@ -584,7 +609,7 @@
                     const hours = Math.floor(remainingMs / (1000 * 60 * 60)); const mins = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
                     timeText = `🔒 Locks lift in ${hours}h ${mins}m`;
                 } else if (isVelocityLocked) {
-                    timeText = `🚨 LOCKED: Insufficient Wants Pacing. Wait until cycle refresh.`;
+                    timeText = `🚨 LOCKED: Insufficient Wants Pacing. Wait until Friday refresh.`;
                 } else {
                     timeText = `✅ Unlocked & ready`;
                 }
@@ -638,7 +663,7 @@
         function populateMonthTimelineOptions() {
             const filter = document.getElementById('global-month-filter'); filter.innerHTML = '';
             for(let i = 0; i < 12; i++) {
-                let d = new Date(2026, 7 + i, 1); // Starts from August 2026 (index 7)
+                let d = new Date(2026, 7 + i, 1);
                 let k = `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}`;
                 let opt = new Option(d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }), k);
                 if(i === 0) opt.selected = true; filter.add(opt);
@@ -665,12 +690,14 @@
             const parts = state.refreshSettings.nextRefreshDate.split('-');
             const refreshDate = new Date(parts[0], parts[1] - 1, parts[2]); refreshDate.setHours(0,0,0,0);
             const diffDays = Math.ceil((refreshDate - today) / (1000 * 60 * 60 * 24));
-            const freq = parseInt(state.refreshSettings.frequency);
+            const freq = parseInt(state.refreshSettings.frequency) || 7;
             let pct = Math.max(0, Math.min(100, ((freq - diffDays) / freq) * 100));
 
             const countdownEl = document.getElementById('hero-days-left'); const cycleBar = document.getElementById('hero-cycle-bar');
             if (countdownEl && cycleBar) {
-                if (diffDays === 0) countdownEl.innerText = 'Today!'; else countdownEl.innerText = `${diffDays} days`;
+                if (diffDays === 0) countdownEl.innerText = 'Payday Today! 🎉'; 
+                else if (diffDays === 1) countdownEl.innerText = 'Tomorrow!';
+                else countdownEl.innerText = `${diffDays} days`;
                 cycleBar.style.width = `${pct}%`;
             }
 
@@ -694,15 +721,31 @@
                 modal.style.display = 'flex';
             }
         }
+
+        /* Pay Cycle Customization Helpers */
         function openRefreshSettings() {
             document.getElementById('refresh-date-input').value = state.refreshSettings.nextRefreshDate;
-            document.getElementById('refresh-freq-input').value = state.refreshSettings.frequency;
+            document.getElementById('refresh-freq-input').value = state.refreshSettings.frequency || "7";
             document.getElementById('refresh-settings-modal').style.display = 'flex';
+        }
+        function closeRefreshSettings() {
+            document.getElementById('refresh-settings-modal').style.display = 'none';
+        }
+        function setNextFridayDate() {
+            document.getElementById('refresh-date-input').value = getUpcomingFridayStr();
+            showToast("Set to next Friday!");
+        }
+        function handleFrequencyChange(val) {
+            if (val === "7") {
+                setNextFridayDate();
+            }
         }
         function saveRefreshSettings() {
             state.refreshSettings.nextRefreshDate = document.getElementById('refresh-date-input').value;
             state.refreshSettings.frequency = document.getElementById('refresh-freq-input').value;
-            document.getElementById('refresh-settings-modal').style.display = 'none'; save();
+            closeRefreshSettings(); 
+            save();
+            showToast("Paycycle schedule updated! 🗓️");
         }
 
         function showToast(msg) {
