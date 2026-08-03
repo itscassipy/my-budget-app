@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cassidy's Budget</title>
+    <title>Cassidy's Budget System</title>
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -13,15 +13,10 @@
     <script src="https://unpkg.com/tesseract.js@5.1.0/dist/tesseract.min.js"></script>
     <style>
         :root {
-            /* Core Accents */
             --venice: #8894B7; --shine: #F5C74D; --success: #527558; --warning: #D18D34; --danger: #BA6868; 
             --block-pink: #F5D3D3; --block-blue: #D3DCF5; --block-yellow: #FBE6AD; --block-green: #D3F5D9; --block-cream: #F6EFE5;
-            
-            /* Dynamic Base Palette */
             --bg-color: #FAF6EE; --card-bg: #FFFFFF; --text-main: #1C1E24; --text-muted: #727B8E; --border: #EFE9DE; --linen: #DDC5A9;
             --dock-glass: rgba(250, 246, 238, 0.75); 
-            
-            /* Dynamic Gradients */
             --hero-gradient: linear-gradient(135deg, #FFFDF9 0%, #F6EFE5 100%);
             --daily-gradient: linear-gradient(135deg, #FFFFFF 0%, #FFFDF9 100%);
             --waiting-gradient: linear-gradient(to bottom, #FFFFFF, #FAF6EE);
@@ -36,100 +31,86 @@
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* Typography & Headers */
         header { margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; }
-        header h1 { font-family: "Georgia", Georgia, serif; font-weight: 400; font-style: italic; font-size: 1.8rem; color: var(--text-main); letter-spacing: -0.5px; text-transform: lowercase; transition: color 0.8s ease; display: flex; align-items: center; gap: 8px; }
-        h2 { font-family: "Georgia", Georgia, serif; font-style: italic; font-size: 1.25rem; font-weight: 400; margin-bottom: 20px; color: var(--text-main); display: flex; justify-content: space-between; align-items: center; transition: color 0.8s ease; }
+        header h1 { font-family: "Georgia", Georgia, serif; font-weight: 400; font-style: italic; font-size: 1.8rem; color: var(--text-main); letter-spacing: -0.5px; text-transform: lowercase; }
+        h2 { font-family: "Georgia", Georgia, serif; font-style: italic; font-size: 1.25rem; font-weight: 400; margin-bottom: 20px; color: var(--text-main); display: flex; justify-content: space-between; align-items: center; }
         
-        /* Badges & Tokens */
-        .token-badge { background: var(--block-yellow); color: #1C1E24; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; font-family: -apple-system, sans-serif; font-style: normal; display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--shine); box-shadow: 0 4px 12px rgba(245,199,77,0.2); transition: all 0.3s ease; }
+        .token-badge { background: var(--block-yellow); color: #1C1E24; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; border: 1px solid var(--shine); box-shadow: 0 4px 12px rgba(245,199,77,0.2); }
         .confetti-particle { position: fixed; pointer-events: none; z-index: 9999; font-size: 1.8rem; animation: floatUp 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
         @keyframes floatUp { 0% { transform: translateY(0) scale(0.5); opacity: 1; } 100% { transform: translateY(-120px) scale(1.2) rotate(25deg); opacity: 0; } }
 
-        /* General Layout Controls */
-        .view-toggle { display: flex; background: var(--border); padding: 4px; border-radius: 20px; margin-bottom: 16px; transition: background-color 0.8s ease; }
-        .toggle-btn { flex: 1; text-align: center; padding: 12px; border-radius: 16px; font-size: 0.88rem; font-weight: 600; border: none; background: transparent; cursor: pointer; color: var(--text-muted); transition: all 0.3s ease; }
+        .view-toggle { display: flex; background: var(--border); padding: 4px; border-radius: 20px; margin-bottom: 16px; }
+        .toggle-btn { flex: 1; text-align: center; padding: 12px; border-radius: 16px; font-size: 0.88rem; font-weight: 600; border: none; background: transparent; cursor: pointer; color: var(--text-muted); }
         .toggle-btn.active { background: var(--card-bg); color: var(--text-main); box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
-        .hero-inline-row { display: flex; gap: 14px; align-items: stretch; margin-bottom: 20px; width: 100%; justify-content: center; }
-        .month-select-wrapper { display: flex; align-items: center; justify-content: center; width: 100%; }
-        select.nav-select { height: 100%; width: 100%; padding: 14px 16px; border-radius: 24px; border: 1px solid var(--border); background: var(--card-bg); font-weight: 600; font-size: 0.88rem; color: var(--text-main); outline: none; box-shadow: 0 4px 12px rgba(0,0,0,0.04); -webkit-appearance: none; text-align: center; transition: all 0.8s ease; }
+        .hero-inline-row { display: flex; gap: 14px; margin-bottom: 20px; justify-content: center; }
+        select.nav-select { width: 100%; padding: 14px 16px; border-radius: 24px; border: 1px solid var(--border); background: var(--card-bg); font-weight: 600; font-size: 0.88rem; color: var(--text-main); outline: none; -webkit-appearance: none; text-align: center; }
 
-        .card { background: var(--card-bg); border-radius: 28px; padding: 24px; margin-bottom: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.03); border: 1px solid var(--border); overflow: hidden; transition: background-color 0.8s ease, border-color 0.8s ease; }
-        
-        /* Grid & Metrics */
+        .card { background: var(--card-bg); border-radius: 28px; padding: 24px; margin-bottom: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.03); border: 1px solid var(--border); }
         .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px; }
-        .mini-stat { background: var(--card-bg); border-radius: 24px; padding: 18px; border: 1px solid var(--border); transition: transform 0.2s, background-color 0.8s ease; }
-        .stat-lbl { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); font-weight: 700; transition: color 0.8s ease; }
-        .stat-val { font-size: 1.4rem; font-weight: 700; margin-top: 6px; color: var(--text-main); letter-spacing: -0.5px; transition: color 0.8s ease; }
-        .choice-hero-box { background: var(--hero-gradient); border: 2px solid var(--shine); border-radius: 28px; padding: 28px; transition: background 0.8s ease; text-align: center; position: relative; margin-bottom: 20px; box-shadow: 0 12px 32px rgba(245,199,77,0.15); }
+        .mini-stat { background: var(--card-bg); border-radius: 24px; padding: 18px; border: 1px solid var(--border); }
+        .stat-lbl { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); font-weight: 700; }
+        .stat-val { font-size: 1.4rem; font-weight: 700; margin-top: 6px; color: var(--text-main); letter-spacing: -0.5px; }
+        .choice-hero-box { background: var(--hero-gradient); border: 2px solid var(--shine); border-radius: 28px; padding: 28px; text-align: center; margin-bottom: 20px; }
 
-        /* Gamification: Stamp Card */
-        .stamp-box { width: 42px; height: 48px; border-radius: 12px; background: var(--bg-color); border: 1px dashed var(--linen); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 1.2rem; position: relative; transition: all 0.3s ease; }
+        .stamp-box { width: 42px; height: 48px; border-radius: 12px; background: var(--bg-color); border: 1px dashed var(--linen); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 1.2rem; }
         .stamp-box.claimed { background: var(--block-cream); border: 1px solid var(--linen); }
         .stamp-box.today-active { background: var(--block-yellow); border: 1px solid var(--shine); cursor: pointer; animation: pulse 2s infinite; }
-        .stamp-lbl { font-size: 0.55rem; font-weight: 800; color: var(--text-muted); margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stamp-lbl { font-size: 0.55rem; font-weight: 800; color: var(--text-muted); margin-bottom: 2px; text-transform: uppercase; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.06); box-shadow: 0 4px 12px rgba(245,199,77,0.4); } 100% { transform: scale(1); } }
 
-        /* Gamification: Top Showcase Carousel */
+        .pulse-warning { animation: borderPulse 2s infinite; border: 1px solid var(--danger) !important; }
+        @keyframes borderPulse { 0% { border-color: rgba(186,104,104,0.3); box-shadow: 0 0 0 rgba(186,104,104,0); } 50% { border-color: var(--danger); box-shadow: 0 0 14px rgba(186,104,104,0.2); } 100% { border-color: rgba(186,104,104,0.3); box-shadow: 0 0 0 rgba(186,104,104,0); } }
+
         .top-showcase-container { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 24px; scrollbar-width: none; scroll-snap-type: x mandatory; }
         .top-showcase-container::-webkit-scrollbar { display: none; }
-        .top-showcase-card { min-width: 260px; flex-shrink: 0; background: var(--card-bg); border-radius: 24px; padding: 16px; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.04); scroll-snap-align: center; transition: background-color 0.8s ease, border-color 0.8s ease; }
+        .top-showcase-card { min-width: 260px; flex-shrink: 0; background: var(--card-bg); border-radius: 24px; padding: 16px; border: 1px solid var(--border); scroll-snap-align: center; }
 
-        /* Inputs & Forms */
-        .form-group { margin-bottom: 16px; width: 100%; }
-        label { display: block; font-size: 0.75rem; color: var(--text-muted); font-weight: 700; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; transition: color 0.8s ease; }
-        input, select.form-input { width: 100%; max-width: 100%; box-sizing: border-box; padding: 14px; border: 1px solid var(--border); border-radius: 16px; font-size: 0.95rem; background: var(--bg-color); color: var(--text-main); outline: none; transition: all 0.3s ease; margin: 0; }
-        input[type="date"] { -webkit-appearance: none; appearance: none; font-family: -apple-system, sans-serif; display: block; }
-        input:focus, select.form-input:focus { border-color: var(--venice); background: var(--card-bg); box-shadow: 0 0 0 3px rgba(136,148,183,0.1); }
-        button { width: 100%; padding: 16px; background: var(--venice); color: white; border: none; border-radius: 18px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; box-sizing: border-box; }
+        .form-group { margin-bottom: 16px; width: 100%; position: relative; }
+        label { display: block; font-size: 0.75rem; color: var(--text-muted); font-weight: 700; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        input, select.form-input { width: 100%; max-width: 100%; box-sizing: border-box; padding: 14px; border: 1px solid var(--border); border-radius: 16px; font-size: 0.95rem; background: var(--bg-color); color: var(--text-main); outline: none; margin: 0; }
+        input[type="date"] { -webkit-appearance: none; appearance: none; display: block; }
+        input:focus, select.form-input:focus { border-color: var(--venice); background: var(--card-bg); }
+        button { width: 100%; padding: 16px; background: var(--venice); color: white; border: none; border-radius: 18px; font-size: 0.95rem; font-weight: 600; cursor: pointer; }
         button:active { transform: scale(0.99); opacity: 0.9; }
-        button.secondary { background: var(--border); color: var(--text-main); margin-top: 0; padding: 8px 14px; width: auto; font-size: 0.78rem; border-radius: 12px; border: 1px solid var(--border); }
+        button.secondary { background: var(--border); color: var(--text-main); padding: 8px 14px; width: auto; font-size: 0.78rem; border-radius: 12px; border: 1px solid var(--border); }
         button.action-link { background: transparent; color: var(--venice); width: auto; padding: 0; margin: 0; font-size: 0.85rem; font-weight: 700; }
         button:disabled { background: var(--bg-color); color: var(--text-muted); cursor: not-allowed; border: 1px solid var(--border); opacity: 0.7; }
-        
-        /* Receipt Scan Widget */
-        .scan-trigger-pill { background: var(--block-yellow); color: #1C1E24; padding: 10px 14px; border-radius: 14px; display: inline-flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 700; border: 1px solid rgba(245,199,77,0.4); cursor: pointer; margin-bottom: 16px; width: auto; text-transform: uppercase; letter-spacing: 0.3px; }
-        .scan-loading-txt { font-size: 0.82rem; color: var(--warning); font-weight: 600; font-style: italic; margin-bottom: 12px; display: none; }
 
-        /* Lists & Ledgers */
+        .fab { position: fixed; bottom: 100px; right: 24px; width: 56px; height: 56px; background: var(--venice); border-radius: 28px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; color: white; box-shadow: 0 12px 24px rgba(136,148,183,0.4); z-index: 1500; cursor: pointer; transition: transform 0.2s ease; border: 2px solid rgba(255,255,255,0.2); }
+        .fab:active { transform: scale(0.92); }
+
+        #rest-state-banner { display: none; background: var(--block-green); border: 1px solid var(--success); color: var(--success); padding: 12px 16px; border-radius: 16px; font-size: 0.85rem; font-weight: 600; text-align: center; margin-bottom: 20px; animation: fadeIn 0.8s ease; }
+
+        .progress-wrapper { margin-bottom: 22px; }
+        .progress-meta { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 8px; align-items: center; }
+        .progress-bg { background: var(--bg-color); height: 12px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border); }
+        .progress-bar { height: 100%; width: 0%; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 6px; }
+        
+        .tx-list { list-style: none; }
+        .tx-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
+        .tx-item:last-child { border-bottom: none; }
+        .tx-cat-tag { font-size: 0.65rem; background: var(--border); padding: 4px 12px; border-radius: 20px; color: var(--text-main); display: inline-block; margin-top: 6px; font-weight: 700; text-transform: uppercase; }
+        .tx-cat-tag.nn { background: var(--block-blue); color: #1C1E24; }
+        
         .inline-actions { display: flex; gap: 12px; margin-top: 8px; align-items: center; }
-        .btn-inline { background: transparent; color: var(--text-muted); font-size: 0.72rem; width: auto; padding: 0; margin: 0; font-weight: 700; border: none; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; }
+        .btn-inline { background: transparent; color: var(--text-muted); font-size: 0.72rem; width: auto; padding: 0; font-weight: 700; border: none; cursor: pointer; text-transform: uppercase; }
         .btn-inline.del { color: var(--danger); }
         .btn-inline.edit { color: var(--venice); }
-        .progress-wrapper { margin-bottom: 22px; }
-        .progress-wrapper:last-child { margin-bottom: 0; }
-        .progress-meta { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 8px; align-items: center; }
-        .progress-bg { background: var(--bg-color); height: 12px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border); transition: background-color 0.8s ease; }
-        .progress-bar { height: 100%; width: 0%; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 6px; }
-        .tx-list { list-style: none; }
-        .tx-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--border); font-size: 0.95rem; transition: border-color 0.8s ease; }
-        .tx-item:last-child { border-bottom: none; }
-        .tx-cat-tag { font-size: 0.65rem; background: var(--border); padding: 4px 12px; border-radius: 20px; color: var(--text-main); display: inline-block; margin-top: 6px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.8s ease; }
-        .tx-cat-tag.nn { background: var(--block-blue); color: #1C1E24; border: 1px solid rgba(136,148,183,0.3); }
-        .pot-eta { font-size: 0.78rem; color: var(--text-muted); margin-top: 6px; font-style: italic; }
 
-        /* Modals */
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: none; justify-content: center; align-items: center; z-index: 2000; padding: 16px; transition: opacity 0.3s ease; }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: none; justify-content: center; align-items: center; z-index: 2000; padding: 16px; }
         .modal-card { background: var(--card-bg); border-radius: 28px; padding: 24px; width: 100%; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); border: 1px solid var(--border); box-sizing: border-box; overflow-x: hidden; }
-        .modal-card h3 { font-family: "Georgia", Georgia, serif; font-style: italic; font-size: 1.4rem; color: var(--danger); margin-bottom: 12px; }
-        .modal-card p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px; }
 
-        /* Gamification: Toast Notifications */
         .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-150px); background: var(--card-bg); color: var(--text-main); padding: 14px 24px; border-radius: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); border: 2px solid var(--shine); font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 10px; z-index: 3000; transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); white-space: nowrap; }
         .toast.show { transform: translateX(-50%) translateY(0); }
 
-        /* Gamification: Sticker Grid */
         .sticker-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 14px; margin-top: 10px; }
-        .sticker-slot { background: var(--bg-color); border: 1px dashed var(--border); border-radius: 18px; height: 60px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; position: relative; transition: all 0.3s ease; }
+        .sticker-slot { background: var(--bg-color); border: 1px dashed var(--border); border-radius: 18px; height: 60px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; position: relative; }
         .sticker-slot.locked { filter: grayscale(100%); opacity: 0.3; }
         .sticker-slot.unlocked { background: var(--card-bg); border: 1px solid var(--venice); box-shadow: 0 4px 14px rgba(136,148,183,0.2); animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .sticker-tooltip { position: absolute; bottom: -24px; font-size: 0.6rem; text-transform: uppercase; font-weight: 800; color: var(--text-muted); opacity: 0; transition: opacity 0.2s; white-space: nowrap; background: var(--card-bg); padding: 4px 8px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 1px solid var(--border); pointer-events: none; z-index: 10;}
-        .sticker-slot:hover .sticker-tooltip { opacity: 1; }
         @keyframes pop { 0% { transform: scale(0.8); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
 
-        /* Floating Glass Pill Dock */
-        .bottom-dock { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 380px; background: var(--dock-glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); height: auto; border-radius: 40px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding: 8px 12px; border: 1px solid var(--border); box-shadow: 0 12px 32px rgba(0,0,0,0.08); transition: all 0.8s ease; }
-        .dock-item { color: var(--text-muted); font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border: none; background: transparent; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 16px; border-radius: 24px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); gap: 2px; }
+        .bottom-dock { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 380px; background: var(--dock-glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); height: auto; border-radius: 40px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding: 8px 12px; border: 1px solid var(--border); box-shadow: 0 12px 32px rgba(0,0,0,0.08); }
+        .dock-item { color: var(--text-muted); font-size: 0.65rem; font-weight: 700; text-transform: uppercase; border: none; background: transparent; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 16px; border-radius: 24px; gap: 2px; transition: all 0.3s; }
         .dock-item span { font-size: 1.2rem; transition: transform 0.3s ease; }
         .dock-item.active { color: var(--text-main); background: var(--card-bg); box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
         .dock-item.active span { transform: translateY(-2px) scale(1.1); }
@@ -140,10 +121,9 @@
         
         <header>
             <h1>lucky girl cass <span id="token-display" class="token-badge" style="display: none;">⭐ 0</span></h1>
-            <div id="fluid-balance" style="font-weight: 700; color: var(--success); font-size: 0.95rem; background: var(--card-bg); padding: 6px 14px; border-radius: 14px; border: 1px solid var(--border); transition: all 0.8s ease;">$0</div>
+            <div id="fluid-balance" style="font-weight: 700; color: var(--success); font-size: 0.95rem; background: var(--card-bg); padding: 6px 14px; border-radius: 14px; border: 1px solid var(--border);">$0</div>
         </header>
 
-        <!-- Global Context Controls (Always Visible) -->
         <div class="view-toggle">
             <button id="toggle-month" class="toggle-btn active" onclick="switchView('month')">Month View</button>
             <button id="toggle-year" class="toggle-btn" onclick="switchView('year')">Cycle View (12M)</button>
@@ -157,7 +137,8 @@
         <!-- ==================== TAB 1: HOME ==================== -->
         <div id="tab-home" class="tab-content active">
             
-            <!-- Safe-To-Spend Hero Card -->
+            <div id="rest-state-banner">🍵 Daily check-in complete. The system is resting.</div>
+
             <div class="choice-hero-box">
                 <div style="font-size: 0.75rem; font-weight: 800; color: var(--warning); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 4px;">Guilt-Free "Wants" Allowance</div>
                 <div id="dash-choice-cash" style="font-size: 3.2rem; font-family: 'Georgia', serif; font-style: italic; font-weight: 400; color: var(--text-main); margin-bottom: 12px;">$0.00</div>
@@ -165,7 +146,7 @@
                 <div id="hero-gamified-msg" style="font-size: 0.9rem; font-weight: 600; color: var(--success); margin-bottom: 24px; padding: 0 10px;">✨ You're pacing beautifully! Keep it cozy.</div>
 
                 <div style="background: var(--bg-color); border-radius: 18px; padding: 16px; border: 1px solid var(--border); cursor: pointer;" onclick="openRefreshSettings()">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
                         <span>Pay Cycle Refresh</span>
                         <span id="hero-days-left" style="color: var(--text-main);">-- Days Left</span>
                     </div>
@@ -197,7 +178,7 @@
             <div class="card" style="padding: 18px 22px; background: var(--daily-gradient);">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                     <h2 style="margin: 0; font-size: 1.1rem;">cozy daily check-in</h2>
-                    <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">This Week</span>
+                    <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 800; text-transform: uppercase;">This Week</span>
                 </div>
                 <div id="stamp-grid" style="display: flex; justify-content: space-between; align-items: center; gap: 8px;"></div>
             </div>
@@ -212,12 +193,6 @@
         <div id="tab-log" class="tab-content">
             <div class="card">
                 <h2>Log Entry Transaction</h2>
-                <div style="margin-top: 10px;">
-                    <div class="scan-trigger-pill" onclick="document.getElementById('native-ocr-input').click()">📷 Scan Raw Receipt</div>
-                    <div id="receipt-scan-loader" class="scan-loading-txt">reading paper asset layout... please wait...</div>
-                    <input type="file" id="native-ocr-input" accept="image/*" capture="environment" style="display: none;" onchange="executeOpticalReceiptScan(event)">
-                </div>
-
                 <div class="form-group">
                     <label>Transaction Blueprint Type</label>
                     <select id="tx-type" class="form-input" onchange="toggleFormContext()">
@@ -232,7 +207,7 @@
             
             <div class="card" id="waiting-room-card" style="display: none; background: var(--waiting-gradient); border-color: var(--venice);">
                 <h2>the impulse waiting room ⏳</h2>
-                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4;">Impulse wants are cooling down. You cannot clear these to your operational ledger until the 48-hour emotional lock lifts.</p>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4;">Impulse wants are cooling down. Max queue size is 5 items. Priorities must be managed.</p>
                 <ul id="wishlist-container" class="tx-list"></ul>
             </div>
         </div>
@@ -248,15 +223,13 @@
         <!-- ==================== TAB 4: GARDEN ==================== -->
         <div id="tab-garden" class="tab-content">
             
-            <!-- Editable Categories Manager -->
             <div class="card" id="category-manager-card">
                 <h2>spending blueprint 📝</h2>
                 <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4;">Design your financial architecture. Mark <strong>Needs</strong> to lock their funds away from your <strong>Wants</strong> allowance.</p>
-                
                 <ul id="editable-categories-list" class="tx-list" style="margin-bottom: 20px;"></ul>
                 
                 <div style="background: var(--bg-color); padding: 16px; border-radius: 16px; border: 1px dashed var(--border);">
-                    <h4 style="margin-bottom: 12px; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Add New Target</h4>
+                    <h4 style="margin-bottom: 12px; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Add New Target</h4>
                     <div class="form-group"><input type="text" id="new-cat-name" placeholder="Category Name (e.g., Dining Out)"></div>
                     <div class="form-group"><input type="number" id="new-cat-limit" placeholder="Monthly Limit ($)"></div>
                     <div class="form-group" style="margin-bottom: 16px;">
@@ -271,53 +244,35 @@
 
             <div class="card">
                 <h2>long-term savings pots</h2>
-                <div class="form-group">
-                    <label>Designation Name</label>
-                    <input type="text" id="pot-name" placeholder="e.g., Cold Savings Runway">
-                </div>
+                <div class="form-group"><label>Designation Name</label><input type="text" id="pot-name" placeholder="e.g., Cold Savings Runway"></div>
                 <div class="form-group">
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 4px;">
                         <div><label>Target Goal ($)</label><input type="number" id="pot-target" placeholder="15000"></div>
                         <div><label>Already Saved ($)</label><input type="number" id="pot-starting" placeholder="5000" value="0"></div>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label>Planned Monthly Contribution ($)</label>
-                    <input type="number" id="pot-monthly" placeholder="500">
-                </div>
+                <div class="form-group"><label>Planned Monthly Contribution ($)</label><input type="number" id="pot-monthly" placeholder="500"></div>
                 <button style="background: var(--text-main);" onclick="createNewPot()">Initialize Pot</button>
                 <div id="pots-container" style="margin-top: 18px;"></div>
             </div>
 
             <div class="card" id="sticker-drawer">
                 <h2>sticker compendium 📖</h2>
-                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; line-height: 1.4;">Unlock beautiful cozy milestones as you build bulletproof digital habits.</p>
                 <div id="sticker-grid-container" class="sticker-grid"></div>
             </div>
 
             <div class="card" id="backup-manager">
                 <h2>data vault 💾</h2>
-                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4;">Your data lives securely on this device. Export a backup regularly so you never lose your progress if you clear your browser or get a new phone.</p>
                 <button style="background: var(--text-main); margin-bottom: 10px;" onclick="exportData()">⬇️ Download Backup File</button>
                 <button class="secondary" style="width: 100%; padding: 14px; background: transparent;" onclick="document.getElementById('import-file').click()">⬆️ Restore from Backup</button>
                 <input type="file" id="import-file" accept=".json" style="display: none;" onchange="importData(event)">
-            </div>
-
-            <div class="card" id="recurring-card-manager">
-                <h2>recurring templates <button class="action-link" onclick="applyRecurringToCurrentMonth()">Apply to Month</button></h2>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:14px; margin-top: 12px;">
-                    <input type="text" id="rec-desc" placeholder="Rent, Spotify...">
-                    <input type="number" id="rec-amt" placeholder="Amount ($)">
-                    <select id="rec-cat" class="form-input"></select>
-                    <button class="secondary" style="margin-top:0; width: 100%; padding: 12px;" onclick="addRecurringTemplate()">+ Save Template</button>
-                </div>
-                <ul id="recurring-list" class="tx-list"></ul>
             </div>
         </div>
 
     </div>
 
-    <!-- Navigation Dock -->
+    <div class="fab" onclick="openQuickAddModal()">+</div>
+
     <nav class="bottom-dock">
         <button class="dock-item active" onclick="switchTab('home', this)"><span>🏠</span> Home</button>
         <button class="dock-item" onclick="switchTab('log', this)"><span>📝</span> Log</button>
@@ -325,8 +280,28 @@
         <button class="dock-item" onclick="switchTab('garden', this)"><span>🪴</span> Garden</button>
     </nav>
 
-    <!-- Modals -->
-    <!-- Recalibration Modal -->
+    <div class="modal-overlay" id="quick-add-modal">
+        <div class="modal-card">
+            <h3 style="color: var(--venice);">Fast Capture ⚡</h3>
+            <p>Log a necessary Need or clear a Want instantly.</p>
+            <div class="form-group">
+                <label>Description</label>
+                <input type="text" id="qa-desc" class="form-input" placeholder="e.g., Whole Foods" onkeyup="checkVendorMemory(this.value, 'qa-cat')">
+                <div id="qa-vendor-hint" style="font-size: 0.65rem; color: var(--success); margin-top: 4px; display: none;">✨ Auto-categorized from memory</div>
+            </div>
+            <div class="form-group">
+                <label>Amount ($)</label>
+                <input type="number" id="qa-amount" class="form-input" placeholder="0.00">
+            </div>
+            <div class="form-group">
+                <label>Category</label>
+                <select id="qa-cat" class="form-input"></select>
+            </div>
+            <button onclick="submitQuickAdd()">Log Instantly</button>
+            <button class="secondary" style="width: 100%; margin-top: 10px;" onclick="document.getElementById('quick-add-modal').style.display='none'">Cancel</button>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="recalibration-modal">
         <div class="modal-card">
             <h3>optimization needed 🧩</h3>
@@ -345,15 +320,10 @@
         </div>
     </div>
 
-    <!-- Cycle Refresh Settings Modal -->
     <div class="modal-overlay" id="refresh-settings-modal">
         <div class="modal-card">
             <h3 style="color: var(--venice);">Pay Cycle Timeline 🗓️</h3>
-            <p>Set your paycheck timeline to trigger the end-of-cycle review.</p>
-            <div class="form-group">
-                <label>Next Paycheck Date</label>
-                <input type="date" id="refresh-date-input" class="form-input">
-            </div>
+            <div class="form-group"><label>Next Paycheck Date</label><input type="date" id="refresh-date-input" class="form-input"></div>
             <div class="form-group">
                 <label>Pay Frequency</label>
                 <select id="refresh-freq-input" class="form-input">
@@ -367,18 +337,17 @@
         </div>
     </div>
 
-    <!-- Rollover Action Modal -->
     <div class="modal-overlay" id="rollover-action-modal">
         <div class="modal-card">
             <h3 style="color: var(--shine); font-size: 1.6rem; font-style: normal;">Cycle Complete! 🎉</h3>
-            <p id="rollover-text-positive" style="display:none;">You made it to payday! You ended the cycle with <strong id="rollover-amt-display" style="color: var(--success); font-size: 1.2rem;">$0.00</strong> of unspent Guilt-Free Wants allowance. Where should we sweep these funds before the new cycle begins?</p>
-            <p id="rollover-text-negative" style="display:none;">You made it to payday, but you ended the cycle in the red by <strong id="rollover-amt-display-neg" style="color: var(--danger); font-size: 1.2rem;">$0.00</strong>. This debt will be carried over.</p>
+            <p id="rollover-text-positive" style="display:none;">You ended the cycle with <strong id="rollover-amt-display" style="color: var(--success); font-size: 1.2rem;">$0.00</strong> of unspent Wants allowance. Where should we sweep these funds?</p>
+            <p id="rollover-text-negative" style="display:none;">You ended the cycle in the red by <strong id="rollover-amt-display-neg" style="color: var(--danger); font-size: 1.2rem;">$0.00</strong>. This debt will carry over.</p>
             
             <div id="rollover-options-container" class="form-group">
                 <label>Action for remaining funds</label>
                 <select id="rollover-dest-input" class="form-input">
                     <option value="carry">Leave it as Fluid Cash (Carry Forward)</option>
-                    <!-- Pots will inject here -->
+                    <option value="cascade">🌊 Automated Cascade Sweep (Fill Pots Top to Bottom)</option>
                 </select>
             </div>
             <button onclick="processRollover()" id="rollover-btn-action">Execute Transfer & Start New Cycle</button>
@@ -386,190 +355,126 @@
     </div>
 
     <script>
-        /* --- Service Worker Registration --- */
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').then(reg => {
-                    console.log('ServiceWorker registration successful');
-                }).catch(err => {
-                    console.log('ServiceWorker registration failed: ', err);
-                });
-            });
-        }
-
-        // Ensure you get today's date formatted properly for default setup
-        const d = new Date();
-        d.setDate(d.getDate() + 14); // default 14 days out
+        const d = new Date(); d.setDate(d.getDate() + 14); 
         const defaultDateStr = d.toISOString().split('T')[0];
 
         let state = JSON.parse(localStorage.getItem('cassidyProBudgetState')) || {
-            globalBalance: 0,
-            taxEscrowBalance: 0,
-            currentViewMode: 'month',
-            pots: [],
-            ledger: [], 
-            recurringTemplates: [],
-            wishlist: [], 
-            stamps: {}, 
+            globalBalance: 0, taxEscrowBalance: 0, currentViewMode: 'month',
+            pots: [], ledger: [], wishlist: [], stamps: {}, vendors: {},
             stickers: { blossom: false, sprout: false, matcha: false, lantern: false, star: false },
-            txCount: 0, 
-            bonusTokens: 0, 
-            refreshSettings: { frequency: "14", nextRefreshDate: defaultDateStr },
-            rolloverPending: false,
-            lastRolloverAmount: 0,
+            txCount: 0, bonusTokens: 0, refreshSettings: { frequency: "14", nextRefreshDate: defaultDateStr },
+            rolloverPending: false, lastRolloverAmount: 0,
             categoryTargets: [
-                { name: "Housing", limit: 1600, nonNegotiable: true },
-                { name: "Groceries", limit: 450, nonNegotiable: true },
-                { name: "Utilities", limit: 250, nonNegotiable: true },
-                { name: "Transport", limit: 350, nonNegotiable: false },
-                { name: "Entertainment", limit: 300, nonNegotiable: false },
-                { name: "Miscellaneous", limit: 200, nonNegotiable: false }
+                { name: "Housing", limit: 1600, nonNegotiable: true }, { name: "Groceries", limit: 450, nonNegotiable: true },
+                { name: "Utilities", limit: 250, nonNegotiable: true }, { name: "Transport", limit: 350, nonNegotiable: false },
+                { name: "Entertainment", limit: 300, nonNegotiable: false }, { name: "Miscellaneous", limit: 200, nonNegotiable: false }
             ]
         };
 
         let pendingOverbudgetTx = null;
 
-        function save() {
-            localStorage.setItem('cassidyProBudgetState', JSON.stringify(state));
-            render();
-        }
+        function save() { localStorage.setItem('cassidyProBudgetState', JSON.stringify(state)); render(); }
 
-        /* --- Fail-Proof Data Backup --- */
         function exportData() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
             const downloadAnchorNode = document.createElement('a');
-            downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", "cassidy_budget_backup_" + new Date().toISOString().split('T')[0] + ".json");
-            document.body.appendChild(downloadAnchorNode);
-            downloadAnchorNode.click();
-            downloadAnchorNode.remove();
+            downloadAnchorNode.setAttribute("href", dataStr); downloadAnchorNode.setAttribute("download", "cassidy_budget_backup_" + new Date().toISOString().split('T')[0] + ".json");
+            document.body.appendChild(downloadAnchorNode); downloadAnchorNode.click(); downloadAnchorNode.remove();
             showToast("Backup downloaded successfully! 💾");
         }
-
         function importData(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+            const file = event.target.files[0]; if (!file) return;
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
                     const importedState = JSON.parse(e.target.result);
                     if (importedState && importedState.ledger) {
                         if(confirm("Are you sure? This will overwrite your current budget data with the backup.")) {
-                            state = importedState;
-                            save();
-                            showToast("Data restored successfully! ✨");
+                            state = importedState; save(); showToast("Data restored successfully! ✨");
                             setTimeout(() => location.reload(), 1500); 
                         }
-                    } else {
-                        alert("This doesn't look like a valid budget backup file.");
-                    }
-                } catch (err) {
-                    alert("Error reading the backup file. It might be corrupted.");
-                }
+                    } else { alert("This doesn't look like a valid budget backup file."); }
+                } catch (err) { alert("Error reading the backup file. It might be corrupted."); }
             };
             reader.readAsText(file);
         }
 
-        /* --- Tab Navigation --- */
         function switchTab(tabId, btn) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.dock-item').forEach(b => b.classList.remove('active'));
-            document.getElementById('tab-' + tabId).classList.add('active');
-            btn.classList.add('active');
-            window.scrollTo({top: 0, behavior: 'smooth'});
-            render();
+            document.getElementById('tab-' + tabId).classList.add('active'); btn.classList.add('active');
+            window.scrollTo({top: 0, behavior: 'smooth'}); render();
         }
 
-        /* --- Gamification: Variable Loot Drop --- */
-        function triggerLootDrop() {
-            state.bonusTokens = (state.bonusTokens || 0) + 1;
-            showToast("✨ Lucky Drop! You found a Cozy Token! ✨");
-            const emojis = ['✨', '🌸', '🪙', '🌱'];
-            for(let i=0; i<18; i++) {
-                const el = document.createElement('div');
-                el.innerText = emojis[Math.floor(Math.random() * emojis.length)];
-                el.className = 'confetti-particle';
-                el.style.left = 40 + (Math.random() * 40 - 20) + 'vw';
-                el.style.top = 40 + (Math.random() * 40 - 20) + 'vh';
-                el.style.animationDelay = (Math.random() * 0.2) + 's';
-                document.body.appendChild(el);
-                setTimeout(() => el.remove(), 1500); 
+        function openQuickAddModal() {
+            document.getElementById('qa-desc').value = ''; document.getElementById('qa-amount').value = '';
+            document.getElementById('qa-vendor-hint').style.display = 'none';
+            document.getElementById('quick-add-modal').style.display = 'flex';
+            populateCategorySelectFields();
+        }
+
+        function submitQuickAdd() {
+            const desc = document.getElementById('qa-desc').value.trim(); const amt = parseFloat(document.getElementById('qa-amount').value); const cat = document.getElementById('qa-cat').value;
+            if(!desc || !amt || amt <= 0) return;
+            const activeMonth = document.getElementById('global-month-filter').value;
+            
+            if (amt > state.globalBalance) { 
+                document.getElementById('quick-add-modal').style.display = 'none'; 
+                triggerRecalibrationModal(desc, amt, cat); return; 
             }
+            
+            state.vendors[desc.toLowerCase()] = cat;
+            state.globalBalance -= amt;
+            state.ledger.unshift({ id: Date.now(), type: 'expense', desc, amt, cat, date: new Date().toLocaleDateString(), monthKey: activeMonth });
+            
+            document.getElementById('quick-add-modal').style.display = 'none';
+            save(); showToast("Captured instantly ⚡");
         }
 
-        /* --- Gamification: Sticker Engine --- */
-        const STICKER_DEX = {
-            blossom: { icon: '🌸', name: 'First Step', desc: 'Logged your very first transaction.' },
-            sprout: { icon: '🪴', name: 'Seed Planter', desc: 'Initialized your first savings pot.' },
-            matcha: { icon: '🍵', name: 'Mindful Saver', desc: 'Passed on an impulse buy in the Waiting Room.' },
-            lantern: { icon: '🏮', name: 'Illuminated', desc: 'Logged 10 total transactions.' },
-            star: { icon: '✨', name: 'Consistent', desc: 'Claimed 3 Daily Stamps.' }
-        };
-
-        function unlockSticker(id) {
-            if (!state.stickers[id]) {
-                state.stickers[id] = true;
-                save();
-                showToast(`New Sticker Unlocked: ${STICKER_DEX[id].icon} ${STICKER_DEX[id].name}`);
+        function checkVendorMemory(inputVal, selectId) {
+            const lowerInput = inputVal.trim().toLowerCase();
+            const hintId = selectId === 'qa-cat' ? 'qa-vendor-hint' : 'main-vendor-hint';
+            const hintEl = document.getElementById(hintId);
+            
+            if(state.vendors[lowerInput]) {
+                const catSelect = document.getElementById(selectId);
+                if(catSelect) {
+                    catSelect.value = state.vendors[lowerInput];
+                    if(hintEl) hintEl.style.display = 'block';
+                }
+            } else {
+                if(hintEl) hintEl.style.display = 'none';
             }
-        }
-
-        function showToast(msg) {
-            let toast = document.getElementById('toast-notification');
-            if (!toast) {
-                toast = document.createElement('div');
-                toast.id = 'toast-notification';
-                toast.className = 'toast';
-                document.body.appendChild(toast);
-            }
-            toast.innerHTML = msg; 
-            toast.classList.remove('show');
-            void toast.offsetWidth; 
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 4000);
-        }
-
-        function renderStickers() {
-            const container = document.getElementById('sticker-grid-container');
-            if (!container) return;
-            container.innerHTML = '';
-            Object.keys(STICKER_DEX).forEach(key => {
-                const data = STICKER_DEX[key];
-                const unlocked = state.stickers[key];
-                container.innerHTML += `
-                    <div class="sticker-slot ${unlocked ? 'unlocked' : 'locked'}">
-                        ${data.icon}
-                        <div class="sticker-tooltip">${unlocked ? data.name : 'Hidden Secret'}</div>
-                    </div>
-                `;
-            });
-        }
-
-        /* --- Cycle Refresh Management --- */
-        function openRefreshSettings() {
-            document.getElementById('refresh-date-input').value = state.refreshSettings.nextRefreshDate;
-            document.getElementById('refresh-freq-input').value = state.refreshSettings.frequency;
-            document.getElementById('refresh-settings-modal').style.display = 'flex';
-        }
-        function closeRefreshSettings() { document.getElementById('refresh-settings-modal').style.display = 'none'; }
-        
-        function saveRefreshSettings() {
-            state.refreshSettings.nextRefreshDate = document.getElementById('refresh-date-input').value;
-            state.refreshSettings.frequency = document.getElementById('refresh-freq-input').value;
-            save();
-            closeRefreshSettings();
         }
 
         function processRollover() {
             if (state.lastRolloverAmount > 0) {
                 const dest = document.getElementById('rollover-dest-input').value;
-                if (dest !== 'carry') {
+                const activeMonth = document.getElementById('global-month-filter').value;
+                const dateStr = new Date().toLocaleDateString();
+
+                if (dest === 'cascade') {
+                    let remaining = state.lastRolloverAmount;
+                    let cascadeLogs = [];
+                    state.pots.forEach(pot => {
+                        if (remaining <= 0) return;
+                        let space = pot.target - pot.current;
+                        if (space > 0) {
+                            let fillAmt = Math.min(space, remaining);
+                            pot.current += fillAmt;
+                            remaining -= fillAmt;
+                            cascadeLogs.push(`$${fillAmt.toFixed(2)} to ${pot.name}`);
+                        }
+                    });
+                    const transferred = state.lastRolloverAmount - remaining;
+                    state.globalBalance -= transferred;
+                    state.ledger.unshift({ id: Date.now(), type: 'expense', desc: `Cascade Sweep: ${cascadeLogs.join(', ')}`, amt: transferred, cat: 'Wants Transfer', date: dateStr, monthKey: activeMonth });
+                } 
+                else if (dest !== 'carry') {
                     const pot = state.pots.find(p => p.id == dest);
                     if (pot) {
                         pot.current += state.lastRolloverAmount;
                         state.globalBalance -= state.lastRolloverAmount;
-                        const activeMonth = document.getElementById('global-month-filter').value;
-                        const dateStr = new Date().toLocaleDateString();
                         state.ledger.unshift({ id: Date.now(), type: 'expense', desc: `End of Cycle Transfer to ${pot.name}`, amt: state.lastRolloverAmount, cat: 'Wants Transfer', date: dateStr, monthKey: activeMonth });
                     }
                 }
@@ -579,251 +484,16 @@
             save();
         }
 
-        function checkRefreshCycle(choiceCashRemaining) {
-            if (!state.refreshSettings || !state.refreshSettings.nextRefreshDate) return;
-            
-            const today = new Date();
-            today.setHours(0,0,0,0);
-            const parts = state.refreshSettings.nextRefreshDate.split('-');
-            const refreshDate = new Date(parts[0], parts[1] - 1, parts[2]); 
-            refreshDate.setHours(0,0,0,0);
-            
-            const diffTime = refreshDate - today;
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            const freq = parseInt(state.refreshSettings.frequency) || 14;
-            
-            // Calculate progress bar percentage
-            let pct = ((freq - diffDays) / freq) * 100;
-            if (pct < 0) pct = 0;
-            if (pct > 100) pct = 100;
-
-            const countdownEl = document.getElementById('hero-days-left');
-            const cycleBar = document.getElementById('hero-cycle-bar');
-            
-            if (countdownEl && cycleBar) {
-                if (diffDays === 0) countdownEl.innerText = 'Today!';
-                else if (diffDays === 1) countdownEl.innerText = 'Tomorrow';
-                else if (diffDays > 1) countdownEl.innerText = `${diffDays} days`;
-                else countdownEl.innerText = 'Processing...';
-                
-                cycleBar.style.width = `${pct}%`;
-            }
-
-            // Trigger rollover logic
-            if (diffDays <= 0 && !state.rolloverPending) {
-                state.rolloverPending = true;
-                state.lastRolloverAmount = choiceCashRemaining;
-                
-                const nextDate = new Date(refreshDate);
-                nextDate.setDate(nextDate.getDate() + parseInt(state.refreshSettings.frequency));
-                const yyyy = nextDate.getFullYear();
-                const mm = String(nextDate.getMonth() + 1).padStart(2, '0');
-                const dd = String(nextDate.getDate()).padStart(2, '0');
-                state.refreshSettings.nextRefreshDate = `${yyyy}-${mm}-${dd}`;
-                
-                save(); 
-            }
-
-            if (state.rolloverPending) {
-                const modal = document.getElementById('rollover-action-modal');
-                const positiveText = document.getElementById('rollover-text-positive');
-                const negativeText = document.getElementById('rollover-text-negative');
-                const optionsContainer = document.getElementById('rollover-options-container');
-                const btn = document.getElementById('rollover-btn-action');
-
-                if (state.lastRolloverAmount >= 0) {
-                    positiveText.style.display = 'block';
-                    negativeText.style.display = 'none';
-                    optionsContainer.style.display = 'block';
-                    document.getElementById('rollover-amt-display').innerText = `$${state.lastRolloverAmount.toFixed(2)}`;
-                    
-                    const select = document.getElementById('rollover-dest-input');
-                    select.innerHTML = '<option value="carry">Leave it as Fluid Cash (Carry Forward)</option>';
-                    state.pots.forEach(pot => {
-                        select.innerHTML += `<option value="${pot.id}">Sweep into "${pot.name}" Pot</option>`;
-                    });
-                    btn.innerText = "Execute Transfer & Start New Cycle";
-                } else {
-                    positiveText.style.display = 'none';
-                    negativeText.style.display = 'block';
-                    optionsContainer.style.display = 'none';
-                    document.getElementById('rollover-amt-display-neg').innerText = `$${Math.abs(state.lastRolloverAmount).toFixed(2)}`;
-                    btn.innerText = "Acknowledge & Start New Cycle";
-                }
-                modal.style.display = 'flex';
-            }
-        }
-
-        /* --- Editable Categories Logic --- */
-        function addNewCategory() {
-            const name = document.getElementById('new-cat-name').value.trim();
-            const limit = parseFloat(document.getElementById('new-cat-limit').value);
-            const type = document.getElementById('new-cat-type').value;
-            if (!name || isNaN(limit) || limit < 0) return;
-            
-            if (state.categoryTargets.find(c => c.name.toLowerCase() === name.toLowerCase())) {
-                alert("A target with this name already exists!"); return;
-            }
-            
-            state.categoryTargets.push({ name, limit, nonNegotiable: type === 'essential' });
-            save();
-            document.getElementById('new-cat-name').value = '';
-            document.getElementById('new-cat-limit').value = '';
-        }
-
-        function deleteCategory(name) {
-            if(confirm(`Wipe "${name}" from your blueprint? Past transactions using this tag will stay in your ledger but won't trace back to a cap.`)) {
-                state.categoryTargets = state.categoryTargets.filter(c => c.name !== name);
-                save();
-            }
-        }
-
-        function editCategoryNameAndLimit(oldName) {
-            const cat = state.categoryTargets.find(c => c.name === oldName);
-            if(!cat) return;
-            
-            const newName = prompt(`Modify target name (currently ${cat.name}):`, cat.name);
-            if(newName === null || newName.trim() === '') return;
-            
-            const nextLimit = parseFloat(prompt(`Modify plan cap target for ${newName.trim()}:`, cat.limit));
-            if(!isNaN(nextLimit) && nextLimit >= 0) { 
-                if(newName.trim() !== oldName) {
-                    state.ledger.forEach(tx => { if(tx.cat === oldName) tx.cat = newName.trim(); });
-                    state.recurringTemplates.forEach(rt => { if(rt.cat === oldName) rt.cat = newName.trim(); });
-                    state.wishlist.forEach(wl => { if(wl.cat === oldName) wl.cat = newName.trim(); });
-                }
-                cat.name = newName.trim();
-                cat.limit = nextLimit; 
-                save(); 
-            }
-        }
-
-        function toggleCategoryPrioritization(name) {
-            const cat = state.categoryTargets.find(c => c.name === name);
-            if(cat) { cat.nonNegotiable = !cat.nonNegotiable; save(); }
-        }
-
-        /* --- Ambient Environments --- */
-        function applyAmbientTheme() {
-            const hour = new Date().getHours();
-            const root = document.documentElement;
-            if (hour >= 6 && hour < 12) {
-                root.style.setProperty('--bg-color', '#F9FAFB'); root.style.setProperty('--card-bg', '#FFFFFF'); root.style.setProperty('--text-main', '#111827'); root.style.setProperty('--text-muted', '#6B7280'); root.style.setProperty('--border', '#F3F4F6'); root.style.setProperty('--hero-gradient', 'linear-gradient(135deg, #FFFFFF 0%, #FEF3C7 100%)'); root.style.setProperty('--daily-gradient', 'linear-gradient(135deg, #FFFFFF 0%, #F9FAFB 100%)'); root.style.setProperty('--waiting-gradient', 'linear-gradient(to bottom, #FFFFFF, #F9FAFB)');
-                root.style.setProperty('--dock-glass', 'rgba(255, 255, 255, 0.7)');
-            } else if (hour >= 12 && hour < 18) {
-                root.style.setProperty('--bg-color', '#FAF6EE'); root.style.setProperty('--card-bg', '#FFFFFF'); root.style.setProperty('--text-main', '#1C1E24'); root.style.setProperty('--text-muted', '#727B8E'); root.style.setProperty('--border', '#EFE9DE'); root.style.setProperty('--hero-gradient', 'linear-gradient(135deg, #FFFDF9 0%, #F6EFE5 100%)'); root.style.setProperty('--daily-gradient', 'linear-gradient(135deg, #FFFFFF 0%, #FFFDF9 100%)'); root.style.setProperty('--waiting-gradient', 'linear-gradient(to bottom, #FFFFFF, #FAF6EE)');
-                root.style.setProperty('--dock-glass', 'rgba(250, 246, 238, 0.75)');
-            } else if (hour >= 18 && hour < 21) {
-                root.style.setProperty('--bg-color', '#FDF5F3'); root.style.setProperty('--card-bg', '#FFFFFF'); root.style.setProperty('--text-main', '#2A1A1A'); root.style.setProperty('--text-muted', '#8A7A7A'); root.style.setProperty('--border', '#F5E6E3'); root.style.setProperty('--hero-gradient', 'linear-gradient(135deg, #FFFFFF 0%, #FCE8E3 100%)'); root.style.setProperty('--daily-gradient', 'linear-gradient(135deg, #FFFFFF 0%, #FDF5F3 100%)'); root.style.setProperty('--waiting-gradient', 'linear-gradient(to bottom, #FFFFFF, #FDF5F3)');
-                root.style.setProperty('--dock-glass', 'rgba(253, 245, 243, 0.75)');
-            } else {
-                root.style.setProperty('--bg-color', '#121620'); root.style.setProperty('--card-bg', '#1E2330'); root.style.setProperty('--text-main', '#EAECEF'); root.style.setProperty('--text-muted', '#8A94A6'); root.style.setProperty('--border', '#2A303F'); root.style.setProperty('--hero-gradient', 'linear-gradient(135deg, #1E2330 0%, #171A24 100%)'); root.style.setProperty('--daily-gradient', 'linear-gradient(135deg, #1E2330 0%, #151923 100%)'); root.style.setProperty('--waiting-gradient', 'linear-gradient(to bottom, #1E2330, #121620)');
-                root.style.setProperty('--dock-glass', 'rgba(30, 35, 48, 0.8)');
-            }
-        }
-
-        function init() {
-            if (!state.stickers) state.stickers = { blossom: false, sprout: false, matcha: false, lantern: false, star: false };
-            if (!state.txCount) state.txCount = 0;
-            if (state.bonusTokens === undefined) state.bonusTokens = 0;
-            if (state.refreshSettings === undefined) state.refreshSettings = { frequency: "14", nextRefreshDate: defaultDateStr };
-            if (state.rolloverPending === undefined) state.rolloverPending = false;
-
-            if (!Array.isArray(state.categoryTargets)) {
-                state.categoryTargets = [
-                    { name: "Housing", limit: 1600, nonNegotiable: true },
-                    { name: "Groceries", limit: 450, nonNegotiable: true },
-                    { name: "Utilities", limit: 250, nonNegotiable: true },
-                    { name: "Transport", limit: 350, nonNegotiable: false },
-                    { name: "Entertainment", limit: 300, nonNegotiable: false },
-                    { name: "Miscellaneous", limit: 200, nonNegotiable: false }
-                ];
-            }
-            if (!Array.isArray(state.wishlist)) state.wishlist = [];
-            if (!state.stamps) state.stamps = {};
-
-            state.pots.forEach((pot, index) => { if(!pot.id) pot.id = Date.now() + index; });
-            populateMonthTimelineOptions();
-            toggleFormContext();
-            populateCategorySelectFields();
-            
-            applyAmbientTheme();
-            setInterval(applyAmbientTheme, 600000); 
-            setInterval(renderWishlist, 60000); 
-            render();
-        }
-
-        function claimStamp(dateStr) {
-            state.stamps[dateStr] = true;
-            const totalStamps = Object.keys(state.stamps).length;
-            if (totalStamps >= 3) unlockSticker('star');
-            save();
-        }
-
-        function renderStamps() {
-            const grid = document.getElementById('stamp-grid');
-            if (!grid) return;
-            grid.innerHTML = '';
-            const today = new Date();
-            const currentDayIndex = today.getDay(); 
-            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-            const todayStr = today.toLocaleDateString('en-US');
-
-            for (let i = 0; i < 7; i++) {
-                let d = new Date(today);
-                d.setDate(today.getDate() - currentDayIndex + i);
-                let dStr = d.toLocaleDateString('en-US');
-                let isToday = (dStr === todayStr);
-                let hasStamp = state.stamps[dStr];
-                let isFuture = d > today;
-                let boxClass = 'stamp-box';
-                let content = '';
-                let clickAction = '';
-
-                if (hasStamp) { boxClass += ' claimed'; content = '🌸'; } 
-                else if (isToday) { boxClass += ' today-active'; content = '✨'; clickAction = `onclick="claimStamp('${dStr}')"`; } 
-                else if (isFuture) { content = '<span style="opacity:0.2;">•</span>'; } 
-
-                grid.innerHTML += `<div class="${boxClass}" ${clickAction}><div class="stamp-lbl">${dayNames[i]}</div><div style="line-height: 1;">${content}</div></div>`;
-            }
-        }
-
-        function populateMonthTimelineOptions() {
-            const filter = document.getElementById('global-month-filter');
-            filter.innerHTML = '';
-            for(let i = 0; i <= 12; i++) {
-                let d = new Date(2026, 6 + i, 1); 
-                let monthStr = (d.getMonth() + 1).toString().padStart(2, '0');
-                let k = `${d.getFullYear()}-${monthStr}`;
-                let label = d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-                let opt = new Option(label, k);
-                if(i === 0) opt.selected = true; 
-                filter.add(opt);
-            }
-        }
-
-        function populateCategorySelectFields() {
-            const selects = [document.getElementById('rec-cat'), document.getElementById('field-cat')];
-            selects.forEach(select => {
-                if (select) select.innerHTML = state.categoryTargets.map(c => `<option value="${c.name}">${c.name}</option>`).join('') + (select.id === 'rec-cat' ? `<option value="Income-Pay">Income-Pay</option>` : ``);
-            });
-        }
-
-        function switchView(mode) {
-            state.currentViewMode = mode;
-            document.getElementById('toggle-month').classList.toggle('active', mode === 'month');
-            document.getElementById('toggle-year').classList.toggle('active', mode === 'year');
-            document.getElementById('month-filter-wrap').style.display = mode === 'month' ? 'flex' : 'none';
-            document.querySelectorAll('.view-label-ctx').forEach(el => { el.innerText = mode === 'month' ? 'Month' : 'Cycle'; });
-            render();
-        }
-
         function toggleFormContext() {
             const type = document.getElementById('tx-type').value;
             const container = document.getElementById('dynamic-form-fields');
             if(type === 'expense' || type === 'wishlist') {
                 container.innerHTML = `
-                    <div class="form-group"><label>Description</label><input type="text" id="field-desc" placeholder="e.g., Central Market"></div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <input type="text" id="field-desc" placeholder="e.g., Central Market" onkeyup="checkVendorMemory(this.value, 'field-cat')">
+                        <div id="main-vendor-hint" style="font-size: 0.65rem; color: var(--success); margin-top: 4px; display: none;">✨ Auto-categorized from memory</div>
+                    </div>
                     <div class="form-group"><label>Amount ($)</label><input type="number" id="field-amount" placeholder="0.00"></div>
                     <div class="form-group"><label>Target Allocation Category</label>
                         <select id="field-cat" class="form-input">
@@ -832,66 +502,9 @@
                     </div>`;
             } else {
                 container.innerHTML = `
-                    <div class="form-group"><label>Pay Frequency Scope</label>
-                        <select id="field-freq" class="form-input" onchange="toggleIncomeRatePlaceholder()">
-                            <option value="monthly">Single Month Paycheck</option>
-                            <option value="annual">Annual Salary (Distribute over 12 Months)</option>
-                        </select>
-                    </div>
-                    <div class="form-group"><label id="income-amt-label">Gross Income Amount ($)</label><input type="number" id="field-gross" placeholder="e.g., 6250"></div>
-                    <div class="form-group"><label>Estimated Withholding Tax Rate (%)</label><input type="number" id="field-tax-rate" value="20"></div>`;
+                    <div class="form-group"><label>Gross Income Amount ($)</label><input type="number" id="field-gross" placeholder="e.g., 6250"></div>
+                    <div class="form-group"><label>Estimated Tax Withholding (%)</label><input type="number" id="field-tax-rate" value="20"></div>`;
             }
-        }
-
-        function toggleIncomeRatePlaceholder() {
-            const freq = document.getElementById('field-freq').value;
-            document.getElementById('field-gross').placeholder = freq === 'annual' ? "e.g., 75000" : "e.g., 6250";
-        }
-
-        function executeOpticalReceiptScan(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const loader = document.getElementById('receipt-scan-loader');
-            loader.style.display = "block";
-            loader.innerText = "loading on-device scanning matrix...";
-            document.getElementById('tx-type').value = 'expense';
-            toggleFormContext();
-
-            const reader = new FileReader();
-            reader.onload = function() {
-                Tesseract.recognize(reader.result, 'eng', { logger: m => { loader.innerText = `scanning layout lines: ${Math.round(m.progress * 100)}%`; } })
-                .then(({ data: { text } }) => { loader.style.display = "none"; parseReceiptTextLayoutMetrics(text); })
-                .catch(err => { console.error(err); loader.innerText = "OCR connection fault. Fill manually."; loader.style.color = "var(--danger)"; });
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function parseReceiptTextLayoutMetrics(text) {
-            const lines = text.toLowerCase().split('\n');
-            let detectedAmount = 0, detectedCategory = "Miscellaneous", detectedDescription = "";
-            const priceRegex = /\d+\.\d{2}/g;
-            const fallbackPrices = text.match(priceRegex) || [];
-
-            for (let line of lines) {
-                if (line.includes('total') || line.includes('due') || line.includes('amount') || line.includes('balance')) {
-                    let numbers = line.match(priceRegex);
-                    if (numbers && numbers.length > 0) { detectedAmount = parseFloat(numbers[numbers.length - 1]); break; }
-                }
-            }
-
-            if (detectedAmount === 0 && fallbackPrices.length > 0) {
-                let sortedPrices = fallbackPrices.map(p => parseFloat(p)).filter(p => p < 999);
-                if (sortedPrices.length > 0) { detectedAmount = Math.max(...sortedPrices); }
-            }
-            if (document.getElementById('field-desc')) document.getElementById('field-desc').value = "scanned vendor log";
-            if (document.getElementById('field-amount')) document.getElementById('field-amount').value = detectedAmount > 0 ? detectedAmount.toFixed(2) : "";
-        }
-
-        function trackTxMilestones() {
-            state.txCount += 1;
-            if (state.txCount >= 1) unlockSticker('blossom');
-            if (state.txCount >= 10) unlockSticker('lantern');
-            if (Math.random() < 0.25) triggerLootDrop();
         }
 
         function submitTransaction() {
@@ -906,43 +519,24 @@
                 if(!desc || !amt || amt <= 0) return;
 
                 if (type === 'wishlist') {
+                    if(state.wishlist.length >= 5) { alert("Your impulse queue is maxed out at 5. You must delete an existing want to add a new one."); return; }
                     state.wishlist.push({ id: Date.now(), desc, amt, cat, timestamp: Date.now() });
-                    save();
-                    toggleFormContext();
                 } else {
                     if (amt > state.globalBalance) { triggerRecalibrationModal(desc, amt, cat); return; }
                     state.globalBalance -= amt;
                     state.ledger.unshift({ id: Date.now(), type, desc, amt, cat, date: dateStr, monthKey: activeMonth });
-                    trackTxMilestones(); 
-                    save();
-                    toggleFormContext();
+                    state.vendors[desc.toLowerCase()] = cat;
                 }
+                save(); toggleFormContext();
             } else {
-                const freq = document.getElementById('field-freq').value;
                 const grossInput = parseFloat(document.getElementById('field-gross').value);
                 const rate = parseFloat(document.getElementById('field-tax-rate').value) / 100;
                 if(!grossInput || grossInput <= 0) return;
 
-                if(freq === 'annual') {
-                    const monthlyGross = grossInput / 12;
-                    const monthlyTax = monthlyGross * rate;
-                    const monthlyNet = monthlyGross - monthlyTax;
-                    for(let i = 0; i < 12; i++) {
-                        let d = new Date(2026, 6 + i, 1);
-                        let monthStr = (d.getMonth() + 1).toString().padStart(2, '0');
-                        let k = `${d.getFullYear()}-${monthStr}`;
-                        state.globalBalance += monthlyNet; state.taxEscrowBalance += monthlyTax;
-                        state.ledger.unshift({ id: Date.now() + Math.random(), type: 'income', desc: 'Annual Salary Allocation', gross: monthlyGross, tax: monthlyTax, net: monthlyNet, date: dateStr, monthKey: k });
-                    }
-                } else {
-                    const tax = grossInput * rate;
-                    const net = grossInput - tax;
-                    state.globalBalance += net; state.taxEscrowBalance += tax;
-                    state.ledger.unshift({ id: Date.now(), type: 'income', desc: 'Paycheck Inflow', gross: grossInput, tax, net, date: dateStr, monthKey: activeMonth });
-                }
-                trackTxMilestones(); 
-                save();
-                toggleFormContext();
+                const tax = grossInput * rate; const net = grossInput - tax;
+                state.globalBalance += net; state.taxEscrowBalance += tax;
+                state.ledger.unshift({ id: Date.now(), type: 'income', desc: 'Paycheck Inflow', gross: grossInput, tax, net, date: dateStr, monthKey: activeMonth });
+                save(); toggleFormContext();
             }
         }
 
@@ -955,78 +549,71 @@
             state.pots.forEach(pot => { potSelect.innerHTML += `<option value="${pot.id}">${pot.name.toLowerCase()} ($${pot.current.toFixed(0)})</option>`; });
             document.getElementById('recalibration-modal').style.display = 'flex';
         }
-
         function closeRecalibration() { pendingOverbudgetTx = null; document.getElementById('recalibration-modal').style.display = 'none'; }
-
         function recalibrateWithDebt() {
-            if(!pendingOverbudgetTx) return;
             const activeMonth = document.getElementById('global-month-filter').value;
             state.globalBalance -= pendingOverbudgetTx.amt; 
             state.ledger.unshift({ id: Date.now(), type: 'expense', desc: pendingOverbudgetTx.desc, amt: pendingOverbudgetTx.amt, cat: pendingOverbudgetTx.cat, date: new Date().toLocaleDateString(), monthKey: activeMonth });
-            trackTxMilestones(); save(); closeRecalibration(); toggleFormContext(); 
+            save(); closeRecalibration(); toggleFormContext(); 
         }
-
         function recalibrateWithPot() {
-            if(!pendingOverbudgetTx) return;
             const potId = document.getElementById('recal-pot-select').value;
-            if(!potId) { alert("Please select a pot from the dropdown first."); return; }
             const pot = state.pots.find(p => p.id == potId);
-            if(!pot) return;
-            if (pot.current < pendingOverbudgetTx.amt) { alert(`There isn't enough in the "${pot.name}" pot to cover this entire purchase.`); return; }
-            const activeMonth = document.getElementById('global-month-filter').value;
+            if (pot.current < pendingOverbudgetTx.amt) { alert("Not enough in this pot."); return; }
             pot.current -= pendingOverbudgetTx.amt;
-            state.ledger.unshift({ id: Date.now(), type: 'expense', desc: `${pendingOverbudgetTx.desc} (from ${pot.name})`, amt: pendingOverbudgetTx.amt, cat: pendingOverbudgetTx.cat, date: new Date().toLocaleDateString(), monthKey: activeMonth });
-            trackTxMilestones(); save(); closeRecalibration(); toggleFormContext();
+            state.ledger.unshift({ id: Date.now(), type: 'expense', desc: `${pendingOverbudgetTx.desc} (from ${pot.name})`, amt: pendingOverbudgetTx.amt, cat: pendingOverbudgetTx.cat, date: new Date().toLocaleDateString(), monthKey: document.getElementById('global-month-filter').value });
+            save(); closeRecalibration(); toggleFormContext();
         }
 
-        function processWishlistItem(id, action) {
-            const index = state.wishlist.findIndex(item => item.id === id);
-            if(index === -1) return;
-            const item = state.wishlist[index];
-            if(action === 'buy') {
-                const activeMonth = document.getElementById('global-month-filter').value;
-                if (item.amt > state.globalBalance) { triggerRecalibrationModal(item.desc, item.amt, item.cat); return; }
-                state.globalBalance -= item.amt;
-                state.ledger.unshift({ id: Date.now(), type: 'expense', desc: item.desc, amt: item.amt, cat: item.cat, date: new Date().toLocaleDateString(), monthKey: activeMonth });
-                state.wishlist.splice(index, 1);
-            } else if (action === 'pass') {
-                state.wishlist.splice(index, 1); unlockSticker('matcha'); 
-            }
-            save();
-        }
-
-        function renderWishlist() {
+        function renderWishlist(choiceCash) {
             const card = document.getElementById('waiting-room-card');
             const container = document.getElementById('wishlist-container');
             if (!container || !card) return;
             container.innerHTML = '';
             if(state.wishlist.length === 0) { card.style.display = 'none'; return; }
             card.style.display = 'block';
+            
+            const isVelocityLocked = choiceCash < 50; 
             const now = Date.now();
+            
             state.wishlist.forEach(item => {
-                const elapsedMs = now - item.timestamp;
-                const totalCooldownMs = 48 * 60 * 60 * 1000; 
-                const remainingMs = totalCooldownMs - elapsedMs;
-                let timeText = ""; let locked = true;
-                if (remainingMs > 0) {
+                const remainingMs = (48 * 60 * 60 * 1000) - (now - item.timestamp);
+                let timeText = ""; let lockedByTime = remainingMs > 0;
+                
+                if (lockedByTime) {
                     const hours = Math.floor(remainingMs / (1000 * 60 * 60)); const mins = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
                     timeText = `🔒 Locks lift in ${hours}h ${mins}m`;
+                } else if (isVelocityLocked) {
+                    timeText = `🚨 LOCKED: Insufficient Wants Pacing. Wait until cycle refresh.`;
                 } else {
-                    timeText = `✅ Unlocked & ready`; locked = false;
+                    timeText = `✅ Unlocked & ready`;
                 }
-                const actionButtons = locked 
-                    ? `<button disabled style="padding: 8px; font-size: 0.75rem; margin-top: 8px;">Cooling Down...</button>`
+                
+                const buttons = (lockedByTime || isVelocityLocked) 
+                    ? `<div style="display:flex; gap: 8px; margin-top:8px;"><button disabled style="padding: 8px; font-size: 0.75rem; flex: 1;">System Locked</button><button style="padding: 8px; font-size: 0.75rem; background: var(--danger); flex: 1;" onclick="processWishlistItem(${item.id}, 'pass')">Delete Entry</button></div>`
                     : `<div style="display: flex; gap: 8px; margin-top: 8px;"><button style="padding: 8px; font-size: 0.75rem; background: var(--success);" onclick="processWishlistItem(${item.id}, 'buy')">Approve & Buy</button><button style="padding: 8px; font-size: 0.75rem; background: var(--danger);" onclick="processWishlistItem(${item.id}, 'pass')">Pass & Save</button></div>`;
+                
                 container.innerHTML += `
                     <li class="tx-item" style="flex-direction: column; align-items: flex-start; padding: 16px; background: var(--card-bg); border-radius: 16px; margin-bottom: 10px; border: 1px solid var(--border);">
                         <div style="display: flex; justify-content: space-between; width: 100%;">
                             <div><strong style="font-size: 0.95rem;">${item.desc.toLowerCase()}</strong><br><span class="tx-cat-tag" style="background:var(--bg-color); margin-top: 4px;">${item.cat}</span></div>
                             <span style="font-weight:700; font-size: 1rem; color: var(--danger);">$${item.amt.toFixed(2)}</span>
                         </div>
-                        <div style="font-size: 0.75rem; font-weight: 600; color: ${locked ? 'var(--warning)' : 'var(--success)'}; margin-top: 10px;">${timeText}</div>
-                        <div style="width: 100%;">${actionButtons}</div>
+                        <div style="font-size: 0.75rem; font-weight: 600; color: ${lockedByTime ? 'var(--warning)' : (isVelocityLocked ? 'var(--danger)' : 'var(--success)')}; margin-top: 10px;">${timeText}</div>
+                        <div style="width: 100%;">${buttons}</div>
                     </li>`;
             });
+        }
+        
+        function processWishlistItem(id, action) {
+            const index = state.wishlist.findIndex(item => item.id === id); if(index === -1) return;
+            const item = state.wishlist[index];
+            if(action === 'buy') {
+                if (item.amt > state.globalBalance) { triggerRecalibrationModal(item.desc, item.amt, item.cat); return; }
+                state.globalBalance -= item.amt;
+                state.ledger.unshift({ id: Date.now(), type: 'expense', desc: item.desc, amt: item.amt, cat: item.cat, date: new Date().toLocaleDateString(), monthKey: document.getElementById('global-month-filter').value });
+            } 
+            state.wishlist.splice(index, 1); save();
         }
 
         function deleteTransaction(id) {
@@ -1035,196 +622,147 @@
             if(item.type === 'expense') state.globalBalance += item.amt; else { state.globalBalance -= item.net; state.taxEscrowBalance -= item.tax; }
             state.ledger.splice(index, 1); save();
         }
-
-        function editTransaction(id) {
-            const item = state.ledger.find(item => item.id === id); if(!item) return;
-            const nextDesc = prompt("Modify Description:", item.desc); if(nextDesc !== null && nextDesc.trim() !== '') item.desc = nextDesc.trim();
-            if(item.type === 'expense') {
-                const nextAmt = parseFloat(prompt("Modify Expense Amount ($):", item.amt)); if(isNaN(nextAmt) || nextAmt <= 0) return;
-                state.globalBalance -= (nextAmt - item.amt); item.amt = nextAmt;
-            } else {
-                const nextGross = parseFloat(prompt("Modify Gross Pay Allocation Amount ($):", item.gross)); if(isNaN(nextGross) || nextGross <= 0) return;
-                const rate = item.tax / item.gross; 
-                state.globalBalance -= item.net; state.taxEscrowBalance -= item.tax;
-                item.gross = nextGross; item.tax = nextGross * rate; item.net = nextGross - item.tax;
-                state.globalBalance += item.net; state.taxEscrowBalance += item.tax;
-            }
-            save();
-        }
-
-        function addRecurringTemplate() {
-            const desc = document.getElementById('rec-desc').value.trim(); const amt = parseFloat(document.getElementById('rec-amt').value); const cat = document.getElementById('rec-cat').value;
-            if(!desc || !amt || amt <= 0) return;
-            state.recurringTemplates.push({ id: Date.now(), desc, amt, cat }); document.getElementById('rec-desc').value = ''; document.getElementById('rec-amt').value = ''; save();
-        }
-
-        function editRecurringTemplate(id) {
-            const template = state.recurringTemplates.find(r => r.id === id); if(!template) return;
-            const nextDesc = prompt("Modify Template Name:", template.desc); if(nextDesc) template.desc = nextDesc.trim();
-            const nextAmt = parseFloat(prompt("Modify Template Default Amount ($):", template.amt)); if(!isNaN(nextAmt) && nextAmt > 0) template.amt = nextAmt;
-            save();
-        }
-
-        function removeRecurringTemplate(id) { state.recurringTemplates = state.recurringTemplates.filter(r => r.id !== id); save(); }
-
-        function applyRecurringToCurrentMonth() {
-            const activeMonth = document.getElementById('global-month-filter').value; const dateStr = new Date().toLocaleDateString();
-            state.recurringTemplates.forEach(item => {
-                if(item.cat === 'Income-Pay') {
-                    const gross = item.amt; const tax = gross * 0.20; const net = gross - tax;
-                    state.globalBalance += net; state.taxEscrowBalance += tax;
-                    state.ledger.unshift({ id: Date.now() + Math.random(), type: 'income', desc: item.desc, gross, tax, net, date: dateStr, monthKey: activeMonth });
-                } else {
-                    state.globalBalance -= item.amt;
-                    state.ledger.unshift({ id: Date.now() + Math.random(), type: 'expense', desc: item.desc, amt: item.amt, cat: item.cat, date: dateStr, monthKey: activeMonth });
-                }
-            });
-            save();
-        }
-
         function createNewPot() {
             const name = document.getElementById('pot-name').value.trim(); const target = parseFloat(document.getElementById('pot-target').value); const starting = parseFloat(document.getElementById('pot-starting').value) || 0; const monthly = parseFloat(document.getElementById('pot-monthly').value) || 0;
-            if(!name || !target || target <= 0) return;
+            if(!name || !target) return;
             state.pots.push({ id: Date.now(), name, target, monthly, current: starting });
-            document.getElementById('pot-name').value = ''; document.getElementById('pot-target').value = ''; document.getElementById('pot-starting').value = '0'; document.getElementById('pot-monthly').value = '';
-            unlockSticker('sprout'); save();
+            document.getElementById('pot-name').value = ''; document.getElementById('pot-target').value = ''; save();
+        }
+        function addNewCategory() {
+            const name = document.getElementById('new-cat-name').value.trim(); const limit = parseFloat(document.getElementById('new-cat-limit').value); const type = document.getElementById('new-cat-type').value;
+            if (!name || isNaN(limit)) return;
+            state.categoryTargets.push({ name, limit, nonNegotiable: type === 'essential' }); save();
+        }
+        function deleteCategory(name) { state.categoryTargets = state.categoryTargets.filter(c => c.name !== name); save(); }
+        
+        function populateMonthTimelineOptions() {
+            const filter = document.getElementById('global-month-filter'); filter.innerHTML = '';
+            for(let i = 0; i < 12; i++) {
+                let d = new Date(2026, 7 + i, 1); // Starts from August 2026 (index 7)
+                let k = `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}`;
+                let opt = new Option(d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }), k);
+                if(i === 0) opt.selected = true; filter.add(opt);
+            }
         }
 
-        function fundPot(id) {
-            const pot = state.pots.find(p => p.id === id); if(!pot) return;
-            const allocation = parseFloat(prompt(`Transfer available fluid cash assets into ${pot.name}:`));
-            if(!allocation || allocation <= 0 || allocation > state.globalBalance) { alert("Invalid amount or insufficient fluid balance."); return; }
-            const source = prompt(`Where should this $${allocation} come from?\nType '1' for General Fluid Balance\nType '2' for This Month's Wants Allowance`, "1");
-            if (source === '2') {
-                const activeMonth = document.getElementById('global-month-filter').value; const dateStr = new Date().toLocaleDateString();
-                state.globalBalance -= allocation; pot.current += allocation;
-                state.ledger.unshift({ id: Date.now(), type: 'expense', desc: `pot fund: ${pot.name}`, amt: allocation, cat: 'Wants Transfer', date: dateStr, monthKey: activeMonth });
-            } else if (source === '1') { state.globalBalance -= allocation; pot.current += allocation; } 
-            else { alert("Operation aborted. Invalid option selected."); return; }
-            save();
+        function populateCategorySelectFields() {
+            const selects = [document.getElementById('field-cat'), document.getElementById('qa-cat')];
+            selects.forEach(select => {
+                if (select) select.innerHTML = state.categoryTargets.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+            });
         }
-
-        function editPot(id) {
-            const pot = state.pots.find(p => p.id === id); if(!pot) return;
-            const nextName = prompt("Modify Pot Name:", pot.name); if(nextName) pot.name = nextName.trim();
-            const nextTarget = parseFloat(prompt("Modify Target Goal Amount ($):", pot.target)); if(!isNaN(nextTarget) && nextTarget > 0) pot.target = nextTarget;
-            const nextMonthly = parseFloat(prompt("Modify Planned Monthly Contribution ($):", pot.monthly)); if(!isNaN(nextMonthly) && nextMonthly >= 0) pot.monthly = nextMonthly;
-            save();
-        }
-
-        function deletePot(id) {
-            const index = state.pots.findIndex(p => p.id === id); if(index === -1) return; const pot = state.pots[index];
-            if(confirm(`Wipe "${pot.name}" savings target completely?`)) { state.globalBalance += pot.current; state.pots.splice(index, 1); save(); }
+        function switchView(mode) {
+            state.currentViewMode = mode;
+            document.getElementById('toggle-month').classList.toggle('active', mode === 'month');
+            document.getElementById('toggle-year').classList.toggle('active', mode === 'year');
+            document.getElementById('month-filter-wrap').style.display = mode === 'month' ? 'flex' : 'none';
+            document.querySelectorAll('.view-label-ctx').forEach(el => { el.innerText = mode === 'month' ? 'Month' : 'Cycle'; });
+            render();
         }
         
-        function render() {
-            renderStamps(); 
-            renderStickers(); 
+        function checkRefreshCycle(choiceCashRemaining) {
+            const today = new Date(); today.setHours(0,0,0,0);
+            const parts = state.refreshSettings.nextRefreshDate.split('-');
+            const refreshDate = new Date(parts[0], parts[1] - 1, parts[2]); refreshDate.setHours(0,0,0,0);
+            const diffDays = Math.ceil((refreshDate - today) / (1000 * 60 * 60 * 24));
+            const freq = parseInt(state.refreshSettings.frequency);
+            let pct = Math.max(0, Math.min(100, ((freq - diffDays) / freq) * 100));
 
-            const tokenDisplay = document.getElementById('token-display');
-            if (state.bonusTokens > 0) {
-                tokenDisplay.style.display = 'inline-flex';
-                tokenDisplay.innerText = `⭐ ${state.bonusTokens}`;
+            const countdownEl = document.getElementById('hero-days-left'); const cycleBar = document.getElementById('hero-cycle-bar');
+            if (countdownEl && cycleBar) {
+                if (diffDays === 0) countdownEl.innerText = 'Today!'; else countdownEl.innerText = `${diffDays} days`;
+                cycleBar.style.width = `${pct}%`;
             }
 
+            if (diffDays <= 0 && !state.rolloverPending) {
+                state.rolloverPending = true; state.lastRolloverAmount = choiceCashRemaining;
+                const nextDate = new Date(refreshDate); nextDate.setDate(nextDate.getDate() + freq);
+                state.refreshSettings.nextRefreshDate = `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, '0')}-${String(nextDate.getDate()).padStart(2, '0')}`;
+                save(); 
+            }
+            if (state.rolloverPending) {
+                const modal = document.getElementById('rollover-action-modal');
+                const positiveText = document.getElementById('rollover-text-positive');
+                const optionsContainer = document.getElementById('rollover-options-container');
+                if (state.lastRolloverAmount >= 0) {
+                    positiveText.style.display = 'block'; optionsContainer.style.display = 'block';
+                    document.getElementById('rollover-amt-display').innerText = `$${state.lastRolloverAmount.toFixed(2)}`;
+                    const select = document.getElementById('rollover-dest-input');
+                    select.innerHTML = '<option value="carry">Leave it as Fluid Cash (Carry Forward)</option><option value="cascade">🌊 Automated Cascade Sweep (Fill Pots Top to Bottom)</option>';
+                    state.pots.forEach(pot => { select.innerHTML += `<option value="${pot.id}">Sweep into "${pot.name}" Pot</option>`; });
+                }
+                modal.style.display = 'flex';
+            }
+        }
+        function openRefreshSettings() {
+            document.getElementById('refresh-date-input').value = state.refreshSettings.nextRefreshDate;
+            document.getElementById('refresh-freq-input').value = state.refreshSettings.frequency;
+            document.getElementById('refresh-settings-modal').style.display = 'flex';
+        }
+        function saveRefreshSettings() {
+            state.refreshSettings.nextRefreshDate = document.getElementById('refresh-date-input').value;
+            state.refreshSettings.frequency = document.getElementById('refresh-freq-input').value;
+            document.getElementById('refresh-settings-modal').style.display = 'none'; save();
+        }
+
+        function showToast(msg) {
+            let toast = document.getElementById('toast-notification');
+            if (!toast) { toast = document.createElement('div'); toast.id = 'toast-notification'; toast.className = 'toast'; document.body.appendChild(toast); }
+            toast.innerHTML = msg; toast.classList.remove('show'); void toast.offsetWidth; toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+
+        function render() {
+            if(!state.vendors) state.vendors = {};
+            
             const activeMonth = document.getElementById('global-month-filter').value;
             const isYearMode = state.currentViewMode === 'year';
-            const topShowcase = document.getElementById('top-progression-showcase');
             
-            if (topShowcase) {
-                topShowcase.innerHTML = '';
-                if (state.pots.length > 0) {
-                    topShowcase.style.display = 'flex';
-                    state.pots.forEach((pot) => {
-                        const pct = Math.min((pot.current / pot.target) * 100, 100);
-                        let cozyIcon = "🌱"; let cozyStage = "Seedling Stage"; let iconBg = "rgba(110,133,115,0.15)"; 
-                        if (pct >= 100) { cozyIcon = "🏡"; cozyStage = "Fully Settled!"; iconBg = "rgba(245,199,77,0.2)"; } 
-                        else if (pct >= 75) { cozyIcon = "🌸"; cozyStage = "Blooming Phase"; iconBg = "rgba(245,211,211,0.5)"; } 
-                        else if (pct >= 50) { cozyIcon = "🪴"; cozyStage = "Taking Root"; iconBg = "rgba(136,148,183,0.15)"; } 
-                        else if (pct >= 25) { cozyIcon = "🌿"; cozyStage = "Growing Well"; iconBg = "rgba(221,197,169,0.3)"; }
+            document.getElementById('dash-balance').innerText = `$${state.globalBalance.toFixed(2)}`;
+            document.getElementById('fluid-balance').innerText = `$${state.globalBalance.toFixed(0)}`;
+            document.getElementById('dash-tax').innerText = `$${state.taxEscrowBalance.toFixed(2)}`;
 
-                        topShowcase.innerHTML += `
-                            <div class="top-showcase-card">
-                                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-                                    <div style="font-size: 1.6rem; background: ${iconBg}; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 14px;">${cozyIcon}</div>
-                                    <div style="flex: 1;"><strong style="font-weight:700; font-size: 0.9rem; display: block; letter-spacing: -0.2px;">${pot.name.toLowerCase()}</strong><span style="font-size: 0.65rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">${cozyStage}</span></div>
-                                    <div style="text-align: right;"><span style="font-size:0.95rem; font-weight: 800; color: var(--text-main);">${Math.round(pct)}%</span></div>
-                                </div>
-                                <div class="progress-bg" style="background: var(--bg-color); height: 8px; border-radius: 4px; border: none;"><div class="progress-bar" style="width: ${pct}%; background: var(--venice); border-radius: 4px;"></div></div>
-                            </div>`;
-                    });
-                } else { topShowcase.style.display = 'none'; }
-            }
+            const targetedLedger = isYearMode ? state.ledger.filter(i => i.monthKey >= '2026-08' && i.monthKey <= '2027-07') : state.ledger.filter(i => i.monthKey === activeMonth);
 
-            renderWishlist();
+            let totalInflow = 0, totalOutflow = 0, categorySpent = {}, nnVaultTotal = 0, choiceLogged = 0;
+            state.categoryTargets.forEach(c => categorySpent[c.name] = 0);
 
-            const dashBal = document.getElementById('dash-balance');
-            const dashTax = document.getElementById('dash-tax');
-            const fluidBal = document.getElementById('fluid-balance');
-            
-            if (dashBal) dashBal.innerText = `$${state.globalBalance.toFixed(2)}`;
-            if (dashTax) dashTax.innerText = `$${state.taxEscrowBalance.toFixed(2)}`;
-            if (fluidBal) fluidBal.innerText = `$${state.globalBalance.toFixed(0)}`;
+            state.categoryTargets.forEach(cat => { if(cat.nonNegotiable) nnVaultTotal += (isYearMode ? cat.limit * 12 : cat.limit); });
 
-            const targetedLedgerDataset = isYearMode ? state.ledger.filter(item => item.monthKey >= '2026-07' && item.monthKey <= '2027-07') : state.ledger.filter(item => item.monthKey === activeMonth);
-
-            let totalInflow = 0, totalOutflow = 0, categorySpendingMap = {};
-            state.categoryTargets.forEach(c => categorySpendingMap[c.name] = 0);
-            let nonNegotiableVaultTotal = 0, choiceExpensesLogged = 0;
-
-            state.categoryTargets.forEach(cat => {
-                const baseLimit = cat.limit; const activeLimit = isYearMode ? baseLimit * 12 : baseLimit;
-                if(cat.nonNegotiable) nonNegotiableVaultTotal += activeLimit;
-            });
-
-            targetedLedgerDataset.forEach(item => {
+            targetedLedger.forEach(item => {
                 if(item.type === 'income') { totalInflow += item.net; } 
                 else { 
                     totalOutflow += item.amt; 
-                    if(categorySpendingMap[item.cat] !== undefined) { categorySpendingMap[item.cat] += item.amt; } 
-                    const matchingCat = state.categoryTargets.find(c => c.name === item.cat);
-                    if (matchingCat && !matchingCat.nonNegotiable) { choiceExpensesLogged += item.amt; }
+                    if(categorySpent[item.cat] !== undefined) categorySpent[item.cat] += item.amt;
+                    const cat = state.categoryTargets.find(c => c.name === item.cat);
+                    if (cat && !cat.nonNegotiable) choiceLogged += item.amt;
                 }
             });
 
-            let trueChoiceCashRemaining = totalInflow - nonNegotiableVaultTotal - choiceExpensesLogged;
+            let trueChoiceCash = totalInflow - nnVaultTotal - choiceLogged;
             
-            const dashNNVault = document.getElementById('dash-nn-vault');
-            const dashInflow = document.getElementById('dash-inflow');
-            const dashOutflow = document.getElementById('dash-outflow');
-            const choiceCashEl = document.getElementById('dash-choice-cash');
+            document.getElementById('dash-nn-vault').innerText = `$${nnVaultTotal.toFixed(0)}`;
+            document.getElementById('dash-outflow').innerText = `$${totalOutflow.toFixed(2)}`;
+            document.getElementById('dash-choice-cash').innerText = `${trueChoiceCash >= 0 ? '' : '-'}$${Math.abs(trueChoiceCash).toFixed(2)}`;
 
-            if (dashNNVault) dashNNVault.innerText = `$${nonNegotiableVaultTotal.toFixed(0)}`;
-            if (dashInflow) dashInflow.innerText = `$${totalInflow.toFixed(2)}`;
-            if (dashOutflow) dashOutflow.innerText = `$${totalOutflow.toFixed(2)}`;
-            
-            if (choiceCashEl) {
-                choiceCashEl.innerText = `${trueChoiceCashRemaining >= 0 ? '' : '-'}$${Math.abs(trueChoiceCashRemaining).toFixed(2)}`;
-            }
-            
-            // Gamification Text Update
             const msgEl = document.getElementById('hero-gamified-msg');
-            if(msgEl) {
-                let msg = ""; let msgColor = "var(--success)";
-                if (trueChoiceCashRemaining > 200) { msg = "✨ You're pacing beautifully! Keep it cozy."; }
-                else if (trueChoiceCashRemaining > 50) { msg = "🌿 Pacing is steady. Mindful choices ahead."; msgColor = "var(--warning)"; }
-                else if (trueChoiceCashRemaining > 0) { msg = "⚠️ Pacing is tight! Guard your remaining allowance."; msgColor = "var(--warning)"; }
-                else { msg = "🚨 You are in the red for this cycle."; msgColor = "var(--danger)"; }
-                msgEl.innerText = msg; msgEl.style.color = msgColor;
-            }
+            if (trueChoiceCash > 200) { msgEl.innerText = "✨ You're pacing beautifully! Keep it cozy."; msgEl.style.color = "var(--success)"; }
+            else if (trueChoiceCash > 50) { msgEl.innerText = "🌿 Pacing is steady. Mindful choices ahead."; msgEl.style.color = "var(--warning)"; }
+            else if (trueChoiceCash > 0) { msgEl.innerText = "⚠️ Pacing is tight! Guard your remaining allowance."; msgEl.style.color = "var(--warning)"; }
+            else { msgEl.innerText = "🚨 You are in the red for this cycle."; msgEl.style.color = "var(--danger)"; }
 
-            const capsContainer = document.getElementById('category-caps-container'); 
+            const capsContainer = document.getElementById('category-caps-container');
             const editCatsContainer = document.getElementById('editable-categories-list');
-            
             if (capsContainer) capsContainer.innerHTML = '';
             if (editCatsContainer) editCatsContainer.innerHTML = '';
 
             state.categoryTargets.forEach(cat => {
-                const spent = categorySpendingMap[cat.name] || 0; const limit = isYearMode ? cat.limit * 12 : cat.limit;
+                const spent = categorySpent[cat.name] || 0; const limit = isYearMode ? cat.limit * 12 : cat.limit;
                 const pct = Math.min((spent / limit) * 100, 100);
                 let color = 'var(--success)'; if(pct >= 90) color = 'var(--danger)'; else if(pct >= 75) color = 'var(--warning)';
+                
+                let pulseClass = (pct >= 95 && cat.nonNegotiable) ? 'pulse-warning' : '';
 
-                // Render in Home Tab
                 if (capsContainer) {
                     capsContainer.innerHTML += `
                         <div class="progress-wrapper">
@@ -1232,11 +770,10 @@
                                 <div><strong style="font-weight: 600; font-size:0.88rem;">${cat.name.toLowerCase()}</strong><span class="tx-cat-tag ${cat.nonNegotiable ? 'nn' : ''}" style="margin-top:0; margin-left:6px; font-size:0.58rem; padding:2px 8px; border-radius:10px;">${cat.nonNegotiable ? 'Need' : 'Want'}</span></div>
                                 <span style="color: var(--text-muted); font-size:0.82rem; font-weight: 600;">$${spent.toFixed(0)} / $${limit}</span>
                             </div>
-                            <div class="progress-bg"><div class="progress-bar" style="width: ${pct}%; background: ${color};"></div></div>
+                            <div class="progress-bg ${pulseClass}"><div class="progress-bar" style="width: ${pct}%; background: ${color};"></div></div>
                         </div>`;
                 }
 
-                // Render in Garden Tab (Editable mode)
                 if (editCatsContainer) {
                     editCatsContainer.innerHTML += `
                         <li class="tx-item" style="padding: 14px; background: var(--card-bg); border-radius: 16px; margin-bottom: 10px; border: 1px solid var(--border); flex-direction: column; align-items: flex-start;">
@@ -1244,76 +781,55 @@
                                 <div><strong style="font-size: 0.95rem;">${cat.name}</strong><br><span class="tx-cat-tag ${cat.nonNegotiable ? 'nn' : ''}" style="margin-top: 4px;">${cat.nonNegotiable ? 'Need' : 'Want'}</span></div>
                                 <span style="font-weight:700; font-size: 1rem;">$${cat.limit}/mo</span>
                             </div>
-                            <div class="inline-actions" style="margin-top: 12px;">
-                                <button class="btn-inline edit" onclick="editCategoryNameAndLimit('${cat.name}')">Edit Cap / Rename</button>
-                                <button class="btn-inline edit" onclick="toggleCategoryPrioritization('${cat.name}')">Swap Priority</button>
-                                <button class="btn-inline del" onclick="deleteCategory('${cat.name}')">Delete</button>
-                            </div>
+                            <div class="inline-actions" style="margin-top: 12px;"><button class="btn-inline del" onclick="deleteCategory('${cat.name}')">Delete</button></div>
                         </li>`;
                 }
             });
 
-            if(!isYearMode) {
-                const recUl = document.getElementById('recurring-list'); 
-                if (recUl) {
-                    recUl.innerHTML = '';
-                    state.recurringTemplates.forEach(item => {
-                        recUl.innerHTML += `
-                            <li class="tx-item" style="padding: 10px 0; align-items: flex-start; flex-direction: column;">
-                                <div style="display:flex; justify-content:space-between; width:100%;"><div><strong>${item.desc.toLowerCase()}</strong> <span class="tx-cat-tag" style="background: var(--bg-color);">${item.cat}</span></div><span style="font-weight:600;">$${item.amt}</span></div>
-                                <div class="inline-actions"><button class="btn-inline edit" onclick="editRecurringTemplate(${item.id})">Edit</button><button class="btn-inline del" onclick="removeRecurringTemplate(${item.id})">Drop</button></div>
-                            </li>`;
-                    });
-                }
-            }
-
-            const potsContainer = document.getElementById('pots-container'); 
-            if (potsContainer) {
-                potsContainer.innerHTML = '';
-                state.pots.forEach((pot) => {
-                    const pct = Math.min((pot.current / pot.target) * 100, 100); const remainingAmount = pot.target - pot.current;
-                    let projectionText = remainingAmount <= 0 ? 'Goal fully achieved! 🎉' : (pot.monthly && pot.monthly > 0 ? `Est. completion: <strong>${Math.ceil(remainingAmount / pot.monthly)} months</strong>` : 'Assign a monthly plan.');
-                    let cozyIcon = "🌱"; let cozyStage = "Seedling Stage"; let iconBg = "rgba(110,133,115,0.15)"; 
-                    if (pct >= 100) { cozyIcon = "🏡"; cozyStage = "Fully Settled!"; iconBg = "rgba(245,199,77,0.2)"; } else if (pct >= 75) { cozyIcon = "🌸"; cozyStage = "Blooming Phase"; iconBg = "rgba(245,211,211,0.5)"; } else if (pct >= 50) { cozyIcon = "🪴"; cozyStage = "Taking Root"; iconBg = "rgba(136,148,183,0.15)"; } else if (pct >= 25) { cozyIcon = "🌿"; cozyStage = "Growing Well"; iconBg = "rgba(221,197,169,0.3)"; }
-
-                    potsContainer.innerHTML += `
-                        <div class="progress-wrapper" style="background: var(--card-bg); padding: 18px; border-radius: 24px; border: 1px solid var(--border); margin-bottom: 20px; transition: background-color 0.8s ease, border-color 0.8s ease;">
-                            <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 14px;">
-                                <div style="font-size: 2rem; background: ${iconBg}; width: 54px; height: 54px; display: flex; align-items: center; justify-content: center; border-radius: 18px;">${cozyIcon}</div>
-                                <div style="flex: 1;"><strong style="font-weight:700; font-size: 1.05rem; display: block; letter-spacing: -0.3px;">${pot.name.toLowerCase()}</strong><span style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">${cozyStage}</span></div>
-                                <div style="text-align: right;"><span style="font-size:0.95rem; font-weight: 700; display: block;">$${pot.current.toFixed(0)}</span><span style="font-size:0.75rem; font-weight: 600; color: var(--text-muted);">/ $${pot.target.toFixed(0)}</span></div>
-                            </div>
-                            <div class="progress-bg" style="background: var(--bg-color); height: 14px; border-radius: 8px;"><div class="progress-bar" style="width: ${pct}%; background: var(--venice); border-radius: 8px;"></div></div>
-                            <div class="pot-eta" style="margin-top: 10px;">${projectionText}</div>
-                            <div class="inline-actions" style="margin-top: 12px; margin-bottom: 6px;"><button class="btn-inline edit" onclick="editPot(${pot.id})">Modify Limits</button><button class="btn-inline del" onclick="deletePot(${pot.id})">Wipe Pot</button></div>
-                            <button class="secondary" style="margin-top:8px; background:var(--bg-color); color:var(--text-main); border: 1px solid var(--border); width: 100%; padding: 14px; border-radius: 16px; font-weight: 600;" onclick="fundPot(${pot.id})">+ Allocate Cash to Pot</button>
-                        </div>`;
-                });
-            }
-
             const ledgerUl = document.getElementById('ledger-container'); 
             if (ledgerUl) {
                 ledgerUl.innerHTML = '';
-                if(targetedLedgerDataset.length === 0) {
-                    ledgerUl.innerHTML = `<li class="tx-item" style="color:var(--text-muted); justify-content:center; padding: 24px 0;">No active logs found for this window.</li>`;
-                } else {
-                    targetedLedgerDataset.slice(0, 15).forEach(item => {
-                        const inlineActionMarkup = `<div class="inline-actions"><button class="btn-inline edit" onclick="editTransaction(${item.id})">Adjust</button><button class="btn-inline del" onclick="deleteTransaction(${item.id})">Delete</button></div>`;
+                if(targetedLedger.length === 0) { ledgerUl.innerHTML = `<li class="tx-item" style="color:var(--text-muted); justify-content:center; padding: 24px 0;">No active logs found.</li>`; } 
+                else {
+                    targetedLedger.slice(0, 15).forEach(item => {
                         const isNN = state.categoryTargets.find(c => c.name === item.cat)?.nonNegotiable;
+                        const action = `<div class="inline-actions"><button class="btn-inline del" onclick="deleteTransaction(${item.id})">Delete</button></div>`;
                         if(item.type === 'expense') {
-                            ledgerUl.innerHTML += `<li class="tx-item" style="align-items: center;"><div><div><strong>${item.desc.toLowerCase()}</strong></div><span class="tx-cat-tag ${isNN ? 'nn' : (item.cat === 'Wants Transfer' ? 'nn' : '')}">${item.cat}</span>${inlineActionMarkup}</div><span style="color:var(--text-main); font-weight:600; font-size: 1rem;">-$${item.amt.toFixed(2)}</span></li>`;
+                            ledgerUl.innerHTML += `<li class="tx-item" style="align-items: center;"><div><div><strong>${item.desc.toLowerCase()}</strong></div><span class="tx-cat-tag ${isNN ? 'nn' : ''}">${item.cat}</span>${action}</div><span style="color:var(--text-main); font-weight:600; font-size: 1rem;">-$${item.amt.toFixed(2)}</span></li>`;
                         } else {
-                            ledgerUl.innerHTML += `<li class="tx-item" style="align-items: center;"><div><div><strong>${item.desc.toLowerCase()}</strong></div><span class="tx-cat-tag" style="background:var(--block-blue); color:#1C1E24;">Net Pay</span>${inlineActionMarkup}</div><span style="color:var(--success); font-weight:600; font-size: 1rem;">+$${item.net.toFixed(2)}</span></li>`;
+                            ledgerUl.innerHTML += `<li class="tx-item" style="align-items: center;"><div><div><strong>${item.desc.toLowerCase()}</strong></div><span class="tx-cat-tag" style="background:var(--block-blue); color:#1C1E24;">Net Pay</span>${action}</div><span style="color:var(--success); font-weight:600; font-size: 1rem;">+$${item.net.toFixed(2)}</span></li>`;
                         }
                     });
                 }
             }
+
+            const grid = document.getElementById('stamp-grid');
+            if (grid) {
+                grid.innerHTML = '';
+                const today = new Date(); const todayStr = today.toLocaleDateString('en-US');
+                for (let i = 0; i < 7; i++) {
+                    let d = new Date(today); d.setDate(today.getDate() - today.getDay() + i);
+                    let dStr = d.toLocaleDateString('en-US');
+                    let boxClass = 'stamp-box'; let content = ''; let click = '';
+                    
+                    if (state.stamps[dStr]) { boxClass += ' claimed'; content = '🌸'; } 
+                    else if (dStr === todayStr) { boxClass += ' today-active'; content = '✨'; click = `onclick="state.stamps['${dStr}']=true; save();"`; } 
+                    else if (d > today) { content = '<span style="opacity:0.2;">•</span>'; } 
+                    grid.innerHTML += `<div class="${boxClass}" ${click}><div class="stamp-lbl">${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][i]}</div><div>${content}</div></div>`;
+                }
+
+                if (state.stamps[todayStr] && trueChoiceCash > 50) {
+                    document.getElementById('rest-state-banner').style.display = 'block';
+                } else {
+                    document.getElementById('rest-state-banner').style.display = 'none';
+                }
+            }
             
-            populateCategorySelectFields();
-            checkRefreshCycle(trueChoiceCashRemaining);
+            renderWishlist(trueChoiceCash);
+            checkRefreshCycle(trueChoiceCash);
         }
 
-        window.onload = init;
+        window.onload = () => { populateMonthTimelineOptions(); toggleFormContext(); populateCategorySelectFields(); render(); };
     </script>
 </body>
 </html>
