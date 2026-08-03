@@ -8,8 +8,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Cassidy Budget">
-    
-    <link rel="apple-touch-icon" href="image_8.png">
+    <meta name="theme-color" content="#8894B7">
+
+    <link rel="apple-touch-icon" href="icon-192.png">
     <script src="https://unpkg.com/tesseract.js@5.1.0/dist/tesseract.min.js"></script>
     <style>
         :root {
@@ -117,6 +118,27 @@
         .dock-item span { font-size: 1.2rem; transition: transform 0.3s ease; }
         .dock-item.active { color: var(--text-main); background: var(--card-bg); box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
         .dock-item.active span { transform: translateY(-2px) scale(1.1); }
+
+        /* ---------- Weekly View ---------- */
+        .week-nav { display: flex; align-items: center; gap: 10px; width: 100%; }
+        .week-nav .week-arrow { width: 44px; flex: 0 0 44px; padding: 12px 0; background: var(--card-bg); color: var(--text-main); border: 1px solid var(--border); border-radius: 22px; font-size: 1rem; font-weight: 700; }
+        .week-nav .week-label { flex: 1; text-align: center; background: var(--card-bg); border: 1px solid var(--border); border-radius: 24px; padding: 10px 12px; cursor: pointer; }
+        .week-label-main { font-size: 0.88rem; font-weight: 700; color: var(--text-main); }
+        .week-label-sub { font-size: 0.62rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); margin-top: 2px; }
+
+        .day-bars { display: flex; align-items: flex-end; justify-content: space-between; gap: 6px; height: 132px; margin-top: 6px; }
+        .day-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 6px; }
+        .day-bar-track { width: 100%; flex: 1; display: flex; align-items: flex-end; }
+        .day-bar { width: 100%; border-radius: 8px 8px 4px 4px; background: var(--venice); min-height: 3px; transition: height 0.5s cubic-bezier(0.4,0,0.2,1); }
+        .day-bar.is-today { background: var(--shine); }
+        .day-bar.is-empty { background: var(--border); }
+        .day-col-lbl { font-size: 0.58rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); }
+        .day-col-lbl.is-today { color: var(--text-main); }
+        .day-col-amt { font-size: 0.56rem; font-weight: 700; color: var(--text-muted); height: 10px; }
+        .week-summary-row { display: flex; justify-content: space-between; gap: 10px; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border); }
+        .week-summary-cell { flex: 1; text-align: center; }
+        .week-summary-cell .stat-lbl { font-size: 0.6rem; }
+        .week-summary-cell .stat-val { font-size: 1rem; margin-top: 4px; }
     </style>
 </head>
 <body>
@@ -132,12 +154,31 @@
 
         <!-- Centered View Toggle -->
         <div class="view-toggle">
-            <button id="toggle-month" class="toggle-btn active" onclick="switchView('month')">Month View</button>
-            <button id="toggle-year" class="toggle-btn" onclick="switchView('year')">Cycle View (12M)</button>
+            <button id="toggle-week" class="toggle-btn" onclick="switchView('week')">Week</button>
+            <button id="toggle-month" class="toggle-btn active" onclick="switchView('month')">Month</button>
+            <button id="toggle-year" class="toggle-btn" onclick="switchView('year')">Cycle (12M)</button>
         </div>
         <div class="hero-inline-row" id="month-filter-wrap">
             <div class="month-select-wrapper">
                 <select id="global-month-filter" class="nav-select" onchange="render()"></select>
+            </div>
+        </div>
+        <div class="hero-inline-row" id="week-nav-wrap" style="display: none;">
+            <div class="week-nav">
+                <button class="week-arrow" onclick="shiftWeek(-1)" aria-label="Previous week">‹</button>
+                <div class="week-label" onclick="shiftWeek(0)">
+                    <div class="week-label-main" id="week-range-label">--</div>
+                    <div class="week-label-sub" id="week-relative-label">This Week</div>
+                </div>
+                <button class="week-arrow" onclick="shiftWeek(1)" aria-label="Next week">›</button>
+            </div>
+        </div>
+
+        <div class="hero-inline-row" id="cycle-range-wrap" style="display: none;">
+            <div class="month-select-wrapper">
+                <div class="nav-select" style="display:block; color: var(--text-muted); font-weight: 700;">
+                    Rolling 12 months · <span id="cycle-range-label">--</span>
+                </div>
             </div>
         </div>
 
@@ -147,7 +188,7 @@
             <div id="rest-state-banner">🍵 Daily check-in complete. The system is resting.</div>
 
             <div class="choice-hero-box">
-                <div style="font-size: 0.75rem; font-weight: 800; color: var(--warning); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 4px;">Guilt-Free "Wants" Allowance</div>
+                <div id="hero-allowance-label" style="font-size: 0.75rem; font-weight: 800; color: var(--warning); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 4px;">Guilt-Free "Wants" Allowance</div>
                 <div id="dash-choice-cash" style="font-size: 3.2rem; font-family: 'Georgia', serif; font-style: italic; font-weight: 400; color: var(--text-main); margin-bottom: 12px;">$0.00</div>
                 
                 <div id="hero-gamified-msg" style="font-size: 0.9rem; font-weight: 600; color: var(--success); margin-bottom: 24px; padding: 0 10px;">✨ You're pacing beautifully! Keep it cozy.</div>
@@ -181,9 +222,32 @@
                 </div>
             </div>
 
+            <!-- Week-only: 7-day spending shape -->
+            <div class="card" id="week-breakdown-card" style="display: none; padding: 20px 22px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <h2 style="margin: 0; font-size: 1.1rem;">the week's shape</h2>
+                    <span id="week-busiest-day" style="font-size: 0.7rem; color: var(--text-muted); font-weight: 800; text-transform: uppercase;"></span>
+                </div>
+                <div id="day-bars" class="day-bars"></div>
+                <div class="week-summary-row">
+                    <div class="week-summary-cell">
+                        <div class="stat-lbl">Daily Avg</div>
+                        <div class="stat-val" id="week-daily-avg">$0</div>
+                    </div>
+                    <div class="week-summary-cell">
+                        <div class="stat-lbl">No-Spend Days</div>
+                        <div class="stat-val" id="week-nospend-days">0</div>
+                    </div>
+                    <div class="week-summary-cell">
+                        <div class="stat-lbl">Entries</div>
+                        <div class="stat-val" id="week-entry-count">0</div>
+                    </div>
+                </div>
+            </div>
+
             <div id="top-progression-showcase" class="top-showcase-container" style="display: none;"></div>
 
-            <div class="card" style="padding: 18px 22px; background: var(--daily-gradient);">
+            <div class="card" id="daily-checkin-card" style="padding: 18px 22px; background: var(--daily-gradient);">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                     <h2 style="margin: 0; font-size: 1.1rem;">cozy daily check-in</h2>
                     <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 800; text-transform: uppercase;">This Week</span>
@@ -306,6 +370,10 @@
                 <label>Category</label>
                 <select id="qa-cat" class="form-input"></select>
             </div>
+            <div class="form-group">
+                <label>Date</label>
+                <input type="date" id="qa-date" class="form-input">
+            </div>
             <button onclick="submitQuickAdd()">Log Instantly</button>
             <button class="secondary" style="width: 100%; margin-top: 10px;" onclick="document.getElementById('quick-add-modal').style.display='none'">Cancel</button>
         </div>
@@ -399,6 +467,126 @@
         };
 
         let pendingOverbudgetTx = null;
+        let weekOffset = 0; // 0 = current week, -1 = last week, +1 = next week
+
+        /* ===================== TIME HELPERS =====================
+           Ledger rows historically had no real timestamp: `date` is a
+           locale string captured at log time and `monthKey` came from the
+           dropdown, not the date. `id` was always Date.now(), so we can
+           recover a true timestamp for every legacy row. New rows write
+           `ts` explicitly.                                              */
+        const MS_DAY = 86400000;
+
+        function getTxTime(item) {
+            if (typeof item.ts === 'number' && item.ts > 0) return item.ts;
+            if (typeof item.id === 'number' && item.id > 1e12) return item.id; // legacy: id === Date.now()
+            const parsed = Date.parse(item.date);
+            return isNaN(parsed) ? 0 : parsed;
+        }
+
+        // An expense records whether it was a Need at the time it was logged.
+        // Without this, deleting a category silently rewrites spending history.
+        function txIsNeed(item) {
+            if (typeof item.isNeed === 'boolean') return item.isNeed;
+            const cat = state.categoryTargets.find(c => c.name === item.cat);
+            if (cat) return !!cat.nonNegotiable;
+            return false; // orphaned category -> count as a Want (the stricter reading)
+        }
+
+        function migrateLedgerTimestamps() {
+            let changed = false;
+            (state.ledger || []).forEach(item => {
+                if (typeof item.ts !== 'number' || !item.ts) { item.ts = getTxTime(item); changed = true; }
+                if (item.type !== 'income' && typeof item.isNeed !== 'boolean') {
+                    const cat = state.categoryTargets.find(c => c.name === item.cat);
+                    if (cat) { item.isNeed = !!cat.nonNegotiable; changed = true; }
+                }
+                // Legacy rows kept whatever monthKey the dropdown held at log time.
+                // We deliberately don't rewrite those — the original filing may have
+                // been intentional. Only rows created from here on derive it from the date.
+                if (!item.monthKey && item.ts) { item.monthKey = monthKeyOf(new Date(item.ts)); changed = true; }
+            });
+            if (changed) localStorage.setItem('cassidyProBudgetState', JSON.stringify(state));
+        }
+
+        // Week runs Sunday -> Saturday, matching the daily check-in grid.
+        function getWeekBounds(offset) {
+            const now = new Date();
+            const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay() + (offset * 7));
+            start.setHours(0, 0, 0, 0);
+            const end = new Date(start.getTime() + 7 * MS_DAY);
+            return { start, end, startMs: start.getTime(), endMs: end.getTime() };
+        }
+
+        /* ===================== DATE / MONTH HELPERS =====================
+           Single source of truth: the date you pick on the entry. `ts`,
+           `date` and `monthKey` are all derived from it, so no view can
+           disagree with another about when something happened.          */
+        const pad2 = n => String(n).padStart(2, '0');
+        const monthKeyOf = d => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}`;
+        const toDateInputValue = d => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+
+        function parseDateInput(value) {
+            const parts = String(value || '').split('-');
+            if (parts.length !== 3) return null;
+            // Noon local, so DST shifts can never bump the entry to the wrong day.
+            const d = new Date(+parts[0], +parts[1] - 1, +parts[2], 12, 0, 0, 0);
+            return isNaN(d.getTime()) ? null : d;
+        }
+
+        // Builds the ts/date/monthKey triple for a new ledger row.
+        function stampFor(dateInputValue) {
+            const picked = parseDateInput(dateInputValue);
+            const now = new Date();
+            // For today's date keep the real clock time so same-day entries stay ordered.
+            const when = (!picked || picked.toDateString() === now.toDateString()) ? now : picked;
+            return { ts: when.getTime(), date: when.toLocaleDateString(), monthKey: monthKeyOf(when) };
+        }
+
+        // Cycle view = a rolling 12 months ending with the current month.
+        // (Previously hardcoded to 2026-08..2027-07, which would have gone stale.)
+        function getCycleBounds() {
+            const now = new Date();
+            const startDate = new Date(now.getFullYear(), now.getMonth() - 11, 1);
+            return {
+                start: monthKeyOf(startDate),
+                end: monthKeyOf(now),
+                label: `${startDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} – ${now.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`
+            };
+        }
+
+        // A calendar week is ~7/30th of a month. Prorate monthly limits honestly
+        // using the actual length of the month the week mostly sits in.
+        function getWeekProration(weekStart) {
+            const mid = new Date(weekStart.getTime() + 3 * MS_DAY);
+            const daysInMonth = new Date(mid.getFullYear(), mid.getMonth() + 1, 0).getDate();
+            return 7 / daysInMonth;
+        }
+
+        function formatWeekRange(bounds) {
+            const opts = { month: 'short', day: 'numeric' };
+            const last = new Date(bounds.endMs - MS_DAY);
+            return `${bounds.start.toLocaleDateString('en-US', opts)} – ${last.toLocaleDateString('en-US', opts)}`;
+        }
+
+        function describeWeekOffset(offset) {
+            if (offset === 0) return 'This Week';
+            if (offset === -1) return 'Last Week';
+            if (offset === 1) return 'Next Week';
+            return offset < 0 ? `${Math.abs(offset)} Weeks Ago` : `In ${offset} Weeks`;
+        }
+
+        function shiftWeek(delta) {
+            weekOffset = delta === 0 ? 0 : weekOffset + delta;
+            render();
+        }
+
+        // Descriptions and category names land inside inline onclick handlers.
+        // An apostrophe ("Trader Joe's") breaks the DOM without this.
+        function esc(str) {
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                              .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
 
         function save() { localStorage.setItem('cassidyProBudgetState', JSON.stringify(state)); render(); }
 
@@ -435,6 +623,7 @@
 
         function openQuickAddModal() {
             document.getElementById('qa-desc').value = ''; document.getElementById('qa-amount').value = '';
+            document.getElementById('qa-date').value = toDateInputValue(new Date());
             document.getElementById('qa-vendor-hint').style.display = 'none';
             document.getElementById('quick-add-modal').style.display = 'flex';
             populateCategorySelectFields();
@@ -443,17 +632,18 @@
         function submitQuickAdd() {
             const desc = document.getElementById('qa-desc').value.trim(); const amt = parseFloat(document.getElementById('qa-amount').value); const cat = document.getElementById('qa-cat').value;
             if(!desc || !amt || amt <= 0) return;
-            const activeMonth = document.getElementById('global-month-filter').value;
-            
-            if (amt > state.globalBalance) { 
-                document.getElementById('quick-add-modal').style.display = 'none'; 
-                triggerRecalibrationModal(desc, amt, cat); return; 
+            const stamp = stampFor(document.getElementById('qa-date').value);
+
+            if (amt > state.globalBalance) {
+                document.getElementById('quick-add-modal').style.display = 'none';
+                triggerRecalibrationModal(desc, amt, cat, stamp); return;
             }
-            
+
             state.vendors[desc.toLowerCase()] = cat;
             state.globalBalance -= amt;
-            state.ledger.unshift({ id: Date.now(), type: 'expense', desc, amt, cat, date: new Date().toLocaleDateString(), monthKey: activeMonth });
-            
+            state.ledger.unshift({ id: Date.now(), type: 'expense', desc, amt, cat, isNeed: catIsNeed(cat), ...stamp });
+            followEntryInto(stamp.monthKey);
+
             document.getElementById('quick-add-modal').style.display = 'none';
             save(); showToast("Captured instantly ⚡");
         }
@@ -477,12 +667,12 @@
         function processRollover() {
             if (state.lastRolloverAmount > 0) {
                 const dest = document.getElementById('rollover-dest-input').value;
-                const activeMonth = document.getElementById('global-month-filter').value;
-                const dateStr = new Date().toLocaleDateString();
+                const stamp = stampFor(null);
 
                 if (dest === 'cascade') {
                     let remaining = state.lastRolloverAmount;
                     let cascadeLogs = [];
+                    let legs = [];
                     state.pots.forEach(pot => {
                         if (remaining <= 0) return;
                         let space = pot.target - pot.current;
@@ -490,19 +680,24 @@
                             let fillAmt = Math.min(space, remaining);
                             pot.current += fillAmt;
                             remaining -= fillAmt;
+                            legs.push({ potId: pot.id, amt: fillAmt });
                             cascadeLogs.push(`$${fillAmt.toFixed(2)} to ${pot.name}`);
                         }
                     });
                     const transferred = state.lastRolloverAmount - remaining;
-                    state.globalBalance -= transferred;
-                    state.ledger.unshift({ id: Date.now(), type: 'expense', desc: `Cascade Sweep: ${cascadeLogs.join(', ')}`, amt: transferred, cat: 'Wants Transfer', date: dateStr, monthKey: activeMonth });
+                    if (transferred > 0) {
+                        state.globalBalance -= transferred;
+                        // `sweep` records exactly which pot got what, so deleting this
+                        // row can pull the money back out instead of minting cash.
+                        state.ledger.unshift({ id: Date.now(), type: 'expense', desc: `Cascade Sweep: ${cascadeLogs.join(', ')}`, amt: transferred, cat: 'Wants Transfer', isNeed: false, sweep: legs, ...stamp });
+                    }
                 } 
                 else if (dest !== 'carry') {
                     const pot = state.pots.find(p => p.id == dest);
                     if (pot) {
                         pot.current += state.lastRolloverAmount;
                         state.globalBalance -= state.lastRolloverAmount;
-                        state.ledger.unshift({ id: Date.now(), type: 'expense', desc: `End of Cycle Transfer to ${pot.name}`, amt: state.lastRolloverAmount, cat: 'Wants Transfer', date: dateStr, monthKey: activeMonth });
+                        state.ledger.unshift({ id: Date.now(), type: 'expense', desc: `End of Cycle Transfer to ${pot.name}`, amt: state.lastRolloverAmount, cat: 'Wants Transfer', isNeed: false, sweep: [{ potId: pot.id, amt: state.lastRolloverAmount }], ...stamp });
                     }
                 }
             }
@@ -514,6 +709,7 @@
         function toggleFormContext() {
             const type = document.getElementById('tx-type').value;
             const container = document.getElementById('dynamic-form-fields');
+            const dateField = `<div class="form-group"><label>Date</label><input type="date" id="field-date" value="${toDateInputValue(new Date())}"></div>`;
             if(type === 'expense' || type === 'wishlist') {
                 container.innerHTML = `
                     <div class="form-group">
@@ -522,22 +718,35 @@
                         <div id="main-vendor-hint" style="font-size: 0.65rem; color: var(--success); margin-top: 4px; display: none;">✨ Auto-categorized from memory</div>
                     </div>
                     <div class="form-group"><label>Amount ($)</label><input type="number" id="field-amount" placeholder="0.00"></div>
+                    ${type === 'expense' ? dateField : ''}
                     <div class="form-group"><label>Target Allocation Category</label>
                         <select id="field-cat" class="form-input">
-                            ${state.categoryTargets.map(c => `<option value="${c.name}">${c.name}</option>`).join('')}
+                            ${state.categoryTargets.map(c => `<option value="${esc(c.name)}">${esc(c.name)}</option>`).join('')}
                         </select>
                     </div>`;
             } else {
                 container.innerHTML = `
                     <div class="form-group"><label>Net Pay Amount ($)</label><input type="number" id="field-net-pay" placeholder="e.g., 1250"></div>
+                    ${dateField}
                     <p style="font-size: 0.75rem; color: var(--text-muted); font-style: italic; margin-bottom: 16px;">Since your employer handles taxes, just enter the exact amount that hits your bank account.</p>`;
+            }
+        }
+
+        // If a logged entry lands outside the month you're looking at, follow it
+        // there instead of letting it appear to vanish.
+        function followEntryInto(monthKey) {
+            if (state.currentViewMode !== 'month') return;
+            const filter = document.getElementById('global-month-filter');
+            if (!filter || filter.value === monthKey) return;
+            if ([...filter.options].some(o => o.value === monthKey)) {
+                filter.value = monthKey;
             }
         }
 
         function submitTransaction() {
             const type = document.getElementById('tx-type').value;
-            const activeMonth = document.getElementById('global-month-filter').value;
-            const dateStr = new Date().toLocaleDateString();
+            const dateEl = document.getElementById('field-date');
+            const stamp = stampFor(dateEl ? dateEl.value : null);
 
             if(type === 'expense' || type === 'wishlist') {
                 const desc = document.getElementById('field-desc').value.trim();
@@ -549,10 +758,11 @@
                     if(state.wishlist.length >= 5) { alert("Your impulse queue is maxed out at 5. You must delete an existing want to add a new one."); return; }
                     state.wishlist.push({ id: Date.now(), desc, amt, cat, timestamp: Date.now() });
                 } else {
-                    if (amt > state.globalBalance) { triggerRecalibrationModal(desc, amt, cat); return; }
+                    if (amt > state.globalBalance) { triggerRecalibrationModal(desc, amt, cat, stamp); return; }
                     state.globalBalance -= amt;
-                    state.ledger.unshift({ id: Date.now(), type, desc, amt, cat, date: dateStr, monthKey: activeMonth });
+                    state.ledger.unshift({ id: Date.now(), type, desc, amt, cat, isNeed: catIsNeed(cat), ...stamp });
                     state.vendors[desc.toLowerCase()] = cat;
+                    followEntryInto(stamp.monthKey);
                 }
                 save(); toggleFormContext();
             } else {
@@ -560,33 +770,45 @@
                 if(!netInput || netInput <= 0) return;
 
                 state.globalBalance += netInput;
-                state.ledger.unshift({ id: Date.now(), type: 'income', desc: 'Paycheck Inflow', net: netInput, date: dateStr, monthKey: activeMonth });
+                state.ledger.unshift({ id: Date.now(), type: 'income', desc: 'Paycheck Inflow', net: netInput, ...stamp });
+                followEntryInto(stamp.monthKey);
                 save(); toggleFormContext();
             }
         }
 
-        function triggerRecalibrationModal(desc, amt, cat) {
-            pendingOverbudgetTx = { desc, amt, cat };
+        function catIsNeed(name) {
+            const cat = state.categoryTargets.find(c => c.name === name);
+            return cat ? !!cat.nonNegotiable : false;
+        }
+
+        function triggerRecalibrationModal(desc, amt, cat, stamp) {
+            pendingOverbudgetTx = { desc, amt, cat, stamp: stamp || stampFor(null) };
             const shortfall = amt - state.globalBalance;
             document.getElementById('recal-shortfall').innerText = `$${shortfall.toFixed(2)}`;
             const potSelect = document.getElementById('recal-pot-select');
             potSelect.innerHTML = '<option value="">-- Choose Pot --</option>';
-            state.pots.forEach(pot => { potSelect.innerHTML += `<option value="${pot.id}">${pot.name.toLowerCase()} ($${pot.current.toFixed(0)})</option>`; });
+            state.pots.forEach(pot => { potSelect.innerHTML += `<option value="${pot.id}">${esc(pot.name.toLowerCase())} ($${pot.current.toFixed(0)})</option>`; });
             document.getElementById('recalibration-modal').style.display = 'flex';
         }
         function closeRecalibration() { pendingOverbudgetTx = null; document.getElementById('recalibration-modal').style.display = 'none'; }
         function recalibrateWithDebt() {
-            const activeMonth = document.getElementById('global-month-filter').value;
-            state.globalBalance -= pendingOverbudgetTx.amt; 
-            state.ledger.unshift({ id: Date.now(), type: 'expense', desc: pendingOverbudgetTx.desc, amt: pendingOverbudgetTx.amt, cat: pendingOverbudgetTx.cat, date: new Date().toLocaleDateString(), monthKey: activeMonth });
-            save(); closeRecalibration(); toggleFormContext(); 
+            const t = pendingOverbudgetTx;
+            state.globalBalance -= t.amt;
+            state.ledger.unshift({ id: Date.now(), type: 'expense', desc: t.desc, amt: t.amt, cat: t.cat, isNeed: catIsNeed(t.cat), ...t.stamp });
+            followEntryInto(t.stamp.monthKey);
+            save(); closeRecalibration(); toggleFormContext();
         }
         function recalibrateWithPot() {
             const potId = document.getElementById('recal-pot-select').value;
             const pot = state.pots.find(p => p.id == potId);
-            if (pot.current < pendingOverbudgetTx.amt) { alert("Not enough in this pot."); return; }
-            pot.current -= pendingOverbudgetTx.amt;
-            state.ledger.unshift({ id: Date.now(), type: 'expense', desc: `${pendingOverbudgetTx.desc} (from ${pot.name})`, amt: pendingOverbudgetTx.amt, cat: pendingOverbudgetTx.cat, date: new Date().toLocaleDateString(), monthKey: document.getElementById('global-month-filter').value });
+            if (!pot) { alert("Pick a savings pot first."); return; }
+            const t = pendingOverbudgetTx;
+            if (pot.current < t.amt) { alert("Not enough in this pot."); return; }
+            pot.current -= t.amt;
+            // paidFromPot: this money never left globalBalance, so deleting the row
+            // must refund the pot rather than crediting cash.
+            state.ledger.unshift({ id: Date.now(), type: 'expense', desc: `${t.desc} (from ${pot.name})`, amt: t.amt, cat: t.cat, isNeed: catIsNeed(t.cat), paidFromPot: pot.id, ...t.stamp });
+            followEntryInto(t.stamp.monthKey);
             save(); closeRecalibration(); toggleFormContext();
         }
 
@@ -634,9 +856,11 @@
             const index = state.wishlist.findIndex(item => item.id === id); if(index === -1) return;
             const item = state.wishlist[index];
             if(action === 'buy') {
-                if (item.amt > state.globalBalance) { triggerRecalibrationModal(item.desc, item.amt, item.cat); return; }
+                const stamp = stampFor(null);
+                if (item.amt > state.globalBalance) { triggerRecalibrationModal(item.desc, item.amt, item.cat, stamp); return; }
                 state.globalBalance -= item.amt;
-                state.ledger.unshift({ id: Date.now(), type: 'expense', desc: item.desc, amt: item.amt, cat: item.cat, date: new Date().toLocaleDateString(), monthKey: document.getElementById('global-month-filter').value });
+                state.ledger.unshift({ id: Date.now(), type: 'expense', desc: item.desc, amt: item.amt, cat: item.cat, isNeed: catIsNeed(item.cat), ...stamp });
+                followEntryInto(stamp.monthKey);
             } 
             state.wishlist.splice(index, 1); save();
         }
@@ -644,12 +868,37 @@
         function deleteTransaction(id) {
             const index = state.ledger.findIndex(item => item.id === id); if(index === -1) return;
             const item = state.ledger[index];
-            if(item.type === 'expense') {
-                state.globalBalance += item.amt; 
-            } else { 
-                const netAmt = item.net || 0; // Fallback for old data structure
-                state.globalBalance -= netAmt; 
+
+            if (item.type === 'income') {
+                state.globalBalance -= (item.net || 0);
             }
+            else if (Array.isArray(item.sweep) && item.sweep.length) {
+                // Cash -> pots. Reversing means pulling it back out of the pots.
+                let recovered = 0;
+                item.sweep.forEach(leg => {
+                    const pot = state.pots.find(p => p.id == leg.potId);
+                    if (pot) { const back = Math.min(pot.current, leg.amt); pot.current -= back; recovered += back; }
+                });
+                state.globalBalance += recovered;
+                if (recovered < item.amt - 0.005) {
+                    showToast(`Only $${recovered.toFixed(2)} of $${item.amt.toFixed(2)} was still in those pots.`);
+                }
+            }
+            else if (item.paidFromPot) {
+                // This never touched cash — it came out of a pot. Refund the pot.
+                const pot = state.pots.find(p => p.id == item.paidFromPot);
+                if (pot) pot.current += item.amt;
+                else state.globalBalance += item.amt; // pot deleted; return to cash rather than losing it
+            }
+            else if (item.cat === 'Wants Transfer') {
+                // Legacy transfer row with no structured record of where the money went.
+                if (!confirm("This is an old transfer row that doesn't record which pot received the money. Deleting it will credit your cash balance but leave the pots untouched, which will overstate your total. Delete anyway?")) return;
+                state.globalBalance += item.amt;
+            }
+            else {
+                state.globalBalance += item.amt;
+            }
+
             state.ledger.splice(index, 1); save();
         }
 
@@ -664,16 +913,35 @@
             if (!name || isNaN(limit)) return;
             state.categoryTargets.push({ name, limit, nonNegotiable: type === 'essential' }); save();
         }
-        function deleteCategory(name) { state.categoryTargets = state.categoryTargets.filter(c => c.name !== name); save(); }
+        function deleteCategory(name) {
+            const affected = state.ledger.filter(i => i.type !== 'income' && i.cat === name).length;
+            if (affected > 0 && !confirm(`"${name}" has ${affected} logged ${affected === 1 ? 'entry' : 'entries'}. Those stay in your ledger and keep counting toward your totals — they'll show under "archived categories". Remove the target?`)) return;
+            state.categoryTargets = state.categoryTargets.filter(c => c.name !== name);
+            save();
+        }
         
         function populateMonthTimelineOptions() {
-            const filter = document.getElementById('global-month-filter'); filter.innerHTML = '';
-            for(let i = 0; i < 12; i++) {
-                let d = new Date(2026, 7 + i, 1);
-                let k = `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}`;
-                let opt = new Option(d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }), k);
-                if(i === 0) opt.selected = true; filter.add(opt);
-            }
+            const filter = document.getElementById('global-month-filter');
+            const previous = filter.value;
+            filter.innerHTML = '';
+
+            const now = new Date();
+            const currentKey = monthKeyOf(now);
+            const keys = new Set();
+
+            // Rolling window around today rather than a hardcoded 2026 range.
+            for (let i = -12; i <= 12; i++) keys.add(monthKeyOf(new Date(now.getFullYear(), now.getMonth() + i, 1)));
+            // Plus any month that actually has data, so old entries stay reachable.
+            (state.ledger || []).forEach(item => { if (item.monthKey) keys.add(item.monthKey); });
+
+            [...keys].sort().forEach(k => {
+                const [y, m] = k.split('-');
+                const d = new Date(+y, +m - 1, 1);
+                const opt = new Option(d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }), k);
+                filter.add(opt);
+            });
+
+            filter.value = (previous && [...keys].includes(previous)) ? previous : currentKey;
         }
 
         function populateCategorySelectFields() {
@@ -684,14 +952,22 @@
         }
         function switchView(mode) {
             state.currentViewMode = mode;
+            if (mode === 'week') weekOffset = 0; // always land on the current week
+            document.getElementById('toggle-week').classList.toggle('active', mode === 'week');
             document.getElementById('toggle-month').classList.toggle('active', mode === 'month');
             document.getElementById('toggle-year').classList.toggle('active', mode === 'year');
             document.getElementById('month-filter-wrap').style.display = mode === 'month' ? 'flex' : 'none';
-            document.querySelectorAll('.view-label-ctx').forEach(el => { el.innerText = mode === 'month' ? 'Month' : 'Cycle'; });
+            document.getElementById('week-nav-wrap').style.display = mode === 'week' ? 'flex' : 'none';
+            document.getElementById('cycle-range-wrap').style.display = mode === 'year' ? 'flex' : 'none';
+            document.getElementById('week-breakdown-card').style.display = mode === 'week' ? 'block' : 'none';
+            const ctxLabel = mode === 'week' ? 'Week' : (mode === 'month' ? 'Month' : 'Cycle');
+            document.querySelectorAll('.view-label-ctx').forEach(el => { el.innerText = ctxLabel; });
+            document.getElementById('hero-allowance-label').innerText =
+                mode === 'week' ? 'Weekly "Wants" Pace' : 'Guilt-Free "Wants" Allowance';
             render();
         }
         
-        function checkRefreshCycle(choiceCashRemaining) {
+        function checkRefreshCycle(choiceCashRemaining, allowRolloverCapture) {
             const today = new Date(); today.setHours(0,0,0,0);
             const parts = state.refreshSettings.nextRefreshDate.split('-');
             const refreshDate = new Date(parts[0], parts[1] - 1, parts[2]); refreshDate.setHours(0,0,0,0);
@@ -707,7 +983,7 @@
                 cycleBar.style.width = `${pct}%`;
             }
 
-            if (diffDays <= 0 && !state.rolloverPending) {
+            if (diffDays <= 0 && !state.rolloverPending && allowRolloverCapture) {
                 state.rolloverPending = true; state.lastRolloverAmount = choiceCashRemaining;
                 const nextDate = new Date(refreshDate); nextDate.setDate(nextDate.getDate() + freq);
                 state.refreshSettings.nextRefreshDate = `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, '0')}-${String(nextDate.getDate()).padStart(2, '0')}`;
@@ -765,16 +1041,47 @@
             
             const activeMonth = document.getElementById('global-month-filter').value;
             const isYearMode = state.currentViewMode === 'year';
-            
+            const isWeekMode = state.currentViewMode === 'week';
+
             // Global Bank Balance explicitly separated
             document.getElementById('global-bank-balance').innerText = `$${state.globalBalance.toFixed(0)}`;
 
-            const targetedLedger = isYearMode ? state.ledger.filter(i => i.monthKey >= '2026-08' && i.monthKey <= '2027-07') : state.ledger.filter(i => i.monthKey === activeMonth);
+            let weekBounds = null, scale = 1;
+            if (isWeekMode) {
+                weekBounds = getWeekBounds(weekOffset);
+                scale = getWeekProration(weekBounds.start);
+                document.getElementById('week-range-label').innerText = formatWeekRange(weekBounds);
+                document.getElementById('week-relative-label').innerText = describeWeekOffset(weekOffset);
+            } else if (isYearMode) {
+                scale = 12;
+            }
 
-            let totalInflow = 0, totalOutflow = 0, categorySpent = {}, nnVaultTotal = 0, choiceLogged = 0;
+            let targetedLedger;
+            if (isWeekMode) {
+                // Week mode filters on the real timestamp, not the dropdown-assigned monthKey.
+                targetedLedger = state.ledger.filter(i => {
+                    const t = getTxTime(i);
+                    return t >= weekBounds.startMs && t < weekBounds.endMs;
+                });
+            } else if (isYearMode) {
+                const cycle = getCycleBounds();
+                targetedLedger = state.ledger.filter(i => i.monthKey >= cycle.start && i.monthKey <= cycle.end);
+                const cycleLabelEl = document.getElementById('cycle-range-label');
+                if (cycleLabelEl) cycleLabelEl.innerText = cycle.label;
+            } else {
+                targetedLedger = state.ledger.filter(i => i.monthKey === activeMonth);
+            }
+
+            let totalInflow = 0, totalOutflow = 0, categorySpent = {}, nnVaultTotal = 0, choiceLogged = 0, wantsBudget = 0;
             state.categoryTargets.forEach(c => categorySpent[c.name] = 0);
 
-            state.categoryTargets.forEach(cat => { if(cat.nonNegotiable) nnVaultTotal += (isYearMode ? cat.limit * 12 : cat.limit); });
+            state.categoryTargets.forEach(cat => {
+                if (cat.nonNegotiable) nnVaultTotal += cat.limit * scale;
+                else wantsBudget += cat.limit * scale;
+            });
+
+            const knownCats = new Set(state.categoryTargets.map(c => c.name));
+            let archivedSpent = 0;
 
             targetedLedger.forEach(item => {
                 if(item.type === 'income') { 
@@ -783,13 +1090,20 @@
                 } 
                 else { 
                     totalOutflow += item.amt; 
-                    if(categorySpent[item.cat] !== undefined) categorySpent[item.cat] += item.amt;
-                    const cat = state.categoryTargets.find(c => c.name === item.cat);
-                    if (cat && !cat.nonNegotiable) choiceLogged += item.amt;
+                    if (knownCats.has(item.cat)) categorySpent[item.cat] += item.amt;
+                    else archivedSpent += item.amt;
+                    // Reads the flag stored at log time, so deleting a category
+                    // no longer rewrites what your allowance was spent on.
+                    if (!txIsNeed(item)) choiceLogged += item.amt;
                 }
             });
 
-            let trueChoiceCash = totalInflow - nnVaultTotal - choiceLogged;
+            // Month/Cycle: allowance is what's left of income after Needs are reserved.
+            // Week: income arrives in lumps, so a 7-day window would swing wildly.
+            // Pace against the prorated Wants budget instead.
+            let trueChoiceCash = isWeekMode
+                ? wantsBudget - choiceLogged
+                : totalInflow - nnVaultTotal - choiceLogged;
             let monthNetCash = totalInflow - totalOutflow;
             
             document.getElementById('dash-nn-vault').innerText = `$${nnVaultTotal.toFixed(0)}`;
@@ -803,10 +1117,14 @@
             document.getElementById('dash-choice-cash').innerText = `${trueChoiceCash >= 0 ? '' : '-'}$${Math.abs(trueChoiceCash).toFixed(2)}`;
 
             const msgEl = document.getElementById('hero-gamified-msg');
-            if (trueChoiceCash > 200) { msgEl.innerText = "✨ You're pacing beautifully! Keep it cozy."; msgEl.style.color = "var(--success)"; }
-            else if (trueChoiceCash > 50) { msgEl.innerText = "🌿 Pacing is steady. Mindful choices ahead."; msgEl.style.color = "var(--warning)"; }
+            // Thresholds scale with the window — $50 left is comfortable in a week, dire in a year.
+            const hiMark = isWeekMode ? wantsBudget * 0.4 : 200;
+            const loMark = isWeekMode ? wantsBudget * 0.12 : 50;
+            const windowWord = isWeekMode ? 'week' : 'cycle';
+            if (trueChoiceCash > hiMark) { msgEl.innerText = "✨ You're pacing beautifully! Keep it cozy."; msgEl.style.color = "var(--success)"; }
+            else if (trueChoiceCash > loMark) { msgEl.innerText = "🌿 Pacing is steady. Mindful choices ahead."; msgEl.style.color = "var(--warning)"; }
             else if (trueChoiceCash > 0) { msgEl.innerText = "⚠️ Pacing is tight! Guard your remaining allowance."; msgEl.style.color = "var(--warning)"; }
-            else { msgEl.innerText = "🚨 You are in the red for this cycle."; msgEl.style.color = "var(--danger)"; }
+            else { msgEl.innerText = `🚨 You are over your Wants pace for this ${windowWord}.`; msgEl.style.color = "var(--danger)"; }
 
             const capsContainer = document.getElementById('category-caps-container');
             const editCatsContainer = document.getElementById('editable-categories-list');
@@ -814,8 +1132,8 @@
             if (editCatsContainer) editCatsContainer.innerHTML = '';
 
             state.categoryTargets.forEach(cat => {
-                const spent = categorySpent[cat.name] || 0; const limit = isYearMode ? cat.limit * 12 : cat.limit;
-                const pct = Math.min((spent / limit) * 100, 100);
+                const spent = categorySpent[cat.name] || 0; const limit = cat.limit * scale;
+                const pct = limit > 0 ? Math.min((spent / limit) * 100, 100) : (spent > 0 ? 100 : 0);
                 let color = 'var(--success)'; if(pct >= 90) color = 'var(--danger)'; else if(pct >= 75) color = 'var(--warning)';
                 
                 let pulseClass = (pct >= 95 && cat.nonNegotiable) ? 'pulse-warning' : '';
@@ -824,8 +1142,8 @@
                     capsContainer.innerHTML += `
                         <div class="progress-wrapper">
                             <div class="progress-meta">
-                                <div><strong style="font-weight: 600; font-size:0.88rem;">${cat.name.toLowerCase()}</strong><span class="tx-cat-tag ${cat.nonNegotiable ? 'nn' : ''}" style="margin-top:0; margin-left:6px; font-size:0.58rem; padding:2px 8px; border-radius:10px;">${cat.nonNegotiable ? 'Need' : 'Want'}</span></div>
-                                <span style="color: var(--text-muted); font-size:0.82rem; font-weight: 600;">$${spent.toFixed(0)} / $${limit}</span>
+                                <div><strong style="font-weight: 600; font-size:0.88rem;">${esc(cat.name.toLowerCase())}</strong><span class="tx-cat-tag ${cat.nonNegotiable ? 'nn' : ''}" style="margin-top:0; margin-left:6px; font-size:0.58rem; padding:2px 8px; border-radius:10px;">${cat.nonNegotiable ? 'Need' : 'Want'}</span></div>
+                                <span style="color: var(--text-muted); font-size:0.82rem; font-weight: 600;">$${spent.toFixed(0)} / $${limit.toFixed(0)}</span>
                             </div>
                             <div class="progress-bg ${pulseClass}"><div class="progress-bar" style="width: ${pct}%; background: ${color};"></div></div>
                         </div>`;
@@ -835,27 +1153,46 @@
                     editCatsContainer.innerHTML += `
                         <li class="tx-item" style="padding: 14px; background: var(--card-bg); border-radius: 16px; margin-bottom: 10px; border: 1px solid var(--border); flex-direction: column; align-items: flex-start;">
                             <div style="display:flex; justify-content:space-between; width:100%; align-items: center;">
-                                <div><strong style="font-size: 0.95rem;">${cat.name}</strong><br><span class="tx-cat-tag ${cat.nonNegotiable ? 'nn' : ''}" style="margin-top: 4px;">${cat.nonNegotiable ? 'Need' : 'Want'}</span></div>
+                                <div><strong style="font-size: 0.95rem;">${esc(cat.name)}</strong><br><span class="tx-cat-tag ${cat.nonNegotiable ? 'nn' : ''}" style="margin-top: 4px;">${cat.nonNegotiable ? 'Need' : 'Want'}</span></div>
                                 <span style="font-weight:700; font-size: 1rem;">$${cat.limit}/mo</span>
                             </div>
-                            <div class="inline-actions" style="margin-top: 12px;"><button class="btn-inline del" onclick="deleteCategory('${cat.name}')">Delete</button></div>
+                            <div class="inline-actions" style="margin-top: 12px;"><button class="btn-inline del" data-cat="${esc(cat.name)}" onclick="deleteCategory(this.dataset.cat)">Delete</button></div>
                         </li>`;
                 }
             });
 
+            // Spend against categories you've since deleted still counts toward your
+            // Wants pacing — show it rather than letting it vanish from the caps list.
+            if (capsContainer && archivedSpent > 0) {
+                capsContainer.innerHTML += `
+                    <div class="progress-wrapper">
+                        <div class="progress-meta">
+                            <div><strong style="font-weight: 600; font-size:0.88rem; color: var(--text-muted);">archived categories</strong><span class="tx-cat-tag" style="margin-top:0; margin-left:6px; font-size:0.58rem; padding:2px 8px; border-radius:10px;">No cap</span></div>
+                            <span style="color: var(--text-muted); font-size:0.82rem; font-weight: 600;">$${archivedSpent.toFixed(0)}</span>
+                        </div>
+                        <div class="progress-bg"><div class="progress-bar" style="width: 100%; background: var(--linen);"></div></div>
+                    </div>`;
+            }
+
             const ledgerUl = document.getElementById('ledger-container'); 
             if (ledgerUl) {
                 ledgerUl.innerHTML = '';
-                if(targetedLedger.length === 0) { ledgerUl.innerHTML = `<li class="tx-item" style="color:var(--text-muted); justify-content:center; padding: 24px 0;">No active logs found.</li>`; } 
-                else {
-                    targetedLedger.slice(0, 15).forEach(item => {
+                if(targetedLedger.length === 0) {
+                    const emptyMsg = isWeekMode ? 'Nothing logged this week.' : 'No active logs found.';
+                    ledgerUl.innerHTML = `<li class="tx-item" style="color:var(--text-muted); justify-content:center; padding: 24px 0;">${emptyMsg}</li>`;
+                } else {
+                    // A week is small enough to show whole; longer windows stay capped.
+                    const rows = isWeekMode ? targetedLedger : targetedLedger.slice(0, 15);
+                    rows.forEach(item => {
                         const isNN = state.categoryTargets.find(c => c.name === item.cat)?.nonNegotiable;
                         const action = `<div class="inline-actions"><button class="btn-inline del" onclick="deleteTransaction(${item.id})">Delete</button></div>`;
+                        const t = getTxTime(item);
+                        const dayTag = t ? `<span style="font-size:0.62rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">${new Date(t).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span><br>` : '';
                         if(item.type === 'expense') {
-                            ledgerUl.innerHTML += `<li class="tx-item" style="align-items: center;"><div><div><strong>${item.desc.toLowerCase()}</strong></div><span class="tx-cat-tag ${isNN ? 'nn' : ''}">${item.cat}</span>${action}</div><span style="color:var(--text-main); font-weight:600; font-size: 1rem;">-$${item.amt.toFixed(2)}</span></li>`;
+                            ledgerUl.innerHTML += `<li class="tx-item" style="align-items: center;"><div>${dayTag}<div><strong>${esc(item.desc.toLowerCase())}</strong></div><span class="tx-cat-tag ${isNN ? 'nn' : ''}">${esc(item.cat)}</span>${action}</div><span style="color:var(--text-main); font-weight:600; font-size: 1rem;">-$${item.amt.toFixed(2)}</span></li>`;
                         } else {
                             const netAmt = item.net || 0; // Fallback
-                            ledgerUl.innerHTML += `<li class="tx-item" style="align-items: center;"><div><div><strong>${item.desc.toLowerCase()}</strong></div><span class="tx-cat-tag" style="background:var(--block-blue); color:#1C1E24;">Net Pay</span>${action}</div><span style="color:var(--success); font-weight:600; font-size: 1rem;">+$${netAmt.toFixed(2)}</span></li>`;
+                            ledgerUl.innerHTML += `<li class="tx-item" style="align-items: center;"><div>${dayTag}<div><strong>${esc(item.desc.toLowerCase())}</strong></div><span class="tx-cat-tag" style="background:var(--block-blue); color:#1C1E24;">Net Pay</span>${action}</div><span style="color:var(--success); font-weight:600; font-size: 1rem;">+$${netAmt.toFixed(2)}</span></li>`;
                         }
                     });
                 }
@@ -883,11 +1220,92 @@
                 }
             }
             
+            // The check-in tracker is always "right now" — hide it while time-travelling.
+            const checkinCard = document.getElementById('daily-checkin-card');
+            if (checkinCard) checkinCard.style.display = (isWeekMode && weekOffset !== 0) ? 'none' : 'block';
+
+            if (isWeekMode) renderWeekBreakdown(weekBounds, targetedLedger);
+
             renderWishlist(trueChoiceCash);
-            checkRefreshCycle(trueChoiceCash);
+
+            // checkRefreshCycle writes lastRolloverAmount, which later gets swept into
+            // savings pots. Only the Month figure is a valid basis for that — the Week
+            // and Cycle numbers are scaled differently and would sweep the wrong amount.
+            checkRefreshCycle(trueChoiceCash, state.currentViewMode === 'month');
         }
 
-        window.onload = () => { populateMonthTimelineOptions(); toggleFormContext(); populateCategorySelectFields(); render(); };
+        function renderWeekBreakdown(bounds, weekLedger) {
+            const barsEl = document.getElementById('day-bars');
+            if (!barsEl || !bounds) return;
+
+            const labels = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+            const todayKey = new Date().toDateString();
+            const daily = new Array(7).fill(0);
+
+            weekLedger.forEach(item => {
+                if (item.type === 'income') return;
+                const idx = Math.floor((getTxTime(item) - bounds.startMs) / MS_DAY);
+                if (idx >= 0 && idx < 7) daily[idx] += item.amt;
+            });
+
+            const peak = Math.max(...daily, 1);
+            const totalOut = daily.reduce((a, b) => a + b, 0);
+
+            barsEl.innerHTML = daily.map((amt, i) => {
+                const dayDate = new Date(bounds.startMs + i * MS_DAY);
+                const isToday = dayDate.toDateString() === todayKey;
+                const heightPct = amt > 0 ? Math.max(6, (amt / peak) * 100) : 0;
+                const barClass = amt > 0 ? (isToday ? 'day-bar is-today' : 'day-bar') : 'day-bar is-empty';
+                return `<div class="day-col">
+                            <div class="day-col-amt">${amt > 0 ? '$' + Math.round(amt) : ''}</div>
+                            <div class="day-bar-track"><div class="${barClass}" style="height: ${amt > 0 ? heightPct : 4}%;"></div></div>
+                            <div class="day-col-lbl ${isToday ? 'is-today' : ''}">${labels[i]}</div>
+                        </div>`;
+            }).join('');
+
+            // Only average over days that have actually happened.
+            const now = Date.now();
+            const elapsedDays = Math.min(7, Math.max(1, Math.ceil((Math.min(now, bounds.endMs) - bounds.startMs) / MS_DAY)));
+            const noSpend = daily.slice(0, elapsedDays).filter(v => v === 0).length;
+
+            document.getElementById('week-daily-avg').innerText = `$${(totalOut / elapsedDays).toFixed(0)}`;
+            document.getElementById('week-nospend-days').innerText = `${noSpend}`;
+            document.getElementById('week-entry-count').innerText = `${weekLedger.length}`;
+
+            const busiestIdx = daily.indexOf(Math.max(...daily));
+            document.getElementById('week-busiest-day').innerText =
+                totalOut > 0 ? `Heaviest: ${labels[busiestIdx]}` : 'Quiet week';
+        }
+
+        /* ===================== PWA REGISTRATION =====================
+           sw.js previously existed but was never registered, so none of the
+           offline behaviour was live. It uses a network-first shell strategy,
+           which means editing index.html and pushing is enough — you don't
+           have to remember to bump a cache version to see your own changes. */
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(reg => {
+                    reg.addEventListener('updatefound', () => {
+                        const incoming = reg.installing;
+                        if (!incoming) return;
+                        incoming.addEventListener('statechange', () => {
+                            if (incoming.state === 'installed' && navigator.serviceWorker.controller) {
+                                showToast('New version ready — reopen to update ✨');
+                            }
+                        });
+                    });
+                }).catch(err => console.warn('Service worker registration failed:', err));
+            });
+        }
+
+        window.onload = () => {
+            migrateLedgerTimestamps();
+            populateMonthTimelineOptions();
+            toggleFormContext();
+            populateCategorySelectFields();
+            // switchView also wires up the toggle chrome, so it replaces the bare render().
+            switchView(state.currentViewMode || 'month');
+        };
     </script>
 </body>
 </html>
