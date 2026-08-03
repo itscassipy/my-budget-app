@@ -5,7 +5,7 @@
    old code until you remember to bump CACHE_NAME. Network-first gets you the
    fresh file whenever you have signal, and the cache is the offline fallback. */
 
-const CACHE_NAME = 'cassidy-budget-v6';
+const CACHE_NAME = 'cassidy-budget-v7';
 const SHELL = './index.html';
 const PRECACHE = [
     './',

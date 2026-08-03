@@ -25,7 +25,7 @@
         }
         
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-main); padding: 24px 16px; padding-bottom: 120px; -webkit-font-smoothing: antialiased; transition: background-color 0.8s ease, color 0.8s ease; overflow-x: hidden; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding: 24px 16px; padding-bottom: calc(140px + env(safe-area-inset-bottom, 0px)); -webkit-font-smoothing: antialiased; transition: background-color 0.8s ease, color 0.8s ease; overflow-x: hidden; }
         .container { max-width: 480px; margin: 0 auto; position: relative; }
         
         /* Tab Management */
@@ -48,7 +48,7 @@
         
         .hero-inline-row { display: flex; gap: 14px; margin-bottom: 20px; justify-content: center; }
         .month-select-wrapper { display: flex; align-items: center; justify-content: center; width: 100%; }
-        select.nav-select { width: 100%; padding: 14px 16px; border-radius: 24px; border: 1px solid var(--border); background: var(--card-bg); font-weight: 600; font-size: 0.88rem; color: var(--text-main); outline: none; -webkit-appearance: none; text-align: center; text-align-last: center; display: flex; align-items: center; justify-content: center; }
+        select.nav-select { width: 100%; padding: 14px 16px; border-radius: 24px; border: 1px solid var(--border); background: var(--card-bg); font-weight: 600; font-size: 16px; color: var(--text-main); outline: none; -webkit-appearance: none; text-align: center; text-align-last: center; display: flex; align-items: center; justify-content: center; }
 
         .card { background: var(--card-bg); border-radius: 28px; padding: 24px; margin-bottom: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.03); border: 1px solid var(--border); }
         .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px; }
@@ -72,7 +72,7 @@
 
         .form-group { margin-bottom: 16px; width: 100%; position: relative; }
         label { display: block; font-size: 0.75rem; color: var(--text-muted); font-weight: 700; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
-        input, select.form-input { width: 100%; max-width: 100%; box-sizing: border-box; padding: 14px; border: 1px solid var(--border); border-radius: 16px; font-size: 0.95rem; background: var(--bg-color); color: var(--text-main); outline: none; margin: 0; text-align-last: center; }
+        input, select.form-input { width: 100%; max-width: 100%; box-sizing: border-box; padding: 14px; border: 1px solid var(--border); border-radius: 16px; font-size: 16px; background: var(--bg-color); color: var(--text-main); outline: none; margin: 0; text-align-last: center; }
         input[type="date"] { -webkit-appearance: none; appearance: none; display: block; text-align: center; }
         input:focus, select.form-input:focus { border-color: var(--venice); background: var(--card-bg); }
         button { width: 100%; padding: 16px; background: var(--venice); color: white; border: none; border-radius: 18px; font-size: 0.95rem; font-weight: 600; cursor: pointer; }
@@ -81,7 +81,7 @@
         button.action-link { background: transparent; color: var(--venice); width: auto; padding: 0; margin: 0; font-size: 0.85rem; font-weight: 700; }
         button:disabled { background: var(--bg-color); color: var(--text-muted); cursor: not-allowed; border: 1px solid var(--border); opacity: 0.7; }
 
-        .fab { position: fixed; bottom: 100px; right: 24px; width: 56px; height: 56px; background: var(--venice); border-radius: 28px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; color: white; box-shadow: 0 12px 24px rgba(136,148,183,0.4); z-index: 1500; cursor: pointer; transition: transform 0.2s ease; border: 2px solid rgba(255,255,255,0.2); }
+        .fab { position: fixed; bottom: calc(104px + env(safe-area-inset-bottom, 0px)); right: 24px; transform: translateZ(0); width: 56px; height: 56px; background: var(--venice); border-radius: 28px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; color: white; box-shadow: 0 12px 24px rgba(136,148,183,0.4); z-index: 1500; cursor: pointer; transition: transform 0.2s ease; border: 2px solid rgba(255,255,255,0.2); }
         .fab:active { transform: scale(0.92); }
 
         #rest-state-banner { display: none; background: var(--block-green); border: 1px solid var(--success); color: var(--success); padding: 12px 16px; border-radius: 16px; font-size: 0.85rem; font-weight: 600; text-align: center; margin-bottom: 20px; animation: fadeIn 0.8s ease; }
@@ -114,7 +114,10 @@
         .sticker-slot.unlocked { background: var(--card-bg); border: 1px solid var(--venice); box-shadow: 0 4px 14px rgba(136,148,183,0.2); animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes pop { 0% { transform: scale(0.8); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
 
-        .bottom-dock { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 380px; background: var(--dock-glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); height: auto; border-radius: 40px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding: 8px 12px; border: 1px solid var(--border); box-shadow: 0 12px 32px rgba(0,0,0,0.08); }
+        .dock-wrap { position: fixed; left: 0; right: 0; bottom: 0; z-index: 1000; display: flex; justify-content: center;
+            padding: 0 16px calc(16px + env(safe-area-inset-bottom, 0px)); pointer-events: none;
+            transform: translateZ(0); -webkit-transform: translateZ(0); will-change: transform; }
+        .bottom-dock { pointer-events: auto; width: 100%; max-width: 380px; background: var(--dock-glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); height: auto; border-radius: 40px; display: flex; justify-content: space-around; align-items: center; padding: 8px 12px; border: 1px solid var(--border); box-shadow: 0 12px 32px rgba(0,0,0,0.08); }
         .dock-item { color: var(--text-muted); font-size: 0.65rem; font-weight: 700; text-transform: uppercase; border: none; background: transparent; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 16px; border-radius: 24px; gap: 2px; transition: all 0.3s; }
         .dock-item span { font-size: 1.2rem; transition: transform 0.3s ease; }
         .dock-item.active { color: var(--text-main); background: var(--card-bg); box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
@@ -143,8 +146,15 @@
 
         .vendor-chip { width: auto; padding: 7px 13px; font-size: 0.72rem; font-weight: 700; background: var(--bg-color); color: var(--text-main); border: 1px solid var(--border); border-radius: 16px; }
         .vendor-chip:active { background: var(--block-yellow); }
-        .undo-pill { position: fixed; bottom: 110px; left: 24px; display: flex; align-items: center; gap: 6px; background: var(--card-bg); color: var(--text-main); border: 1px solid var(--border); border-radius: 22px; padding: 10px 16px; font-size: 0.78rem; font-weight: 700; box-shadow: 0 8px 20px rgba(0,0,0,0.08); z-index: 1500; cursor: pointer; }
+        .undo-pill { position: fixed; bottom: calc(110px + env(safe-area-inset-bottom, 0px)); left: 24px; transform: translateZ(0); display: flex; align-items: center; gap: 6px; background: var(--card-bg); color: var(--text-main); border: 1px solid var(--border); border-radius: 22px; padding: 10px 16px; font-size: 0.78rem; font-weight: 700; box-shadow: 0 8px 20px rgba(0,0,0,0.08); z-index: 1500; cursor: pointer; }
         .undo-pill:active { transform: scale(0.94); }
+
+        /* iOS Safari zooms the viewport when a focused control is under 16px and
+           never zooms back out. That's why the app opened "zoomed in" once
+           user-scalable=no was removed. 16px everywhere is the real fix. */
+        @supports (-webkit-touch-callout: none) {
+            input, select, textarea { font-size: 16px !important; }
+        }
 
         /* ---------- Accessibility & theming ---------- */
         :root { color-scheme: light dark; }
@@ -188,7 +198,7 @@
 
         /* ---------- Search & filter ---------- */
         .filter-row { display: flex; gap: 8px; margin-bottom: 14px; }
-        .filter-row input, .filter-row select { text-align: left; text-align-last: left; font-size: 0.85rem; padding: 12px; }
+        .filter-row input, .filter-row select { text-align: left; text-align-last: left; font-size: 16px; padding: 12px; }
         .chip-row { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 12px; scrollbar-width: none; }
         .chip-row::-webkit-scrollbar { display: none; }
         .filter-chip { width: auto; flex-shrink: 0; padding: 8px 14px; font-size: 0.72rem; font-weight: 700; background: var(--card-bg); color: var(--text-muted); border: 1px solid var(--border); border-radius: 16px; min-height: 36px; }
@@ -294,9 +304,14 @@
                 <button onclick="submitTransaction()">Record Entry</button>
             </div>
 
-            <div class="card" id="waiting-room-card" style="display: none; background: var(--waiting-gradient); border-color: var(--venice);">
-                <h2>the impulse waiting room ⏳</h2>
-                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4;">Impulse wants are cooling down. Max queue size is 5 items.</p>
+            <div class="card" id="waiting-room-card" style="background: var(--waiting-gradient); border-color: var(--venice);">
+                <h2>the impulse waiting room ⏳
+                    <span id="wishlist-count" style="font-size:0.68rem; font-weight:800; text-transform:uppercase; color:var(--text-muted);"></span>
+                </h2>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4;">
+                    Impulse wants sit here for <strong><span id="wishlist-hours">24</span> hours</strong> before you can approve them. Max 5 at a time.
+                    <button class="btn-inline edit" style="text-transform:none;" onclick="switchTab('settings')">Change the wait</button>
+                </p>
                 <ul id="wishlist-container" class="tx-list"></ul>
             </div>
         </div>
@@ -455,6 +470,21 @@
             </div>
 
             <div class="card">
+                <h2>impulse cooldown ⏳</h2>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4;">How long an impulse want has to sit in the waiting room before you're allowed to approve it.</p>
+                <div class="form-group">
+                    <label for="cooldown-hours-input">Wait time</label>
+                    <select id="cooldown-hours-input" class="form-input" onchange="saveCooldown()">
+                        <option value="12">12 hours</option>
+                        <option value="24">24 hours (sleep on it)</option>
+                        <option value="48">48 hours</option>
+                        <option value="72">72 hours</option>
+                        <option value="168">1 week</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="card">
                 <h2>pay cycle 🗓️</h2>
                 <div id="paycycle-summary" style="font-size:0.8rem; color:var(--text-muted); text-align:center; margin-bottom:12px;"></div>
                 <button class="secondary" style="width:100%; padding:14px;" onclick="openRefreshSettings()">Edit pay cycle</button>
@@ -485,13 +515,15 @@
     <div class="undo-pill" id="undo-pill" style="display: none;" onclick="undoLastChange()">↩️ Undo</div>
     <button class="fab" aria-label="Quick add a transaction" onclick="openQuickAddModal()">+</button>
 
-    <nav class="bottom-dock">
+    <div class="dock-wrap">
+    <nav class="bottom-dock" aria-label="Main navigation">
         <button class="dock-item active" data-tab="today" onclick="switchTab('today')"><span>🏠</span> Today</button>
         <button class="dock-item" data-tab="log" onclick="switchTab('log')"><span>📝</span> Log</button>
         <button class="dock-item" data-tab="ledger" onclick="switchTab('ledger')"><span>📊</span> Ledger</button>
         <button class="dock-item" data-tab="plan" onclick="switchTab('plan')"><span>🪴</span> Plan</button>
         <button class="dock-item" data-tab="review" onclick="switchTab('review')"><span>🍵</span> Review</button>
     </nav>
+    </div>
 
     <!-- Quick Add Modal -->
     <div class="modal-overlay" id="quick-add-modal">
@@ -700,6 +732,7 @@
             refreshSettings: { frequency: "7", nextRefreshDate: getUpcomingFridayStr() },
             rolloverPending: false, lastRolloverAmount: 0,
             categoryRolloverThrough: null,
+            cooldownHours: 24,
             categoryTargets: [
                 // kind: 'need' (monthly survival) | 'reserve' (non-monthly, accrues) | 'want' (discretionary)
                 { name: "Housing", limit: 1600, kind: 'need', rollover: false, carried: 0 },
@@ -963,6 +996,7 @@
                 const protectedNow = cat.kind !== 'want';
                 if (cat.nonNegotiable !== protectedNow) { cat.nonNegotiable = protectedNow; changed = true; }
             });
+            if (typeof state.cooldownHours !== 'number' || state.cooldownHours <= 0) { state.cooldownHours = 24; changed = true; }
             // Start accruing from this month forward. Backfilling from history would
             // conjure large carried balances out of months that were never budgeted
             // with rollover in mind.
@@ -1033,6 +1067,9 @@
            you cannot forget to reverse something that was never separately tracked.
            Pots stay stored, because they're a deliberate allocation, not a total. */
         const round2 = n => Math.round(n * 100) / 100;
+
+        const cooldownHours = () => Number(state.cooldownHours) > 0 ? Number(state.cooldownHours) : 24;
+        const cooldownMs = () => cooldownHours() * 3600000;
 
         function cashBalance() {
             let bal = state.openingBalance || 0;
@@ -1324,7 +1361,7 @@
                     <div style="flex:1; min-width:0;">
                         <strong style="font-size:0.82rem;">${esc(r.desc.slice(0, 34))}</strong><br>
                         <span style="font-size:0.66rem; color:var(--text-muted);">${r.day}</span>
-                        ${r.isIncome ? '' : `<select style="font-size:0.68rem; padding:4px 6px; margin-top:4px; text-align-last:left;" onchange="csvPending[${i}].cat = this.value">
+                        ${r.isIncome ? '' : `<select style="font-size:16px; padding:6px 8px; margin-top:6px; text-align-last:left; width:100%;" onchange="csvPending[${i}].cat = this.value">
                             <option value="">— use default —</option>
                             ${opts.map(o => `<option value="${o}" ${r.cat === o ? 'selected' : ''}>${o}</option>`).join('')}
                         </select>`}
@@ -1712,6 +1749,12 @@
             </div>`;
         }
 
+        function saveCooldown() {
+            state.cooldownHours = Number(document.getElementById('cooldown-hours-input').value) || 24;
+            save('the cooldown change');
+            showToast(`Impulse wait set to ${cooldownHours()} hours ⏳`);
+        }
+
         function saveOpeningBalance() {
             const val = parseFloat(document.getElementById('opening-balance-input').value);
             if (isNaN(val)) return;
@@ -1723,6 +1766,8 @@
         function renderSettingsSummaries() {
             const ob = document.getElementById('opening-balance-input');
             if (ob && document.activeElement !== ob) ob.value = (state.openingBalance || 0).toFixed(2);
+            const cd = document.getElementById('cooldown-hours-input');
+            if (cd && document.activeElement !== cd) cd.value = String(cooldownHours());
             const pc = document.getElementById('paycycle-summary');
             if (pc) {
                 const freqLabel = { '7': 'Weekly', '14': 'Bi-weekly', '15': 'Semi-monthly', '30': 'Monthly' }[String(state.refreshSettings.frequency)] || 'Custom';
@@ -1969,21 +2014,35 @@
             const container = document.getElementById('wishlist-container');
             if (!container || !card) return;
             container.innerHTML = '';
-            if(state.wishlist.length === 0) { card.style.display = 'none'; return; }
+            // Always visible: hiding it when empty is precisely when you'd go
+            // looking for it and conclude the feature doesn't exist.
             card.style.display = 'block';
-            
+            const countEl = document.getElementById('wishlist-count');
+            if (countEl) countEl.innerText = state.wishlist.length ? `${state.wishlist.length}/5 waiting` : 'empty';
+            const hoursEl = document.getElementById('wishlist-hours');
+            if (hoursEl) hoursEl.innerText = cooldownHours();
+
+            if (state.wishlist.length === 0) {
+                container.innerHTML = `<li><div class="empty-state">
+                    <span class="es-icon">⏳</span>
+                    <div class="es-title">nothing cooling down</div>
+                    <div class="es-body">Want something that isn't a need? Log it above as an <strong>Impulse want</strong> instead of an expense. It sits here for ${cooldownHours()} hours before you can approve it — and no money moves until you do.</div>
+                </div></li>`;
+                return;
+            }
+
             const isVelocityLocked = choiceCash < 50; 
             const now = Date.now();
             
             state.wishlist.forEach(item => {
-                const remainingMs = (48 * 60 * 60 * 1000) - (now - item.timestamp);
+                const remainingMs = cooldownMs() - (now - item.timestamp);
                 let timeText = ""; let lockedByTime = remainingMs > 0;
                 
                 if (lockedByTime) {
                     const hours = Math.floor(remainingMs / (1000 * 60 * 60)); const mins = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
-                    timeText = `🔒 Locks lift in ${hours}h ${mins}m`;
+                    timeText = `🔒 Unlocks in ${hours}h ${mins}m`;
                 } else if (isVelocityLocked) {
-                    timeText = `🚨 LOCKED: Insufficient Wants Pacing. Wait until cycle refresh.`;
+                    timeText = `🚨 Locked: not enough Wants allowance left this cycle.`;
                 } else {
                     timeText = `✅ Unlocked & ready`;
                 }
