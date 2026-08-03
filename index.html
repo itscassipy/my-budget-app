@@ -140,6 +140,8 @@
         .week-summary-cell .stat-lbl { font-size: 0.6rem; }
         .week-summary-cell .stat-val { font-size: 1rem; margin-top: 4px; }
 
+        .vendor-chip { width: auto; padding: 7px 13px; font-size: 0.72rem; font-weight: 700; background: var(--bg-color); color: var(--text-main); border: 1px solid var(--border); border-radius: 16px; }
+        .vendor-chip:active { background: var(--block-yellow); }
         .undo-pill { position: fixed; bottom: 110px; left: 24px; display: flex; align-items: center; gap: 6px; background: var(--card-bg); color: var(--text-main); border: 1px solid var(--border); border-radius: 22px; padding: 10px 16px; font-size: 0.78rem; font-weight: 700; box-shadow: 0 8px 20px rgba(0,0,0,0.08); z-index: 1500; cursor: pointer; }
         .undo-pill:active { transform: scale(0.94); }
     </style>
@@ -194,7 +196,8 @@
                 <div id="hero-allowance-label" style="font-size: 0.75rem; font-weight: 800; color: var(--warning); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 4px;">Guilt-Free "Wants" Allowance</div>
                 <div id="dash-choice-cash" style="font-size: 3.2rem; font-family: 'Georgia', serif; font-style: italic; font-weight: 400; color: var(--text-main); margin-bottom: 12px;">$0.00</div>
                 
-                <div id="hero-gamified-msg" style="font-size: 0.9rem; font-weight: 600; color: var(--success); margin-bottom: 24px; padding: 0 10px;">✨ You're pacing beautifully! Keep it cozy.</div>
+                <div id="hero-gamified-msg" style="font-size: 0.9rem; font-weight: 600; color: var(--success); margin-bottom: 8px; padding: 0 10px;">✨ You're pacing beautifully! Keep it cozy.</div>
+                <div id="hero-daily-rate" style="font-size: 1rem; font-weight: 700; color: var(--text-main); margin-bottom: 20px;"></div>
 
                 <div style="background: var(--bg-color); border-radius: 18px; padding: 16px; border: 1px solid var(--border); cursor: pointer;" onclick="openRefreshSettings()">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
@@ -223,6 +226,19 @@
                     <div class="stat-lbl" style="color: #4A5568;"><span class="view-label-ctx">Month</span> Net Cash</div>
                     <div class="stat-val" id="dash-month-net" style="color: #1C1E24;">$0.00</div>
                 </div>
+            </div>
+
+            <div class="card" style="padding: 18px 22px;" id="age-of-money-card">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <div class="stat-lbl">Age of Money</div>
+                        <div class="stat-val" id="dash-age-of-money" style="font-size: 1.6rem;">—</div>
+                    </div>
+                    <div style="text-align:right; max-width: 55%;">
+                        <div id="age-of-money-note" style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.4;">How long a dollar sits with you before you spend it. 30+ days means you're a month ahead.</div>
+                    </div>
+                </div>
+                <div class="progress-bg" style="margin-top: 12px;"><div id="age-of-money-bar" class="progress-bar" style="width: 0%; background: var(--venice);"></div></div>
             </div>
 
             <!-- Week-only: 7-day spending shape -->
@@ -259,8 +275,24 @@
             </div>
 
             <div class="card">
-                <h2><span class="view-label-ctx">Month</span> spending targets</h2>
+                <h2><span class="view-label-ctx">Month</span> spending targets
+                    <button class="secondary" style="font-size:0.72rem;" onclick="openMoveMoney()">🔀 Move money</button>
+                </h2>
                 <div id="category-caps-container"></div>
+            </div>
+
+            <div class="card" id="weekly-close-card" style="display: none; background: var(--waiting-gradient); border-color: var(--venice);">
+                <h2>close the week 🍵</h2>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4;">Two questions, once a week. This is the part that actually changes behaviour — the stamps only track that you showed up.</p>
+                <div id="weekly-close-summary" style="font-size: 0.82rem; margin-bottom: 14px;"></div>
+                <div class="form-group"><label>What was worth it?</label><input type="text" id="review-worth" placeholder="e.g., the concert, no regrets"></div>
+                <div class="form-group"><label>What will you change next week?</label><input type="text" id="review-change" placeholder="e.g., cook Thursday instead of takeout"></div>
+                <button onclick="saveWeeklyReview()">Save & Close the Week</button>
+            </div>
+
+            <div class="card" id="past-reviews-card" style="display: none;">
+                <h2>weekly reflections</h2>
+                <ul id="past-reviews-list" class="tx-list"></ul>
             </div>
         </div>
 
@@ -341,6 +373,20 @@
                 <div id="sticker-grid-container" class="sticker-grid"></div>
             </div>
 
+            <div class="card" id="reconcile-card">
+                <h2>reconcile 🏦</h2>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4;">A hand-kept ledger drifts. Check it against your real bank balance every week or two so the numbers stay worth trusting.</p>
+                <div id="reconcile-last" style="font-size: 0.75rem; color: var(--text-muted); text-align:center; margin-bottom: 12px;"></div>
+                <button style="background: var(--success);" onclick="openReconcile()">⚖️ Reconcile Balance</button>
+            </div>
+
+            <div class="card" id="csv-card">
+                <h2>import from bank csv 📥</h2>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4;">Export a CSV from your bank and drop it here. Rows already in your ledger are skipped automatically.</p>
+                <button class="secondary" style="width:100%; padding:14px; background: var(--venice); color: white;" onclick="document.getElementById('csv-file').click()">Choose CSV File</button>
+                <input type="file" id="csv-file" accept=".csv,text/csv" style="display:none" onchange="handleCsvFile(event)">
+            </div>
+
             <div class="card" id="backup-manager">
                 <h2>data vault 💾</h2>
                 <div id="storage-status" style="font-size: 0.75rem; font-weight: 700; text-align: center; padding: 10px; background: var(--bg-color); border-radius: 14px; margin-bottom: 14px;">Checking storage…</div>
@@ -371,6 +417,7 @@
         <div class="modal-card">
             <h3 style="color: var(--venice);">Fast Capture ⚡</h3>
             <p>Log a necessary Need or clear a Want instantly.</p>
+            <div id="qa-chips" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; justify-content:center;"></div>
             <div class="form-group">
                 <label>Description</label>
                 <input type="text" id="qa-desc" class="form-input" placeholder="e.g., Whole Foods" onkeyup="checkVendorMemory(this.value, 'qa-cat')">
@@ -408,6 +455,47 @@
                 <button style="background: var(--border); color: var(--text-main); border: 1px solid var(--border);" onclick="recalibrateWithDebt()">Option 2: Log as Debt (Pull from Future)</button>
                 <button style="background: transparent; color: var(--text-muted); border: 1px solid var(--border);" onclick="closeRecalibration()">Option 3: Cancel Entry (Save the Cash!)</button>
             </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="reconcile-modal">
+        <div class="modal-card">
+            <h3 style="color: var(--success);">Reconcile ⚖️</h3>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px;">Open your banking app and type the balance it shows.</p>
+            <div style="display:flex; justify-content:space-between; padding: 12px 16px; background: var(--bg-color); border-radius: 14px; margin-bottom: 14px; font-size: 0.85rem;">
+                <span style="color: var(--text-muted); font-weight: 700;">This app says</span>
+                <strong id="reconcile-app-balance">$0.00</strong>
+            </div>
+            <div class="form-group"><label>Actual bank balance ($)</label><input type="number" id="reconcile-actual" placeholder="0.00" oninput="previewReconcile()"></div>
+            <div id="reconcile-diff" style="text-align:center; padding: 4px 0 16px;"></div>
+            <button id="reconcile-apply" onclick="applyReconcile()" disabled>Write Adjustment</button>
+            <button class="secondary" style="width: 100%; margin-top: 10px;" onclick="closeReconcile()">Cancel</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="move-money-modal">
+        <div class="modal-card">
+            <h3 style="color: var(--venice);">Move Money 🔀</h3>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px;">Went over in one category? Cover it from another. This is a decision, not a failure — no guilt.</p>
+            <div class="form-group"><label>Take from</label><select id="move-from" class="form-input"></select></div>
+            <div class="form-group"><label>Give to</label><select id="move-to" class="form-input"></select></div>
+            <div class="form-group"><label>Amount ($)</label><input type="number" id="move-amount" placeholder="0.00"></div>
+            <button onclick="applyMoveMoney()">Move It</button>
+            <button class="secondary" style="width: 100%; margin-top: 10px;" onclick="closeMoveMoney()">Cancel</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="csv-modal">
+        <div class="modal-card" style="max-width: 460px;">
+            <h3 style="color: var(--venice);">Review Import 📥</h3>
+            <div id="csv-summary" style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;"></div>
+            <div class="form-group" style="margin-bottom: 10px;">
+                <label>Default category for unmatched rows</label>
+                <select id="csv-default-cat" class="form-input"></select>
+            </div>
+            <div id="csv-rows" style="max-height: 300px; overflow-y: auto; margin-bottom: 14px;"></div>
+            <button onclick="commitCsvImport()">Import Selected</button>
+            <button class="secondary" style="width: 100%; margin-top: 10px;" onclick="document.getElementById('csv-modal').style.display='none'">Cancel</button>
         </div>
     </div>
 
@@ -470,7 +558,7 @@
         const SNAPSHOT_KEY = 'cassidyProBudgetSnapshots';
 
         let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
-            globalBalance: 0, currentViewMode: 'month',
+            openingBalance: 0, currentViewMode: 'month',
             pots: [], ledger: [], wishlist: [], stamps: {}, vendors: {},
             stickers: { blossom: false, sprout: false, matcha: false, lantern: false, star: false },
             txCount: 0, bonusTokens: 0, 
@@ -764,15 +852,18 @@
                 if (rollovers.length) {
                     const spentInMonth = {};
                     state.ledger.forEach(item => {
-                        if (item.type === 'income' || item.monthKey !== cursor) return;
+                        if (item.type === 'income' || item.excluded || item.monthKey !== cursor) return;
                         spentInMonth[item.cat] = (spentInMonth[item.cat] || 0) + item.amt;
                     });
                     rollovers.forEach(cat => {
                         const spent = spentInMonth[cat.name] || 0;
                         // Surplus banks; a deficit carries as a debt, same as Monarch.
-                        cat.carried = Math.round(((cat.carried || 0) + (cat.limit - spent)) * 100) / 100;
+                        cat.carried = round2((cat.carried || 0) + (cat.limit - spent));
                     });
                 }
+                // A move-money adjustment is a decision about *this* month. Categories
+                // without rollover shed it at close instead of compounding forever.
+                state.categoryTargets.forEach(c => { if (!c.rollover) c.carried = 0; });
                 cursor = nextMonthKey(cursor);
             }
             state.categoryRolloverThrough = current;
@@ -794,6 +885,460 @@
             if (!confirm(`Zero out the $${cat.carried.toFixed(2)} banked in "${name}"? Use this after you've actually spent it on the real-world bill.`)) return;
             cat.carried = 0;
             save('the balance reset');
+        }
+
+        /* ===================== DERIVED CASH BALANCE =====================
+           Cash is no longer a stored counter that every mutation has to remember
+           to update — it's computed from the ledger. `openingBalance` is the only
+           stored figure. This makes an entire class of bug structurally impossible:
+           you cannot forget to reverse something that was never separately tracked.
+           Pots stay stored, because they're a deliberate allocation, not a total. */
+        const round2 = n => Math.round(n * 100) / 100;
+
+        function cashBalance() {
+            let bal = state.openingBalance || 0;
+            for (const item of state.ledger) {
+                if (item.type === 'income') bal += (item.net || 0);
+                else if (!item.paidFromPot) bal -= (item.amt || 0); // pot-funded spend never touched cash
+            }
+            return round2(bal);
+        }
+
+        function ledgerNetMovement(ledger) {
+            let net = 0;
+            (ledger || []).forEach(item => {
+                if (item.type === 'income') net += (item.net || 0);
+                else if (!item.paidFromPot) net -= (item.amt || 0);
+            });
+            return round2(net);
+        }
+
+        // Converts a legacy stored balance into an opening balance that reproduces
+        // exactly the number the user was already seeing. No silent restatement.
+        function migrateToDerivedBalance() {
+            if (typeof state.openingBalance === 'number') return;
+            const legacy = typeof state.globalBalance === 'number' ? state.globalBalance : 0;
+            state.openingBalance = round2(legacy - ledgerNetMovement(state.ledger));
+            delete state.globalBalance;
+            persist();
+        }
+
+        function describeIncomingBalance(incoming) {
+            if (typeof incoming.openingBalance === 'number') {
+                return round2(incoming.openingBalance + ledgerNetMovement(incoming.ledger)).toFixed(2);
+            }
+            return Number(incoming.globalBalance || 0).toFixed(2);
+        }
+
+        /* ===================== RECONCILIATION =====================
+           A hand-kept ledger drifts. Without a way to true it up against the real
+           account, the app slowly becomes fiction while still looking authoritative. */
+        function openReconcile() {
+            document.getElementById('reconcile-actual').value = '';
+            document.getElementById('reconcile-diff').innerHTML = '';
+            document.getElementById('reconcile-apply').disabled = true;
+            document.getElementById('reconcile-app-balance').innerText = `$${cashBalance().toFixed(2)}`;
+            document.getElementById('reconcile-modal').style.display = 'flex';
+        }
+        function closeReconcile() { document.getElementById('reconcile-modal').style.display = 'none'; }
+
+        function previewReconcile() {
+            const actual = parseFloat(document.getElementById('reconcile-actual').value);
+            const box = document.getElementById('reconcile-diff');
+            const btn = document.getElementById('reconcile-apply');
+            if (isNaN(actual)) { box.innerHTML = ''; btn.disabled = true; return; }
+            const diff = round2(actual - cashBalance());
+            btn.disabled = Math.abs(diff) < 0.005;
+            if (Math.abs(diff) < 0.005) {
+                box.innerHTML = `<div style="color: var(--success); font-weight: 700;">✅ Already matches. Nothing to adjust.</div>`;
+            } else {
+                const dir = diff > 0 ? 'more' : 'less';
+                box.innerHTML = `<div style="font-weight:700; color: ${diff > 0 ? 'var(--success)' : 'var(--danger)'};">
+                        Off by $${Math.abs(diff).toFixed(2)}</div>
+                    <div style="font-size:0.75rem; color: var(--text-muted); margin-top:6px; line-height:1.4;">
+                        Your bank has ${dir} than the app thinks — usually a purchase you didn't log${diff > 0 ? ', a refund, or interest' : ' or a fee'}.
+                        Applying this writes one adjustment entry. It won't touch your category budgets.</div>`;
+            }
+        }
+
+        function applyReconcile() {
+            const actual = parseFloat(document.getElementById('reconcile-actual').value);
+            if (isNaN(actual)) return;
+            const diff = round2(actual - cashBalance());
+            if (Math.abs(diff) < 0.005) { closeReconcile(); return; }
+            state.ledger.unshift({
+                id: Date.now(),
+                type: diff > 0 ? 'income' : 'expense',
+                desc: 'Balance adjustment (reconcile)',
+                cat: 'Adjustment', isNeed: false, excluded: true,
+                ...(diff > 0 ? { net: Math.abs(diff) } : { amt: Math.abs(diff) }),
+                ...stampFor(null)
+            });
+            state.lastReconciled = { at: Date.now(), balance: actual };
+            closeReconcile();
+            save('the reconciliation');
+            showToast(`Reconciled to $${actual.toFixed(2)} ⚖️`);
+        }
+
+        /* ===================== AGE OF MONEY =====================
+           FIFO-matches each expense against the oldest unspent income. Answers the
+           one question none of the other metrics can: am I actually getting ahead,
+           or just not falling behind inside this particular window?            */
+        function ageOfMoney() {
+            const income = state.ledger.filter(i => i.type === 'income' && !i.excluded)
+                .map(i => ({ ts: getTxTime(i), left: i.net || 0 })).sort((a, b) => a.ts - b.ts);
+            const spend = state.ledger.filter(i => i.type !== 'income' && !i.excluded && !i.paidFromPot)
+                .map(i => ({ ts: getTxTime(i), amt: i.amt || 0 })).sort((a, b) => a.ts - b.ts);
+            if (!income.length || !spend.length) return null;
+
+            const cutoff = Date.now() - 90 * MS_DAY; // average over recent spending only
+            let head = 0, weighted = 0, counted = 0;
+            for (const s of spend) {
+                let need = s.amt;
+                while (need > 0.005 && head < income.length) {
+                    if (income[head].left <= 0.005) { head++; continue; }
+                    const take = Math.min(need, income[head].left);
+                    income[head].left -= take; need -= take;
+                    if (s.ts >= cutoff) {
+                        weighted += Math.max(0, (s.ts - income[head].ts) / MS_DAY) * take;
+                        counted += take;
+                    }
+                }
+                if (head >= income.length) break; // spending outran recorded income
+            }
+            if (counted < 0.01) return null;
+            return Math.round(weighted / counted);
+        }
+
+        function daysUntilRefresh() {
+            const today = new Date(); today.setHours(0,0,0,0);
+            const parts = String(state.refreshSettings.nextRefreshDate || '').split('-');
+            if (parts.length !== 3) return null;
+            const refresh = new Date(+parts[0], +parts[1] - 1, +parts[2]); refresh.setHours(0,0,0,0);
+            return Math.ceil((refresh - today) / MS_DAY);
+        }
+
+        /* ===================== MOVE MONEY (YNAB rule three) =====================
+           Overspending should be a decision you make, not a failure the app scolds
+           you for. `carried` doubles as this month's adjustment to a category. */
+        function openMoveMoney() {
+            const from = document.getElementById('move-from'), to = document.getElementById('move-to');
+            const opts = state.categoryTargets.map(c =>
+                `<option value="${esc(c.name)}">${esc(c.name)}${c.carried ? ` (${c.carried > 0 ? '+' : ''}$${c.carried.toFixed(0)})` : ''}</option>`).join('');
+            from.innerHTML = opts; to.innerHTML = opts;
+            if (state.categoryTargets.length > 1) to.selectedIndex = 1;
+            document.getElementById('move-amount').value = '';
+            document.getElementById('move-money-modal').style.display = 'flex';
+        }
+        function closeMoveMoney() { document.getElementById('move-money-modal').style.display = 'none'; }
+        function applyMoveMoney() {
+            const fromName = document.getElementById('move-from').value;
+            const toName = document.getElementById('move-to').value;
+            const amt = parseFloat(document.getElementById('move-amount').value);
+            if (!amt || amt <= 0) return;
+            if (fromName === toName) { alert("Pick two different categories."); return; }
+            const from = state.categoryTargets.find(c => c.name === fromName);
+            const to = state.categoryTargets.find(c => c.name === toName);
+            if (!from || !to) return;
+            from.carried = round2((from.carried || 0) - amt);
+            to.carried = round2((to.carried || 0) + amt);
+            closeMoveMoney();
+            save('the money move');
+            showToast(`Moved $${amt.toFixed(0)} to ${toName} 🔀`);
+        }
+
+        /* ===================== CSV IMPORT =====================
+           Manual entry is the model, but it's also the reason budget apps get
+           abandoned around month three. A bank CSV closes the gap without
+           handing credentials to an aggregator.                             */
+        let csvPending = [];
+
+        // Minimal RFC4180-ish parser: handles quoted fields, escaped quotes, CRLF.
+        function parseCsv(text) {
+            const rows = []; let row = [], field = '', inQuotes = false;
+            for (let i = 0; i < text.length; i++) {
+                const c = text[i];
+                if (inQuotes) {
+                    if (c === '"') { if (text[i + 1] === '"') { field += '"'; i++; } else inQuotes = false; }
+                    else field += c;
+                } else if (c === '"') inQuotes = true;
+                else if (c === ',') { row.push(field); field = ''; }
+                else if (c === '\n' || c === '\r') {
+                    if (c === '\r' && text[i + 1] === '\n') i++;
+                    row.push(field); field = '';
+                    if (row.some(v => v.trim() !== '')) rows.push(row);
+                    row = [];
+                } else field += c;
+            }
+            row.push(field);
+            if (row.some(v => v.trim() !== '')) rows.push(row);
+            return rows;
+        }
+
+        function findColumn(headers, candidates) {
+            for (const cand of candidates) {
+                const i = headers.findIndex(h => h.includes(cand));
+                if (i !== -1) return i;
+            }
+            return -1;
+        }
+
+        function parseCsvDate(raw) {
+            const v = String(raw).trim();
+            let m = v.match(/^(\d{4})-(\d{2})-(\d{2})/);            // ISO
+            if (m) return new Date(+m[1], +m[2] - 1, +m[3], 12);
+            m = v.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/); // US M/D/Y
+            if (m) { let y = +m[3]; if (y < 100) y += 2000; return new Date(y, +m[1] - 1, +m[2], 12); }
+            const d = new Date(v);
+            return isNaN(d.getTime()) ? null : d;
+        }
+
+        // Same day + same amount + same description = already recorded.
+        function dedupeKey(dateStr, amt, desc) {
+            return `${dateStr}|${Math.round(amt * 100)}|${String(desc).trim().toLowerCase().slice(0, 40)}`;
+        }
+
+        function existingLedgerKeys() {
+            const set = new Set();
+            state.ledger.forEach(i => {
+                const t = getTxTime(i);
+                if (!t) return;
+                set.add(dedupeKey(toDateInputValue(new Date(t)), i.type === 'income' ? (i.net || 0) : (i.amt || 0), i.desc));
+            });
+            return set;
+        }
+
+        function handleCsvFile(event) {
+            const file = event.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                try { buildCsvPreview(String(e.target.result)); }
+                catch (err) { alert("Couldn't read that CSV: " + err.message); }
+                finally { event.target.value = ''; }
+            };
+            reader.readAsText(file);
+        }
+
+        function buildCsvPreview(text) {
+            const rows = parseCsv(text);
+            if (rows.length < 2) { alert("That file doesn't have any data rows."); return; }
+            const headers = rows[0].map(h => h.trim().toLowerCase());
+            const dateIdx = findColumn(headers, ['date', 'posted', 'transaction date']);
+            const descIdx = findColumn(headers, ['description', 'payee', 'name', 'memo', 'merchant', 'details']);
+            const amtIdx = findColumn(headers, ['amount', 'value']);
+            const debitIdx = findColumn(headers, ['debit', 'withdrawal']);
+            const creditIdx = findColumn(headers, ['credit', 'deposit']);
+
+            if (dateIdx === -1 || descIdx === -1 || (amtIdx === -1 && debitIdx === -1)) {
+                alert(`Couldn't identify the columns.\n\nFound: ${headers.join(', ')}\n\nNeeds a date column, a description column, and either an amount column or debit/credit columns.`);
+                return;
+            }
+
+            const known = existingLedgerKeys();
+            const seenInFile = new Set();
+            csvPending = []; let skipped = 0, unparsed = 0;
+
+            rows.slice(1).forEach(cols => {
+                const d = parseCsvDate(cols[dateIdx]);
+                if (!d) { unparsed++; return; }
+                const desc = String(cols[descIdx] || '').trim();
+                let raw;
+                if (amtIdx !== -1) raw = parseFloat(String(cols[amtIdx]).replace(/[$,\s]/g, ''));
+                else {
+                    const deb = parseFloat(String(cols[debitIdx] || '').replace(/[$,\s]/g, '')) || 0;
+                    const cred = creditIdx !== -1 ? (parseFloat(String(cols[creditIdx] || '').replace(/[$,\s]/g, '')) || 0) : 0;
+                    raw = cred - deb;
+                }
+                if (isNaN(raw) || Math.abs(raw) < 0.005 || !desc) { unparsed++; return; }
+
+                const dayStr = toDateInputValue(d);
+                const key = dedupeKey(dayStr, Math.abs(raw), desc);
+                if (known.has(key) || seenInFile.has(key)) { skipped++; return; }
+                seenInFile.add(key);
+
+                csvPending.push({
+                    day: dayStr, desc, amount: Math.abs(raw),
+                    isIncome: raw > 0,                       // most exports use negative for spending
+                    cat: state.vendors[desc.toLowerCase()] || null,
+                    include: true
+                });
+            });
+
+            if (!csvPending.length) {
+                alert(`Nothing new to import.\n\n${skipped} row${skipped === 1 ? '' : 's'} already in your ledger, ${unparsed} unreadable.`);
+                return;
+            }
+
+            const catSelect = document.getElementById('csv-default-cat');
+            catSelect.innerHTML = state.categoryTargets.map(c => `<option value="${esc(c.name)}">${esc(c.name)}</option>`).join('');
+            document.getElementById('csv-summary').innerText =
+                `${csvPending.length} new row${csvPending.length === 1 ? '' : 's'} · ${skipped} already logged · ${unparsed} unreadable`;
+            renderCsvRows();
+            document.getElementById('csv-modal').style.display = 'flex';
+        }
+
+        function renderCsvRows() {
+            const opts = state.categoryTargets.map(c => esc(c.name));
+            document.getElementById('csv-rows').innerHTML = csvPending.map((r, i) => `
+                <li class="tx-item" style="align-items:center; gap:10px;">
+                    <input type="checkbox" style="width:auto; margin:0;" ${r.include ? 'checked' : ''} onchange="csvPending[${i}].include = this.checked">
+                    <div style="flex:1; min-width:0;">
+                        <strong style="font-size:0.82rem;">${esc(r.desc.slice(0, 34))}</strong><br>
+                        <span style="font-size:0.66rem; color:var(--text-muted);">${r.day}</span>
+                        ${r.isIncome ? '' : `<select style="font-size:0.68rem; padding:4px 6px; margin-top:4px; text-align-last:left;" onchange="csvPending[${i}].cat = this.value">
+                            <option value="">— use default —</option>
+                            ${opts.map(o => `<option value="${o}" ${r.cat === o ? 'selected' : ''}>${o}</option>`).join('')}
+                        </select>`}
+                    </div>
+                    <span style="font-weight:700; font-size:0.85rem; color:${r.isIncome ? 'var(--success)' : 'var(--text-main)'};">${r.isIncome ? '+' : '−'}$${r.amount.toFixed(2)}</span>
+                </li>`).join('');
+        }
+
+        function commitCsvImport() {
+            const fallback = document.getElementById('csv-default-cat').value;
+            const chosen = csvPending.filter(r => r.include);
+            if (!chosen.length) { document.getElementById('csv-modal').style.display = 'none'; return; }
+            chosen.forEach((r, n) => {
+                const stamp = stampFor(r.day);
+                if (r.isIncome) {
+                    state.ledger.unshift({ id: Date.now() + n, type: 'income', desc: r.desc, net: r.amount, ...stamp });
+                } else {
+                    const cat = r.cat || fallback;
+                    state.vendors[r.desc.toLowerCase()] = cat;
+                    state.ledger.unshift({ id: Date.now() + n, type: 'expense', desc: r.desc, amt: r.amount, cat, isNeed: catIsNeed(cat), ...stamp });
+                }
+            });
+            csvPending = [];
+            document.getElementById('csv-modal').style.display = 'none';
+            save('the CSV import');
+            showToast(`Imported ${chosen.length} transaction${chosen.length === 1 ? '' : 's'} 📥`);
+        }
+
+        /* ===================== FAST ENTRY ===================== */
+        function renderVendorChips() {
+            const box = document.getElementById('qa-chips');
+            if (!box) return;
+            const seen = new Set(); const chips = [];
+            for (const item of state.ledger) {
+                if (item.type === 'income' || item.excluded || chips.length >= 6) continue;
+                const key = item.desc.toLowerCase();
+                if (seen.has(key)) continue;
+                seen.add(key);
+                if (state.categoryTargets.some(c => c.name === item.cat)) chips.push({ desc: item.desc, cat: item.cat });
+            }
+            box.innerHTML = chips.length
+                ? chips.map(c => `<button type="button" class="vendor-chip" data-desc="${esc(c.desc)}" data-cat="${esc(c.cat)}" onclick="applyVendorChip(this)">${esc(c.desc.slice(0, 18))}</button>`).join('')
+                : '';
+        }
+        function applyVendorChip(btn) {
+            document.getElementById('qa-desc').value = btn.dataset.desc;
+            const sel = document.getElementById('qa-cat');
+            if (sel) sel.value = btn.dataset.cat;
+            document.getElementById('qa-amount').focus();
+        }
+
+        /* ===================== WEEKLY REVIEW ===================== */
+        function weekKeyOf(bounds) { return toDateInputValue(bounds.start); }
+
+        function saveWeeklyReview() {
+            const bounds = getWeekBounds(weekOffset);
+            const key = weekKeyOf(bounds);
+            const worth = document.getElementById('review-worth').value.trim();
+            const change = document.getElementById('review-change').value.trim();
+            if (!worth && !change) { alert("Write at least one line — that's the whole point."); return; }
+            if (!state.reviews) state.reviews = {};
+            state.reviews[key] = { worth, change, at: Date.now() };
+            save('the weekly review');
+            showToast("Week closed 🍵");
+        }
+
+        function renderWeeklyReview(bounds, weekLedger) {
+            const card = document.getElementById('weekly-close-card');
+            const pastCard = document.getElementById('past-reviews-card');
+            if (!card) return;
+            const reviews = state.reviews || {};
+
+            if (!bounds) { card.style.display = 'none'; }
+            else {
+                const key = weekKeyOf(bounds);
+                const existing = reviews[key];
+                const spent = weekLedger.filter(i => i.type !== 'income' && !i.excluded).reduce((a, b) => a + b.amt, 0);
+                // Only offer the ritual once the week has actually happened.
+                const weekOver = Date.now() >= bounds.endMs - MS_DAY;
+                card.style.display = (weekOver || existing) ? 'block' : 'none';
+                document.getElementById('weekly-close-summary').innerHTML =
+                    `<strong>${formatWeekRange(bounds)}</strong> — $${spent.toFixed(0)} spent across ${weekLedger.length} entries.`;
+                document.getElementById('review-worth').value = existing ? existing.worth : '';
+                document.getElementById('review-change').value = existing ? existing.change : '';
+            }
+
+            const entries = Object.entries(reviews).sort((a, b) => b[0].localeCompare(a[0])).slice(0, 6);
+            if (!entries.length) { pastCard.style.display = 'none'; return; }
+            pastCard.style.display = 'block';
+            document.getElementById('past-reviews-list').innerHTML = entries.map(([k, r]) => `
+                <li class="tx-item" style="flex-direction:column; align-items:flex-start; gap:4px;">
+                    <span style="font-size:0.66rem; font-weight:800; color:var(--text-muted); text-transform:uppercase;">week of ${k}</span>
+                    ${r.worth ? `<div style="font-size:0.82rem;">✨ ${esc(r.worth)}</div>` : ''}
+                    ${r.change ? `<div style="font-size:0.82rem; color:var(--text-muted);">🌱 ${esc(r.change)}</div>` : ''}
+                </li>`).join('');
+        }
+
+        function renderAgeOfMoney() {
+            const el = document.getElementById('dash-age-of-money');
+            const bar = document.getElementById('age-of-money-bar');
+            const note = document.getElementById('age-of-money-note');
+            if (!el) return;
+            const age = ageOfMoney();
+            if (age === null) {
+                el.innerText = '—';
+                bar.style.width = '0%';
+                note.innerText = 'Log a paycheck and some spending and this will start tracking.';
+                return;
+            }
+            el.innerText = `${age} day${age === 1 ? '' : 's'}`;
+            const pct = Math.min(100, (age / 30) * 100);
+            bar.style.width = `${pct}%`;
+            bar.style.background = age >= 30 ? 'var(--success)' : (age >= 14 ? 'var(--warning)' : 'var(--danger)');
+            el.style.color = age >= 30 ? 'var(--success)' : 'var(--text-main)';
+            note.innerText = age >= 30
+                ? "You're spending last month's money. This is the goal — you're a full cycle ahead."
+                : `${30 - age} more days of ageing to break the paycheck-to-paycheck cycle.`;
+        }
+
+        function renderDailyRate(choiceCash, isWeekMode, weekBounds) {
+            const el = document.getElementById('hero-daily-rate');
+            if (!el) return;
+            let days, label;
+            if (isWeekMode) {
+                // Days left in the week being viewed (whole week if it's in the future).
+                const remainingMs = weekBounds.endMs - Date.now();
+                days = Math.max(1, Math.min(7, Math.ceil(remainingMs / MS_DAY)));
+                label = days === 1 ? 'for the rest of today' : `for the ${days} days left this week`;
+                if (Date.now() < weekBounds.startMs) { days = 7; label = 'per day next week'; }
+            } else {
+                const until = daysUntilRefresh();
+                if (until === null || until <= 0) { el.innerHTML = `<span style="color: var(--shine);">Payday — a fresh cycle starts now 🎉</span>`; return; }
+                days = until;
+                label = until === 1 ? 'to spend before tomorrow\'s payday' : `per day for ${until} days until payday`;
+            }
+            if (choiceCash <= 0) {
+                el.innerHTML = `<span style="color: var(--danger); font-size: 0.9rem;">Nothing left to pace — hold off or move money between categories.</span>`;
+                return;
+            }
+            const perDay = choiceCash / days;
+            el.innerHTML = `<span style="color: var(--venice);">$${perDay.toFixed(2)}</span> <span style="font-weight:600; font-size:0.8rem; color: var(--text-muted);">${label}</span>`;
+        }
+
+        function renderReconcileStatus() {
+            const el = document.getElementById('reconcile-last');
+            if (!el) return;
+            if (!state.lastReconciled) {
+                el.innerHTML = `<span style="color: var(--warning);">Never reconciled.</span>`;
+                return;
+            }
+            const days = Math.floor((Date.now() - state.lastReconciled.at) / MS_DAY);
+            const stale = days > 14;
+            el.innerHTML = `<span style="color: ${stale ? 'var(--warning)' : 'var(--text-muted)'};">Last reconciled ${days === 0 ? 'today' : `${days} day${days === 1 ? '' : 's'} ago`}${stale ? ' — worth doing again' : ''}.</span>`;
         }
 
         function exportData() {
@@ -820,8 +1365,8 @@
                     const summary = `This backup contains:\n\n` +
                         `  • ${txCount} transactions (most recent: ${newestStr})\n` +
                         `  • ${catCount} categories, ${potCount} savings pots\n` +
-                        `  • Cash balance: $${Number(incoming.globalBalance || 0).toFixed(2)}\n\n` +
-                        `You currently have ${state.ledger.length} transactions and $${state.globalBalance.toFixed(2)}.\n\n` +
+                        `  • Cash balance: $${describeIncomingBalance(incoming)}\n\n` +
+                        `You currently have ${state.ledger.length} transactions and $${cashBalance().toFixed(2)}.\n\n` +
                         `Replace your current data? A snapshot of what you have now is kept, and you can undo this.`;
                     if (!confirm(summary)) return;
 
@@ -829,7 +1374,7 @@
                     state = incoming;
                     undoStack.push({ label: 'the restore', at: Date.now(), data: current });
                     persist();
-                    migrateLedgerTimestamps(); migrateCategoryModel();
+                    migrateToDerivedBalance(); migrateLedgerTimestamps(); migrateCategoryModel();
                     showToast("Data restored — undo is available ✨");
                     populateMonthTimelineOptions(); populateCategorySelectFields();
                     switchView(state.currentViewMode || 'month');
@@ -852,6 +1397,7 @@
             document.getElementById('qa-vendor-hint').style.display = 'none';
             document.getElementById('quick-add-modal').style.display = 'flex';
             populateCategorySelectFields();
+            renderVendorChips();
         }
 
         function submitQuickAdd() {
@@ -859,13 +1405,12 @@
             if(!desc || !amt || amt <= 0) return;
             const stamp = stampFor(document.getElementById('qa-date').value);
 
-            if (amt > state.globalBalance) {
+            if (amt > cashBalance()) {
                 document.getElementById('quick-add-modal').style.display = 'none';
                 triggerRecalibrationModal(desc, amt, cat, stamp); return;
             }
 
             state.vendors[desc.toLowerCase()] = cat;
-            state.globalBalance -= amt;
             state.ledger.unshift({ id: Date.now(), type: 'expense', desc, amt, cat, isNeed: catIsNeed(cat), ...stamp });
             followEntryInto(stamp.monthKey);
 
@@ -911,7 +1456,6 @@
                     });
                     const transferred = state.lastRolloverAmount - remaining;
                     if (transferred > 0) {
-                        state.globalBalance -= transferred;
                         // `sweep` records exactly which pot got what, so deleting this
                         // row can pull the money back out instead of minting cash.
                         state.ledger.unshift({ id: Date.now(), type: 'expense', desc: `Cascade Sweep: ${cascadeLogs.join(', ')}`, amt: transferred, cat: 'Wants Transfer', isNeed: false, sweep: legs, ...stamp });
@@ -921,7 +1465,6 @@
                     const pot = state.pots.find(p => p.id == dest);
                     if (pot) {
                         pot.current += state.lastRolloverAmount;
-                        state.globalBalance -= state.lastRolloverAmount;
                         state.ledger.unshift({ id: Date.now(), type: 'expense', desc: `End of Cycle Transfer to ${pot.name}`, amt: state.lastRolloverAmount, cat: 'Wants Transfer', isNeed: false, sweep: [{ potId: pot.id, amt: state.lastRolloverAmount }], ...stamp });
                     }
                 }
@@ -983,8 +1526,7 @@
                     if(state.wishlist.length >= 5) { alert("Your impulse queue is maxed out at 5. You must delete an existing want to add a new one."); return; }
                     state.wishlist.push({ id: Date.now(), desc, amt, cat, timestamp: Date.now() });
                 } else {
-                    if (amt > state.globalBalance) { triggerRecalibrationModal(desc, amt, cat, stamp); return; }
-                    state.globalBalance -= amt;
+                    if (amt > cashBalance()) { triggerRecalibrationModal(desc, amt, cat, stamp); return; }
                     state.ledger.unshift({ id: Date.now(), type, desc, amt, cat, isNeed: catIsNeed(cat), ...stamp });
                     state.vendors[desc.toLowerCase()] = cat;
                     followEntryInto(stamp.monthKey);
@@ -994,7 +1536,6 @@
                 const netInput = parseFloat(document.getElementById('field-net-pay').value);
                 if(!netInput || netInput <= 0) return;
 
-                state.globalBalance += netInput;
                 state.ledger.unshift({ id: Date.now(), type: 'income', desc: 'Paycheck Inflow', net: netInput, ...stamp });
                 followEntryInto(stamp.monthKey);
                 save('the entry'); toggleFormContext();
@@ -1008,7 +1549,7 @@
 
         function triggerRecalibrationModal(desc, amt, cat, stamp) {
             pendingOverbudgetTx = { desc, amt, cat, stamp: stamp || stampFor(null) };
-            const shortfall = amt - state.globalBalance;
+            const shortfall = amt - cashBalance();
             document.getElementById('recal-shortfall').innerText = `$${shortfall.toFixed(2)}`;
             const potSelect = document.getElementById('recal-pot-select');
             potSelect.innerHTML = '<option value="">-- Choose Pot --</option>';
@@ -1018,7 +1559,6 @@
         function closeRecalibration() { pendingOverbudgetTx = null; document.getElementById('recalibration-modal').style.display = 'none'; }
         function recalibrateWithDebt() {
             const t = pendingOverbudgetTx;
-            state.globalBalance -= t.amt;
             state.ledger.unshift({ id: Date.now(), type: 'expense', desc: t.desc, amt: t.amt, cat: t.cat, isNeed: catIsNeed(t.cat), ...t.stamp });
             followEntryInto(t.stamp.monthKey);
             save('the entry'); closeRecalibration(); toggleFormContext();
@@ -1030,7 +1570,7 @@
             const t = pendingOverbudgetTx;
             if (pot.current < t.amt) { alert("Not enough in this pot."); return; }
             pot.current -= t.amt;
-            // paidFromPot: this money never left globalBalance, so deleting the row
+            // paidFromPot: this money never left cash, so deleting the row
             // must refund the pot rather than crediting cash.
             state.ledger.unshift({ id: Date.now(), type: 'expense', desc: `${t.desc} (from ${pot.name})`, amt: t.amt, cat: t.cat, isNeed: catIsNeed(t.cat), paidFromPot: pot.id, ...t.stamp });
             followEntryInto(t.stamp.monthKey);
@@ -1082,8 +1622,7 @@
             const item = state.wishlist[index];
             if(action === 'buy') {
                 const stamp = stampFor(null);
-                if (item.amt > state.globalBalance) { triggerRecalibrationModal(item.desc, item.amt, item.cat, stamp); return; }
-                state.globalBalance -= item.amt;
+                if (item.amt > cashBalance()) { triggerRecalibrationModal(item.desc, item.amt, item.cat, stamp); return; }
                 state.ledger.unshift({ id: Date.now(), type: 'expense', desc: item.desc, amt: item.amt, cat: item.cat, isNeed: catIsNeed(item.cat), ...stamp });
                 followEntryInto(stamp.monthKey);
             } 
@@ -1094,37 +1633,33 @@
             const index = state.ledger.findIndex(item => item.id === id); if(index === -1) return;
             const item = state.ledger[index];
 
-            if (item.type === 'income') {
-                state.globalBalance -= (item.net || 0);
-            }
-            else if (Array.isArray(item.sweep) && item.sweep.length) {
-                // Cash -> pots. Reversing means pulling it back out of the pots.
+            // Cash is derived from the ledger, so removing the row corrects the balance
+            // on its own. Only pots need explicit unwinding — they're stored, not derived.
+            if (Array.isArray(item.sweep) && item.sweep.length) {
                 let recovered = 0;
                 item.sweep.forEach(leg => {
                     const pot = state.pots.find(p => p.id == leg.potId);
                     if (pot) { const back = Math.min(pot.current, leg.amt); pot.current -= back; recovered += back; }
                 });
-                state.globalBalance += recovered;
-                if (recovered < item.amt - 0.005) {
-                    showToast(`Only $${recovered.toFixed(2)} of $${item.amt.toFixed(2)} was still in those pots.`);
+                const shortfall = round2(item.amt - recovered);
+                if (shortfall > 0.005) {
+                    // The pots had already been spent down. Book the gap so the derived
+                    // cash figure doesn't quietly inherit money that no longer exists.
+                    state.ledger.unshift({
+                        id: Date.now(), type: 'expense', desc: `Sweep reversal shortfall (${esc(item.desc).slice(0, 30)})`,
+                        amt: shortfall, cat: 'Adjustment', isNeed: false, excluded: true, ...stampFor(null)
+                    });
+                    showToast(`Only $${recovered.toFixed(2)} was left in those pots — the $${shortfall.toFixed(2)} gap was booked as an adjustment.`);
                 }
             }
             else if (item.paidFromPot) {
-                // This never touched cash — it came out of a pot. Refund the pot.
                 const pot = state.pots.find(p => p.id == item.paidFromPot);
                 if (pot) pot.current += item.amt;
-                else state.globalBalance += item.amt; // pot deleted; return to cash rather than losing it
-            }
-            else if (item.cat === 'Wants Transfer') {
-                // Legacy transfer row with no structured record of where the money went.
-                if (!confirm("This is an old transfer row that doesn't record which pot received the money. Deleting it will credit your cash balance but leave the pots untouched, which will overstate your total. Delete anyway?")) return;
-                state.globalBalance += item.amt;
-            }
-            else {
-                state.globalBalance += item.amt;
             }
 
-            state.ledger.splice(index, 1); save('the deletion');
+            const target = state.ledger.findIndex(i => i.id === id);
+            if (target !== -1) state.ledger.splice(target, 1);
+            save('the deletion');
         }
 
         function createNewPot() {
@@ -1289,7 +1824,7 @@
             const isWeekMode = state.currentViewMode === 'week';
 
             // Global Bank Balance explicitly separated
-            document.getElementById('global-bank-balance').innerText = `$${state.globalBalance.toFixed(0)}`;
+            document.getElementById('global-bank-balance').innerText = `$${cashBalance().toFixed(0)}`;
 
             let weekBounds = null, scale = 1;
             if (isWeekMode) {
@@ -1329,6 +1864,9 @@
             let archivedSpent = 0;
 
             targetedLedger.forEach(item => {
+                // Reconciliation adjustments move cash but were never a budgeting
+                // decision, so they stay out of category and pacing math entirely.
+                if (item.excluded) return;
                 if(item.type === 'income') { 
                     const netAmt = item.net || 0; // Fallback
                     totalInflow += netAmt; 
@@ -1378,7 +1916,7 @@
 
             state.categoryTargets.forEach(cat => {
                 const spent = categorySpent[cat.name] || 0;
-                const carried = cat.rollover ? (cat.carried || 0) : 0;
+                const carried = cat.carried || 0;
                 // Carried money is an absolute bank, not a monthly rate — prorating it
                 // into a week would let a fat balance mask a bad week's pacing.
                 // Week view shows the base pace and reports the bank separately.
@@ -1487,6 +2025,10 @@
             if (checkinCard) checkinCard.style.display = (isWeekMode && weekOffset !== 0) ? 'none' : 'block';
 
             if (isWeekMode) renderWeekBreakdown(weekBounds, targetedLedger);
+            renderWeeklyReview(isWeekMode ? weekBounds : null, targetedLedger);
+            renderAgeOfMoney();
+            renderDailyRate(trueChoiceCash, isWeekMode, weekBounds);
+            renderReconcileStatus();
 
             renderStorageControls();
             renderWishlist(trueChoiceCash);
@@ -1562,6 +2104,7 @@
         }
 
         window.onload = () => {
+            migrateToDerivedBalance();
             migrateLedgerTimestamps();
             migrateCategoryModel();
             closeOutCategoryMonths();
